@@ -26,12 +26,15 @@ export default function ManagePoints() {
         base44.entities.PointTransaction.list("-created_date", 200),
         base44.entities.Mission.filter({ is_active: true }),
       ]);
-      setMissions(ms);
+      const myProfile = emps.find(p => p.user_id === u.id || p.email === u.email);
+      const mySector = myProfile?.sector;
 
-      const filtered = isAdmin ? emps : emps.filter(e => e.sector === u.sector && e.role !== "admin");
+      const filtered = isAdmin ? emps : emps.filter(e => e.sector === mySector && e.role !== "admin");
       setEmployees(filtered);
-      const filteredTxs = isAdmin ? txs : txs.filter(t => t.sector === u.sector);
+      const filteredTxs = isAdmin ? txs : txs.filter(t => t.sector === mySector);
       setTransactions(filteredTxs);
+      const filteredMissions = isAdmin ? ms : ms.filter(m => m.sector === mySector || m.sector === "Todos");
+      setMissions(filteredMissions);
       setLoading(false);
     };
     load();
