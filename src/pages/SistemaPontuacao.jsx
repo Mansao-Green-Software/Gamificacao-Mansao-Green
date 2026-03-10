@@ -255,9 +255,6 @@ export default function SistemaPontuacao() {
                                     </div>
                                   )}
                                 </div>
-                                <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${tier.color}`}>
-                                  {tier.label}
-                                </span>
                                 {isEditingThis ? (
                                   <input type="number" value={editing.points} onChange={e => setEditing(p => ({ ...p, points: e.target.value }))} className="w-20 bg-gray-900 border border-gray-600 text-white rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:border-green-500" />
                                 ) : (
