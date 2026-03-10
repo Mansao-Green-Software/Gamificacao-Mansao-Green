@@ -205,6 +205,29 @@ export default function Employees() {
                   <tr key={emp.id} className="border-b border-gray-700/50 hover:bg-gray-700/20 transition-colors">
                     <td className="px-5 py-3">
                       {editing === emp.id ? (
+                        <label className="cursor-pointer block w-10 h-10 rounded-full bg-gray-700 overflow-hidden relative group">
+                          {editForm.photo_url ? (
+                            <img src={editForm.photo_url} alt="foto" className="w-full h-full object-cover" />
+                          ) : (
+                            <Camera className="w-4 h-4 text-gray-500 absolute inset-0 m-auto" />
+                          )}
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                            <Camera className="w-3 h-3 text-white" />
+                          </div>
+                          <input type="file" accept="image/*" className="hidden" onChange={e => handlePhotoUpload(e.target.files[0], "edit", emp.id)} />
+                        </label>
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center">
+                          {emp.photo_url ? (
+                            <img src={emp.photo_url} alt={emp.full_name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-gray-400 text-sm font-bold">{emp.full_name?.[0]?.toUpperCase()}</span>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-5 py-3">
+                      {editing === emp.id ? (
                         <input
                           value={editForm.full_name}
                           onChange={e => setEditForm(p => ({ ...p, full_name: e.target.value }))}
