@@ -7,6 +7,7 @@ const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto",
 export default function ManagePoints() {
   const [user, setUser] = useState(null);
   const [employees, setEmployees] = useState([]);
+  const [missions, setMissions] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [tab, setTab] = useState("add");
   const [form, setForm] = useState({ employee_id: "", points: "", description: "" });
