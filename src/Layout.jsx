@@ -26,6 +26,7 @@ export default function Layout({ children, currentPageName }) {
     { label: "Ranking Geral", page: "RankingGeral", icon: Trophy },
     { label: "Missões", page: "Missions", icon: Target },
     { label: "Green Shop", page: "GreenShop", icon: ShoppingBag },
+    { label: "Pontuação", page: "SistemaPontuacao", icon: Zap },
     ...(isManager ? [{ label: "Gerenciar Pontos", page: "ManagePoints", icon: Star }] : []),
     ...(isAdmin ? [{ label: "Colaboradores", page: "Employees", icon: Users }] : []),
   ];
