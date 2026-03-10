@@ -188,6 +188,7 @@ export default function Employees() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-700">
+                <th className="text-left text-gray-400 text-xs font-medium px-5 py-3 w-12"></th>
                 <th className="text-left text-gray-400 text-xs font-medium px-5 py-3">Nome</th>
                 <th className="text-left text-gray-400 text-xs font-medium px-5 py-3">Setor</th>
                 <th className="text-left text-gray-400 text-xs font-medium px-5 py-3">Função</th>
