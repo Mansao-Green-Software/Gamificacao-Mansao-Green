@@ -232,7 +232,6 @@ export default function SistemaPontuacao() {
                         </div>
                         <div className="divide-y divide-gray-700/40">
                           {items.map((mission) => {
-                            const tier = getTier(mission.points);
                             const isEditingThis = editing?.id === mission.id;
                             return (
                               <div key={mission.id} className={`grid items-center gap-4 px-5 py-3.5 hover:bg-gray-700/20 transition-colors ${isAdminOrManager ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}>
