@@ -18,8 +18,9 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => {
     base44.auth.me().then(async (u) => {
       setUser(u);
-      const profiles = await base44.entities.EmployeeProfile.filter({ user_id: u.id });
-      if (profiles.length > 0) setProfile(profiles[0]);
+      const all = await base44.entities.EmployeeProfile.list();
+      const found = all.find(p => p.user_id === u.id || p.email === u.email);
+      if (found) setProfile(found);
     }).catch(() => {});
   }, []);
 
