@@ -40,7 +40,7 @@ export default function Employees() {
       is_active: true,
     });
     setEmployees(prev => [...prev, emp]);
-    setForm({ full_name: "", email: "", sector: "", role: "user", user_id: "" });
+    setForm({ full_name: "", email: "", sector: "", role: "user", user_id: "", photo_url: "" });
     setShowForm(false);
   };
 
