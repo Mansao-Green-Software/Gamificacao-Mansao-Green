@@ -52,6 +52,7 @@ import Employees from './pages/Employees';
 import ManagePoints from './pages/ManagePoints';
 import Missions from './pages/Missions';
 import RankingGeral from './pages/RankingGeral';
+import GreenShop from './pages/GreenShop';
 import __Layout from './Layout.jsx';
 
 
@@ -61,6 +62,7 @@ export const PAGES = {
     "ManagePoints": ManagePoints,
     "Missions": Missions,
     "RankingGeral": RankingGeral,
+    "GreenShop": GreenShop,
 }
 
 export const pagesConfig = {
