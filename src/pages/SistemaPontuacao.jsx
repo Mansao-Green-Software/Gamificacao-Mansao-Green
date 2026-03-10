@@ -101,13 +101,45 @@ export default function SistemaPontuacao() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Zap className="w-6 h-6 text-yellow-400" />
-          Sistema de Pontuação
-        </h1>
-        <p className="text-gray-400 text-sm mt-1">Todas as tarefas e quantos pontos cada uma vale</p>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Zap className="w-6 h-6 text-yellow-400" />
+            Sistema de Pontuação
+          </h1>
+          <p className="text-gray-400 text-sm mt-1">Todas as tarefas e quantos pontos cada uma vale</p>
+        </div>
+        {isAdminOrManager && (
+          <button
+            onClick={() => { setShowForm(!showForm); setForm({ title: "", description: "", points: "", sector: selectedSector === "Todos" ? "" : selectedSector }); }}
+            className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium text-sm transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Nova Tarefa
+          </button>
+        )}
       </div>
+
+      {/* Create form */}
+      {showForm && isAdminOrManager && (
+        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
+          <h3 className="text-white font-bold mb-4">Nova Tarefa</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="Título da tarefa *" className="col-span-2 bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500" />
+            <input value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Descrição (opcional)" className="col-span-2 bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500" />
+            <input type="number" value={form.points} onChange={e => setForm(p => ({ ...p, points: e.target.value }))} placeholder="Pontos *" className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500" />
+            <select value={form.sector} onChange={e => setForm(p => ({ ...p, sector: e.target.value }))} className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500">
+              <option value="">Setor *</option>
+              {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
+              <option value="Todos">Todos</option>
+            </select>
+          </div>
+          <div className="flex gap-3 mt-4">
+            <button onClick={handleCreate} className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm font-medium transition-colors">Criar</button>
+            <button onClick={() => setShowForm(false)} className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors">Cancelar</button>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-4 items-start">
         {/* Sidebar */}
