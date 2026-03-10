@@ -41,9 +41,10 @@ export default function SistemaPontuacao() {
   const [loading, setLoading] = useState(true);
   const [selectedSector, setSelectedSector] = useState(null);
   const [search, setSearch] = useState("");
-  const [editing, setEditing] = useState(null); // { id, title, points, description }
+  const [editing, setEditing] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", points: "", sector: "" });
+  const [form, setForm] = useState({ title: "", description: "", points: "", sector: "", category: "Performance & Resultados" });
+  const [collapsedCategories, setCollapsedCategories] = useState({});
 
   useEffect(() => {
     const load = async () => {
