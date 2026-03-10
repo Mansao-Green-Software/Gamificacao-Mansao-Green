@@ -110,6 +110,20 @@ export default function Employees() {
         <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
           <h3 className="text-white font-bold mb-4">Cadastrar Colaborador</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Photo upload */}
+            <div className="col-span-2 flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-gray-700 border-2 border-gray-600 overflow-hidden flex items-center justify-center shrink-0">
+                {form.photo_url ? (
+                  <img src={form.photo_url} alt="foto" className="w-full h-full object-cover" />
+                ) : (
+                  <Camera className="w-6 h-6 text-gray-500" />
+                )}
+              </div>
+              <label className="cursor-pointer px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors">
+                {uploadingPhoto === "new" ? "Enviando..." : "Carregar foto"}
+                <input type="file" accept="image/*" className="hidden" onChange={e => handlePhotoUpload(e.target.files[0], "form", null)} />
+              </label>
+            </div>
             <input
               value={form.full_name}
               onChange={e => setForm(p => ({ ...p, full_name: e.target.value }))}
