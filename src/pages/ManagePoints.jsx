@@ -21,10 +21,12 @@ export default function ManagePoints() {
       setUser(u);
 
       const isAdmin = u.role === "admin";
-      const [emps, txs] = await Promise.all([
+      const [emps, txs, ms] = await Promise.all([
         base44.entities.EmployeeProfile.list(),
         base44.entities.PointTransaction.list("-created_date", 200),
+        base44.entities.Mission.filter({ is_active: true }),
       ]);
+      setMissions(ms);
 
       const filtered = isAdmin ? emps : emps.filter(e => e.sector === u.sector && e.role !== "admin");
       setEmployees(filtered);
