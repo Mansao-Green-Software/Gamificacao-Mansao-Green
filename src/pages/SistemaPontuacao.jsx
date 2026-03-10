@@ -4,6 +4,13 @@ import { Zap, Star, Search, Pencil, Trash2, Check, X, Plus, ChevronDown, Chevron
 
 const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro"];
 
+const CATEGORIES = [
+  { key: "Performance & Resultados", emoji: "🚀", color: "text-orange-400 border-orange-700/50 bg-orange-900/20" },
+  { key: "Disciplina & Organização", emoji: "📋", color: "text-blue-400 border-blue-700/50 bg-blue-900/20" },
+  { key: "Cultura & Atitude Green", emoji: "💚", color: "text-green-400 border-green-700/50 bg-green-900/20" },
+  { key: "Bônus de Pontuação", emoji: "⭐", color: "text-yellow-400 border-yellow-700/50 bg-yellow-900/20" },
+];
+
 const SECTOR_COLORS = {
   "Social Media": "from-pink-500 to-rose-600",
   "Audiovisual": "from-purple-500 to-indigo-600",
