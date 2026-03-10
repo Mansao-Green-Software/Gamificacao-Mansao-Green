@@ -28,6 +28,7 @@ export default function GreenShop() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", points_cost: "", stock: "", category: "Outros", image_url: "" });
   const [loading, setLoading] = useState(true);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [redeeming, setRedeeming] = useState(null);
   const [confirmReward, setConfirmReward] = useState(null);
   const [filterCategory, setFilterCategory] = useState("Todos");
