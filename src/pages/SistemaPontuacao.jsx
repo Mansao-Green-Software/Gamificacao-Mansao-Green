@@ -25,16 +25,7 @@ const SECTOR_COLORS = {
   "Todos": "from-gray-500 to-gray-600",
 };
 
-const POINT_TIERS = [
-  { min: 100, label: "Lendário", color: "text-amber-400 bg-amber-900/30" },
-  { min: 50, label: "Épico", color: "text-purple-400 bg-purple-900/30" },
-  { min: 20, label: "Raro", color: "text-blue-400 bg-blue-900/30" },
-  { min: 0, label: "Comum", color: "text-gray-400 bg-gray-700/50" },
-];
 
-function getTier(points) {
-  return POINT_TIERS.find(t => points >= t.min);
-}
 
 export default function SistemaPontuacao() {
   const [user, setUser] = useState(null);
