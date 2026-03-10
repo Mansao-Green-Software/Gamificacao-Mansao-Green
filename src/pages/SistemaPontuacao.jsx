@@ -224,9 +224,8 @@ export default function SistemaPontuacao() {
                     {/* Items */}
                     {!collapsed && (
                       <div className="bg-gray-800 border-t border-gray-700">
-                        <div className={`grid items-center gap-4 px-5 py-2.5 border-b border-gray-700/50 ${isAdminOrManager ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}>
+                        <div className={`grid items-center gap-4 px-5 py-2.5 border-b border-gray-700/50 ${isAdminOrManager ? "grid-cols-[1fr_auto_auto]" : "grid-cols-[1fr_auto]"}`}>
                           <span className="text-gray-500 text-xs font-medium uppercase tracking-wide">Tarefa</span>
-
                           <span className="text-gray-500 text-xs font-medium uppercase tracking-wide text-right">Pontos</span>
                           {isAdminOrManager && <span />}
                         </div>
