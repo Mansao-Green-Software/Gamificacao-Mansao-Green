@@ -198,7 +198,7 @@ export default function Employees() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="text-center text-gray-500 py-10 text-sm">Nenhum colaborador encontrado.</td>
+                  <td colSpan={5} className="text-center text-gray-500 py-10 text-sm">Nenhum colaborador encontrado.</td>
                 </tr>
               ) : (
                 filtered.map(emp => (
