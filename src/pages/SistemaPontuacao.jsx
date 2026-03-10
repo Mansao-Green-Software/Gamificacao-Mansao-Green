@@ -143,6 +143,9 @@ export default function SistemaPontuacao() {
               {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
               <option value="Todos">Todos</option>
             </select>
+            <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} className="col-span-2 bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500">
+              {CATEGORIES.map(c => <option key={c.key} value={c.key}>{c.emoji} {c.key}</option>)}
+            </select>
           </div>
           <div className="flex gap-3 mt-4">
             <button onClick={handleCreate} className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm font-medium transition-colors">Criar</button>
