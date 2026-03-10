@@ -25,7 +25,8 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   const isAdmin = user?.role === "admin";
-  const isManager = user?.role === "manager" || isAdmin;
+  const isSupervisor = user?.role === "supervisor";
+  const isManager = user?.role === "manager" || isAdmin || isSupervisor;
 
   const navItems = [
     { label: "Dashboard", page: "Dashboard", icon: LayoutDashboard },
