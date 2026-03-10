@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ShoppingBag, Plus, Trash2, Star, CheckCircle, Clock, Package, Tag } from "lucide-react";
+import { ShoppingBag, Plus, Trash2, Star, CheckCircle, Clock, Package, Tag, Camera } from "lucide-react";
 
 const CATEGORIES = ["Experiência", "Produto", "Benefício", "Vale-presente", "Outros"];
 
