@@ -49,20 +49,22 @@
  */
 import Dashboard from './pages/Dashboard';
 import Employees from './pages/Employees';
+import GreenShop from './pages/GreenShop';
 import ManagePoints from './pages/ManagePoints';
 import Missions from './pages/Missions';
 import RankingGeral from './pages/RankingGeral';
-import GreenShop from './pages/GreenShop';
+import SistemaPontuacao from './pages/SistemaPontuacao';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Dashboard": Dashboard,
     "Employees": Employees,
+    "GreenShop": GreenShop,
     "ManagePoints": ManagePoints,
     "Missions": Missions,
     "RankingGeral": RankingGeral,
-    "GreenShop": GreenShop,
+    "SistemaPontuacao": SistemaPontuacao,
 }
 
 export const pagesConfig = {
