@@ -11,11 +11,16 @@ const SECTORS = [
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(async (u) => {
+      setUser(u);
+      const profiles = await base44.entities.EmployeeProfile.filter({ user_id: u.id });
+      if (profiles.length > 0) setProfile(profiles[0]);
+    }).catch(() => {});
   }, []);
 
   const isAdmin = user?.role === "admin";
