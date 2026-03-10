@@ -136,6 +136,22 @@ export default function ManagePoints() {
                 </select>
               </div>
               <div>
+                <label className="text-gray-400 text-xs mb-1.5 block">Selecionar Tarefa (opcional)</label>
+                <select
+                  onChange={e => {
+                    const mission = missions.find(m => m.id === e.target.value);
+                    if (mission) setForm(p => ({ ...p, points: String(mission.points), description: mission.title }));
+                    else setForm(p => ({ ...p, points: "", description: "" }));
+                  }}
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
+                >
+                  <option value="">— Pontuação manual —</option>
+                  {missions.map(m => (
+                    <option key={m.id} value={m.id}>{m.title} ({m.points > 0 ? "+" : ""}{m.points} pts)</option>
+                  ))}
+                </select>
+              </div>
+              <div>
                 <label className="text-gray-400 text-xs mb-1.5 block">Pontos</label>
                 <input
                   type="number"
@@ -146,7 +162,7 @@ export default function ManagePoints() {
                 />
               </div>
               <div>
-                <label className="text-gray-400 text-xs mb-1.5 block">Motivo (opcional)</label>
+                <label className="text-gray-400 text-xs mb-1.5 block">Motivo</label>
                 <input
                   value={form.description}
                   onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
