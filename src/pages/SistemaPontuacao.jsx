@@ -47,7 +47,11 @@ export default function SistemaPontuacao() {
       // Default: setor do usuário, ou primeiro setor se admin
       const isAdminOrManager = u.role === "admin" || u.role === "manager" || u.role === "supervisor";
       setSelectedSector(isAdminOrManager ? "Todos" : u.sector);
-...
+      setLoading(false);
+    };
+    load();
+  }, []);
+
   const isAdminOrManager = user?.role === "admin" || user?.role === "manager" || user?.role === "supervisor";
 
   const availableSectors = isAdminOrManager ? ["Todos", ...SECTORS] : [user?.sector].filter(Boolean);
