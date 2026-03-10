@@ -74,6 +74,8 @@ export default function SistemaPontuacao() {
 
   const sorted = [...filteredMissions].sort((a, b) => b.points - a.points);
 
+  const toggleCategory = (cat) => setCollapsedCategories(p => ({ ...p, [cat]: !p[cat] }));
+
   const handleCreate = async () => {
     if (!form.title || !form.points || !form.sector) return;
     const created = await base44.entities.Mission.create({
