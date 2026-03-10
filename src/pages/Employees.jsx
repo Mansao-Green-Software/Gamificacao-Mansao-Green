@@ -49,9 +49,21 @@ export default function Employees() {
     setEmployees(prev => prev.filter(e => e.id !== id));
   };
 
+  const handlePhotoUpload = async (file, target, id) => {
+    if (!file) return;
+    setUploadingPhoto(id || "new");
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    if (target === "form") {
+      setForm(p => ({ ...p, photo_url: file_url }));
+    } else {
+      setEditForm(p => ({ ...p, photo_url: file_url }));
+    }
+    setUploadingPhoto(false);
+  };
+
   const startEdit = (emp) => {
     setEditing(emp.id);
-    setEditForm({ full_name: emp.full_name, sector: emp.sector, role: emp.role });
+    setEditForm({ full_name: emp.full_name, sector: emp.sector, role: emp.role, photo_url: emp.photo_url || "" });
   };
 
   const saveEdit = async (id) => {
