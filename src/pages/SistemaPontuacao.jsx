@@ -202,76 +202,103 @@ export default function SistemaPontuacao() {
             </div>
           </div>
 
-          {/* Missions list */}
+          {/* Missions grouped by category */}
           {sorted.length === 0 ? (
             <div className="bg-gray-800 border border-gray-700 rounded-2xl p-12 text-center text-gray-500">
               <Zap className="w-10 h-10 mx-auto mb-3 opacity-30" />
               <p>Nenhuma tarefa encontrada para este setor.</p>
             </div>
           ) : (
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
-              <div className={`grid items-center gap-4 px-5 py-3 border-b border-gray-700 ${isAdminOrManager ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}>
-                <span className="text-gray-400 text-xs font-medium uppercase tracking-wide">Tarefa</span>
-                <span className="text-gray-400 text-xs font-medium uppercase tracking-wide text-center">Nível</span>
-                <span className="text-gray-400 text-xs font-medium uppercase tracking-wide text-right">Pontos</span>
-                {isAdminOrManager && <span />}
-              </div>
-              <div className="divide-y divide-gray-700/50">
-                {sorted.map((mission) => {
-                  const tier = getTier(mission.points);
-                  const isEditingThis = editing?.id === mission.id;
-                  return (
-                    <div key={mission.id} className={`grid items-center gap-4 px-5 py-4 hover:bg-gray-700/20 transition-colors ${isAdminOrManager ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}>
-                      <div className="min-w-0">
-                        {isEditingThis ? (
-                          <div className="space-y-2">
-                            <input value={editing.title} onChange={e => setEditing(p => ({ ...p, title: e.target.value }))} className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-500" />
-                            <input value={editing.description} onChange={e => setEditing(p => ({ ...p, description: e.target.value }))} placeholder="Descrição" className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-500" />
-                          </div>
-                        ) : (
-                          <div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <p className="text-white text-sm font-medium">{mission.title}</p>
-                              {mission.sector === "Todos" && (
-                                <span className="text-xs px-1.5 py-0.5 bg-gray-700 text-gray-400 rounded">Todos</span>
-                              )}
-                            </div>
-                            {mission.description && (
-                              <p className="text-gray-500 text-xs mt-0.5 truncate">{mission.description}</p>
-                            )}
-                          </div>
-                        )}
+            <div className="space-y-4">
+              {CATEGORIES.map(cat => {
+                const items = sorted.filter(m => (m.category || "Performance & Resultados") === cat.key);
+                if (items.length === 0) return null;
+                const collapsed = collapsedCategories[cat.key];
+                return (
+                  <div key={cat.key} className={`border rounded-2xl overflow-hidden ${cat.color}`}>
+                    {/* Category header */}
+                    <button
+                      onClick={() => toggleCategory(cat.key)}
+                      className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-black/10 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{cat.emoji}</span>
+                        <span className="font-bold text-sm text-white">{cat.key}</span>
+                        <span className="text-xs px-2 py-0.5 bg-black/20 rounded-full text-white/70">{items.length} {items.length === 1 ? "item" : "itens"}</span>
                       </div>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${tier.color}`}>
-                        {tier.label}
-                      </span>
-                      {isEditingThis ? (
-                        <input type="number" value={editing.points} onChange={e => setEditing(p => ({ ...p, points: e.target.value }))} className="w-20 bg-gray-900 border border-gray-600 text-white rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:border-green-500" />
-                      ) : (
-                        <div className="flex items-center gap-1 justify-end">
-                          <Star className="w-3.5 h-3.5 text-green-400" />
-                          <span className="text-green-400 font-bold text-sm">{mission.points}</span>
+                      {collapsed ? <ChevronRight className="w-4 h-4 text-white/60" /> : <ChevronDown className="w-4 h-4 text-white/60" />}
+                    </button>
+
+                    {/* Items */}
+                    {!collapsed && (
+                      <div className="bg-gray-800 border-t border-gray-700">
+                        <div className={`grid items-center gap-4 px-5 py-2.5 border-b border-gray-700/50 ${isAdminOrManager ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}>
+                          <span className="text-gray-500 text-xs font-medium uppercase tracking-wide">Tarefa</span>
+                          <span className="text-gray-500 text-xs font-medium uppercase tracking-wide text-center">Nível</span>
+                          <span className="text-gray-500 text-xs font-medium uppercase tracking-wide text-right">Pontos</span>
+                          {isAdminOrManager && <span />}
                         </div>
-                      )}
-                      {isAdminOrManager && (
-                        <div className="flex items-center gap-1 justify-end">
-                          {isEditingThis ? (
-                            <>
-                              <button onClick={() => handleSaveEdit(mission.id)} className="p-1.5 text-green-400 hover:bg-green-900/20 rounded-lg"><Check className="w-4 h-4" /></button>
-                              <button onClick={() => setEditing(null)} className="p-1.5 text-gray-400 hover:bg-gray-700 rounded-lg"><X className="w-4 h-4" /></button>
-                            </>
-                          ) : (
-                            <>
-                              <button onClick={() => setEditing({ id: mission.id, title: mission.title, points: mission.points, description: mission.description || "" })} className="p-1.5 text-blue-400 hover:bg-blue-900/20 rounded-lg"><Pencil className="w-4 h-4" /></button>
-                              <button onClick={() => handleDelete(mission.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg"><Trash2 className="w-4 h-4" /></button>
-                            </>
-                          )}
+                        <div className="divide-y divide-gray-700/40">
+                          {items.map((mission) => {
+                            const tier = getTier(mission.points);
+                            const isEditingThis = editing?.id === mission.id;
+                            return (
+                              <div key={mission.id} className={`grid items-center gap-4 px-5 py-3.5 hover:bg-gray-700/20 transition-colors ${isAdminOrManager ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}>
+                                <div className="min-w-0">
+                                  {isEditingThis ? (
+                                    <div className="space-y-2">
+                                      <input value={editing.title} onChange={e => setEditing(p => ({ ...p, title: e.target.value }))} className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-500" />
+                                      <input value={editing.description} onChange={e => setEditing(p => ({ ...p, description: e.target.value }))} placeholder="Descrição" className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-500" />
+                                    </div>
+                                  ) : (
+                                    <div>
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <p className="text-white text-sm font-medium">{mission.title}</p>
+                                        {mission.sector === "Todos" && (
+                                          <span className="text-xs px-1.5 py-0.5 bg-gray-700 text-gray-400 rounded">Todos</span>
+                                        )}
+                                      </div>
+                                      {mission.description && (
+                                        <p className="text-gray-500 text-xs mt-0.5 truncate">{mission.description}</p>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                                <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${tier.color}`}>
+                                  {tier.label}
+                                </span>
+                                {isEditingThis ? (
+                                  <input type="number" value={editing.points} onChange={e => setEditing(p => ({ ...p, points: e.target.value }))} className="w-20 bg-gray-900 border border-gray-600 text-white rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:border-green-500" />
+                                ) : (
+                                  <div className="flex items-center gap-1 justify-end">
+                                    <Star className="w-3.5 h-3.5 text-green-400" />
+                                    <span className="text-green-400 font-bold text-sm">{mission.points}</span>
+                                  </div>
+                                )}
+                                {isAdminOrManager && (
+                                  <div className="flex items-center gap-1 justify-end">
+                                    {isEditingThis ? (
+                                      <>
+                                        <button onClick={() => handleSaveEdit(mission.id)} className="p-1.5 text-green-400 hover:bg-green-900/20 rounded-lg"><Check className="w-4 h-4" /></button>
+                                        <button onClick={() => setEditing(null)} className="p-1.5 text-gray-400 hover:bg-gray-700 rounded-lg"><X className="w-4 h-4" /></button>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <button onClick={() => setEditing({ id: mission.id, title: mission.title, points: mission.points, description: mission.description || "" })} className="p-1.5 text-blue-400 hover:bg-blue-900/20 rounded-lg"><Pencil className="w-4 h-4" /></button>
+                                        <button onClick={() => handleDelete(mission.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                                      </>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
