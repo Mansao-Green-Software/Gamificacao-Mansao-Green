@@ -264,6 +264,7 @@ export default function Employees() {
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
                           emp.role === "admin" ? "bg-red-900/50 text-red-300" :
                           emp.role === "manager" ? "bg-blue-900/50 text-blue-300" :
+                          emp.role === "supervisor" ? "bg-purple-900/50 text-purple-300" :
                           "bg-gray-700 text-gray-300"
                         }`}>
                           {ROLES.find(r => r.value === emp.role)?.label || "Colaborador"}
