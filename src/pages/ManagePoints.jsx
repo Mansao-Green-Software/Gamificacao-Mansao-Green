@@ -79,7 +79,7 @@ export default function ManagePoints() {
     </div>
   );
 
-  if (user?.role !== "admin" && user?.role !== "manager") {
+  if (user?.role !== "admin" && user?.role !== "manager" && user?.role !== "supervisor") {
     return (
       <div className="text-center py-16 text-gray-500">
         <p>Acesso restrito a gerentes.</p>
