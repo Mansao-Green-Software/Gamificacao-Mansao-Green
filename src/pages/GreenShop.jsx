@@ -179,7 +179,34 @@ export default function GreenShop() {
             <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500">
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
-            <input value={form.image_url} onChange={e => setForm(p => ({ ...p, image_url: e.target.value }))} placeholder="URL da imagem (opcional)" className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500" />
+            <div className="col-span-2 flex items-center gap-4">
+              <div className="w-20 h-20 rounded-xl bg-gray-700 border border-gray-600 overflow-hidden flex items-center justify-center shrink-0">
+                {form.image_url ? (
+                  <img src={form.image_url} alt="preview" className="w-full h-full object-cover" />
+                ) : (
+                  <Camera className="w-6 h-6 text-gray-500" />
+                )}
+              </div>
+              <label className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors">
+                {uploadingPhoto ? "Enviando..." : "Carregar foto"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    setUploadingPhoto(true);
+                    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                    setForm(p => ({ ...p, image_url: file_url }));
+                    setUploadingPhoto(false);
+                  }}
+                />
+              </label>
+              {form.image_url && (
+                <button onClick={() => setForm(p => ({ ...p, image_url: "" }))} className="text-red-400 text-xs hover:underline">Remover</button>
+              )}
+            </div>
           </div>
           <div className="flex gap-3 mt-4">
             <button onClick={handleCreate} className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm font-medium transition-colors">Criar Prêmio</button>
