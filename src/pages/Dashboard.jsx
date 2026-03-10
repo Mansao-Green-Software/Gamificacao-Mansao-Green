@@ -20,6 +20,7 @@ const SECTOR_COLORS = {
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [myPoints, setMyPoints] = useState(0);
@@ -38,14 +39,19 @@ export default function Dashboard() {
       setTransactions(txs);
       setEmployees(emps);
 
+      // Find profile by user_id or email
+      const myProfile = emps.find(p => p.user_id === u.id || p.email === u.email);
+      setProfile(myProfile || null);
+      const sector = myProfile?.sector;
+
       // My points
       const myTxs = txs.filter(t => t.employee_id === u.id);
       const total = myTxs.reduce((s, t) => s + (t.points || 0), 0);
       setMyPoints(total);
 
       // My rank in sector
-      if (u.sector) {
-        const sectorTxs = txs.filter(t => t.sector === u.sector);
+      if (sector) {
+        const sectorTxs = txs.filter(t => t.sector === sector);
         const empPoints = {};
         sectorTxs.forEach(t => {
           empPoints[t.employee_id] = (empPoints[t.employee_id] || 0) + t.points;
