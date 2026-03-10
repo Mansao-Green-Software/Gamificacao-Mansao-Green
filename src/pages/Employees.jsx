@@ -5,6 +5,7 @@ import { Users, Plus, Trash2, Edit2, Check, X, Camera } from "lucide-react";
 const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Gestão de IA"];
 const ROLES = [
   { value: "user", label: "Colaborador" },
+  { value: "supervisor", label: "Supervisor" },
   { value: "manager", label: "Gerente" },
   { value: "admin", label: "Admin" },
 ];
