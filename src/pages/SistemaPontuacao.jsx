@@ -233,7 +233,7 @@ export default function SistemaPontuacao() {
                           {items.map((mission) => {
                             const isEditingThis = editing?.id === mission.id;
                             return (
-                              <div key={mission.id} className={`grid items-center gap-4 px-5 py-3.5 hover:bg-gray-700/20 transition-colors ${isAdminOrManager ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}>
+                              <div key={mission.id} className={`grid items-center gap-4 px-5 py-3.5 hover:bg-gray-700/20 transition-colors ${isAdminOrManager ? "grid-cols-[1fr_auto_auto]" : "grid-cols-[1fr_auto]"}`}>
                                 <div className="min-w-0">
                                   {isEditingThis ? (
                                     <div className="space-y-2">
