@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Users } from "lucide-react";
+import { Trophy, Users, BarChart2 } from "lucide-react";
 
 const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro"];
 
@@ -16,10 +16,23 @@ const SECTOR_COLORS = {
   "Financeiro": "from-emerald-500 to-green-600",
 };
 
+const SECTOR_ICON_COLORS = {
+  "Social Media": "bg-pink-500/20 text-pink-400",
+  "Audiovisual": "bg-purple-500/20 text-purple-400",
+  "Tráfego": "bg-blue-500/20 text-blue-400",
+  "Líder de Projeto": "bg-amber-500/20 text-amber-400",
+  "Tipster": "bg-green-500/20 text-green-400",
+  "Suporte": "bg-sky-500/20 text-sky-400",
+  "Contingência": "bg-red-500/20 text-red-400",
+  "Comercial": "bg-yellow-500/20 text-yellow-400",
+  "Financeiro": "bg-emerald-500/20 text-emerald-400",
+};
+
+const medals = ["🥇", "🥈", "🥉"];
+
 export default function RankingGeral() {
   const [user, setUser] = useState(null);
-  const [tab, setTab] = useState("setores");
-  const [selectedSector, setSelectedSector] = useState(null);
+  const [selectedSector, setSelectedSector] = useState("geral");
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,7 +42,6 @@ export default function RankingGeral() {
       setUser(u);
       if (u.role !== "admin" && u.role !== "manager") {
         setSelectedSector(u.sector);
-        setTab("colaboradores");
       }
       const txs = await base44.entities.PointTransaction.list("-created_date", 1000);
       setTransactions(txs);
@@ -49,26 +61,27 @@ export default function RankingGeral() {
   };
 
   const getEmployeeRanking = (sector) => {
-    const filtered = sector ? transactions.filter(t => t.sector === sector) : transactions;
+    const filtered = sector && sector !== "geral" ? transactions.filter(t => t.sector === sector) : transactions;
     const pts = {};
     const names = {};
+    const sectors = {};
     filtered.forEach(t => {
       pts[t.employee_id] = (pts[t.employee_id] || 0) + (t.points || 0);
       names[t.employee_id] = t.employee_name;
+      sectors[t.employee_id] = t.sector;
     });
     return Object.entries(pts)
-      .map(([id, points]) => ({ id, name: names[id], points, sector: sector }))
+      .map(([id, points]) => ({ id, name: names[id], points, sector: sectors[id] }))
       .sort((a, b) => b.points - a.points);
   };
 
   const sectorRanking = getSectorPoints();
   const maxSectorPts = sectorRanking[0]?.points || 1;
 
-  const employeeRanking = getEmployeeRanking(selectedSector || (isAdminOrManager ? null : user?.sector));
+  const employeeRanking = getEmployeeRanking(selectedSector);
   const maxEmpPts = employeeRanking[0]?.points || 1;
 
-  const medalColors = ["text-amber-400", "text-gray-300", "text-amber-600"];
-  const medals = ["🥇", "🥈", "🥉"];
+  const availableSectors = isAdminOrManager ? SECTORS : [user?.sector].filter(Boolean);
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
@@ -77,119 +90,124 @@ export default function RankingGeral() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
           <Trophy className="w-6 h-6 text-amber-400" />
-          Ranking Geral
+          Ranking
         </h1>
-        <p className="text-gray-400 text-sm mt-1">Acompanhe a performance de todos os setores</p>
+        <p className="text-gray-400 text-sm mt-1">Performance por setor</p>
       </div>
 
-      {/* Tabs */}
-      {isAdminOrManager && (
-        <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1 w-fit">
-          <button
-            onClick={() => setTab("setores")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "setores" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
-          >
-            Setores
-          </button>
-          <button
-            onClick={() => setTab("colaboradores")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "colaboradores" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
-          >
-            Colaboradores
-          </button>
-        </div>
-      )}
-
-      {/* Sector ranking */}
-      {tab === "setores" && isAdminOrManager && (
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
-          <h2 className="text-white font-bold mb-5">Ranking de Setores</h2>
-          <div className="space-y-4">
-            {sectorRanking.map((item, idx) => (
-              <div key={item.sector}>
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{medals[idx] || <span className="text-gray-400 font-bold">{idx + 1}</span>}</span>
-                    <button
-                      onClick={() => { setSelectedSector(item.sector); setTab("colaboradores"); }}
-                      className="text-white font-medium hover:text-green-400 transition-colors text-sm"
-                    >
-                      {item.sector}
-                    </button>
-                  </div>
-                  <span className="text-green-400 font-bold text-sm">{item.points.toLocaleString()} pts</span>
-                </div>
-                <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full bg-gradient-to-r ${SECTOR_COLORS[item.sector] || "from-green-500 to-teal-500"} transition-all duration-700`}
-                    style={{ width: `${(item.points / maxSectorPts) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Employee ranking */}
-      {tab === "colaboradores" && (
-        <div className="space-y-4">
-          {/* Sector filter */}
+      <div className="flex gap-4 items-start">
+        {/* Sidebar de setores */}
+        <aside className="w-48 shrink-0 bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
           {isAdminOrManager && (
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setSelectedSector(null)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${!selectedSector ? "bg-green-500 text-white" : "bg-gray-800 text-gray-400 hover:text-white border border-gray-700"}`}
-              >
-                Todos
-              </button>
-              {SECTORS.map(s => (
-                <button
-                  key={s}
-                  onClick={() => setSelectedSector(s)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${selectedSector === s ? "bg-green-500 text-white" : "bg-gray-800 text-gray-400 hover:text-white border border-gray-700"}`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+            <button
+              onClick={() => setSelectedSector("geral")}
+              className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all border-b border-gray-700 ${
+                selectedSector === "geral"
+                  ? "bg-green-500 text-white"
+                  : "text-gray-400 hover:text-white hover:bg-gray-700"
+              }`}
+            >
+              <BarChart2 className="w-4 h-4 shrink-0" />
+              <span>Geral</span>
+            </button>
           )}
+          {availableSectors.map(sector => (
+            <button
+              key={sector}
+              onClick={() => setSelectedSector(sector)}
+              className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all border-b border-gray-700 last:border-0 ${
+                selectedSector === sector
+                  ? "bg-green-500 text-white"
+                  : "text-gray-400 hover:text-white hover:bg-gray-700"
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full shrink-0 bg-gradient-to-br ${SECTOR_COLORS[sector]}`} />
+              <span className="truncate text-left">{sector}</span>
+            </button>
+          ))}
+        </aside>
 
-          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
-            <h2 className="text-white font-bold mb-5 flex items-center gap-2">
-              <Users className="w-5 h-5 text-green-400" />
-              {selectedSector ? selectedSector : "Todos os Colaboradores"}
-            </h2>
-            {employeeRanking.length === 0 ? (
-              <p className="text-gray-400 text-sm text-center py-8">Nenhum ponto registrado ainda.</p>
-            ) : (
-              <div className="space-y-3">
-                {employeeRanking.map((emp, idx) => (
-                  <div key={emp.id} className={`flex items-center gap-4 p-3 rounded-xl ${idx === 0 ? "bg-amber-900/20 border border-amber-700/40" : "bg-gray-900/50"}`}>
-                    <span className="text-xl w-8 text-center">
-                      {medals[idx] || <span className="text-gray-400 font-bold text-sm">{idx + 1}</span>}
-                    </span>
-                    <div className="flex-1">
-                      <p className="text-white font-medium text-sm">{emp.name}</p>
-                      <div className="h-1.5 bg-gray-700 rounded-full mt-1.5 overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-green-500 to-teal-400"
-                          style={{ width: `${(emp.points / maxEmpPts) * 100}%` }}
-                        />
+        {/* Conteúdo principal */}
+        <div className="flex-1 min-w-0">
+          {/* View Geral - ranking de setores */}
+          {selectedSector === "geral" && isAdminOrManager && (
+            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+              <h2 className="text-white font-bold mb-5 flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-amber-400" />
+                Ranking de Setores
+              </h2>
+              <div className="space-y-4">
+                {sectorRanking.map((item, idx) => (
+                  <div key={item.sector}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg w-7">{medals[idx] || <span className="text-gray-500 text-sm font-bold">{idx + 1}</span>}</span>
+                        <button
+                          onClick={() => setSelectedSector(item.sector)}
+                          className="text-white font-medium hover:text-green-400 transition-colors text-sm"
+                        >
+                          {item.sector}
+                        </button>
                       </div>
+                      <span className="text-green-400 font-bold text-sm">{item.points.toLocaleString()} pts</span>
                     </div>
-                    <span className="text-green-400 font-bold text-sm shrink-0">{emp.points.toLocaleString()} pts</span>
+                    <div className="h-2 bg-gray-700 rounded-full overflow-hidden ml-9">
+                      <div
+                        className={`h-full rounded-full bg-gradient-to-r ${SECTOR_COLORS[item.sector]} transition-all duration-700`}
+                        style={{ width: `${(item.points / maxSectorPts) * 100}%` }}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* View por Setor - ranking de colaboradores */}
+          {selectedSector !== "geral" && (
+            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+              <h2 className="text-white font-bold mb-5 flex items-center gap-2">
+                <Users className="w-5 h-5 text-green-400" />
+                {selectedSector}
+              </h2>
+              {employeeRanking.length === 0 ? (
+                <p className="text-gray-400 text-sm text-center py-10">Nenhum ponto registrado neste setor ainda.</p>
+              ) : (
+                <div className="space-y-3">
+                  {employeeRanking.map((emp, idx) => (
+                    <div
+                      key={emp.id}
+                      className={`flex items-center gap-4 p-3 rounded-xl ${
+                        idx === 0 ? "bg-amber-900/20 border border-amber-700/40" :
+                        idx === 1 ? "bg-gray-700/30 border border-gray-600/30" :
+                        "bg-gray-900/50"
+                      }`}
+                    >
+                      <span className="text-xl w-8 text-center">
+                        {medals[idx] !== undefined ? medals[idx] : <span className="text-gray-500 font-bold text-sm">{idx + 1}</span>}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium text-sm truncate">{emp.name}</p>
+                        <div className="h-1.5 bg-gray-700 rounded-full mt-1.5 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full bg-gradient-to-r ${SECTOR_COLORS[selectedSector] || "from-green-500 to-teal-400"}`}
+                            style={{ width: `${(emp.points / maxEmpPts) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="text-green-400 font-bold text-sm shrink-0">{emp.points.toLocaleString()} pts</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
