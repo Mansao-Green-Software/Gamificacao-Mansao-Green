@@ -66,6 +66,33 @@ export default function SistemaPontuacao() {
 
   const sorted = [...filteredMissions].sort((a, b) => b.points - a.points);
 
+  const handleCreate = async () => {
+    if (!form.title || !form.points || !form.sector) return;
+    const created = await base44.entities.Mission.create({
+      ...form,
+      points: parseInt(form.points),
+      is_active: true,
+    });
+    setMissions(prev => [...prev, created]);
+    setForm({ title: "", description: "", points: "", sector: "" });
+    setShowForm(false);
+  };
+
+  const handleSaveEdit = async (id) => {
+    await base44.entities.Mission.update(id, {
+      title: editing.title,
+      points: parseInt(editing.points),
+      description: editing.description,
+    });
+    setMissions(prev => prev.map(m => m.id === id ? { ...m, ...editing, points: parseInt(editing.points) } : m));
+    setEditing(null);
+  };
+
+  const handleDelete = async (id) => {
+    await base44.entities.Mission.update(id, { is_active: false });
+    setMissions(prev => prev.filter(m => m.id !== id));
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="w-10 h-10 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
