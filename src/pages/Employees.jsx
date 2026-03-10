@@ -13,7 +13,8 @@ export default function Employees() {
   const [user, setUser] = useState(null);
   const [employees, setEmployees] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ full_name: "", email: "", sector: "", role: "user", user_id: "" });
+  const [form, setForm] = useState({ full_name: "", email: "", sector: "", role: "user", user_id: "", photo_url: "" });
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [loading, setLoading] = useState(true);
