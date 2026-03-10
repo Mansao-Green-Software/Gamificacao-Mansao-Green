@@ -65,12 +65,22 @@ export default function Layout({ children, currentPageName }) {
 
         {user && (
           <div className="px-4 py-3 border-b border-gray-800">
-            <p className="text-gray-400 text-xs">Logado como</p>
-            <p className="text-white text-sm font-medium truncate">{user.full_name}</p>
-            {user.sector && <p className="text-green-400 text-xs">{user.sector}</p>}
-            <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-300">
-              {user.role === "admin" ? "Admin" : user.role === "manager" ? "Gerente" : "Colaborador"}
-            </span>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0">
+                {profile?.photo_url ? (
+                  <img src={profile.photo_url} alt={user.full_name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-gray-400 text-sm font-bold">{user.full_name?.[0]?.toUpperCase()}</span>
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="text-white text-sm font-medium truncate">{user.full_name}</p>
+                {(profile?.sector || user.sector) && <p className="text-green-400 text-xs truncate">{profile?.sector || user.sector}</p>}
+                <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-300">
+                  {user.role === "admin" ? "Admin" : user.role === "manager" ? "Gerente" : "Colaborador"}
+                </span>
+              </div>
+            </div>
           </div>
         )}
 
