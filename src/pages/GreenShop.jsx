@@ -384,6 +384,47 @@ export default function GreenShop() {
         </div>
       )}
 
+      {/* Edit reward modal */}
+      {editingReward && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md">
+            <h3 className="text-white font-bold text-lg mb-4">Editar Prêmio</h3>
+            <div className="space-y-3">
+              <input value={editForm.title} onChange={e => setEditForm(p => ({ ...p, title: e.target.value }))} placeholder="Nome do prêmio *" className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500" />
+              <textarea value={editForm.description} onChange={e => setEditForm(p => ({ ...p, description: e.target.value }))} placeholder="Descrição" rows={2} className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 resize-none" />
+              <div className="grid grid-cols-2 gap-3">
+                <input type="number" value={editForm.points_cost} onChange={e => setEditForm(p => ({ ...p, points_cost: e.target.value }))} placeholder="Custo em pontos *" className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500" />
+                <input type="number" value={editForm.stock} onChange={e => setEditForm(p => ({ ...p, stock: e.target.value }))} placeholder="Estoque (vazio = ilimitado)" className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500" />
+              </div>
+              <select value={editForm.category} onChange={e => setEditForm(p => ({ ...p, category: e.target.value }))} className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500">
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-xl bg-gray-700 border border-gray-600 overflow-hidden flex items-center justify-center shrink-0">
+                  {editForm.image_url ? <img src={editForm.image_url} alt="preview" className="w-full h-full object-cover" /> : <Camera className="w-5 h-5 text-gray-500" />}
+                </div>
+                <label className="cursor-pointer px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors">
+                  {uploadingPhoto ? "Enviando..." : "Alterar foto"}
+                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    setUploadingPhoto(true);
+                    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                    setEditForm(p => ({ ...p, image_url: file_url }));
+                    setUploadingPhoto(false);
+                  }} />
+                </label>
+                {editForm.image_url && <button onClick={() => setEditForm(p => ({ ...p, image_url: "" }))} className="text-red-400 text-xs hover:underline">Remover</button>}
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button onClick={handleSaveEditReward} className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium text-sm transition-colors">Salvar</button>
+              <button onClick={() => setEditingReward(null)} className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-medium text-sm transition-colors">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Confirm modal */}
       {confirmReward && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
