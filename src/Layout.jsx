@@ -79,7 +79,13 @@ export default function Layout({ children, currentPageName }) {
                 <p className="text-white text-sm font-medium truncate">{user.full_name}</p>
                 {(profile?.sector || user.sector) && <p className="text-green-400 text-xs truncate">{profile?.sector || user.sector}</p>}
                 <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-300">
-                  {user.role === "admin" ? "Admin" : user.role === "manager" ? "Gerente" : "Colaborador"}
+                  {(() => {
+                    const role = profile?.role || user.role;
+                    if (role === "admin") return "Admin";
+                    if (role === "manager") return "Gerente";
+                    if (role === "supervisor") return "Supervisor";
+                    return "Colaborador";
+                  })()}
                 </span>
               </div>
             </div>
