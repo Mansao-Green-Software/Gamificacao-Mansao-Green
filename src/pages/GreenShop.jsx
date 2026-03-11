@@ -35,15 +35,20 @@ export default function GreenShop() {
   const [editingReward, setEditingReward] = useState(null);
   const [editForm, setEditForm] = useState({});
 
+  const [profile, setProfile] = useState(null);
+
   useEffect(() => {
     const load = async () => {
       const u = await base44.auth.me();
       setUser(u);
-      const [rws, reds, txs] = await Promise.all([
+      const [rws, reds, txs, profiles] = await Promise.all([
         base44.entities.Reward.list(),
         base44.entities.RewardRedemption.list("-created_date", 200),
         base44.entities.PointTransaction.filter({ employee_id: u.id }),
+        base44.entities.EmployeeProfile.list(),
       ]);
+      const found = profiles.find(p => p.user_id === u.id || p.email === u.email);
+      setProfile(found);
       setRewards(rws);
       setRedemptions(reds);
       setTransactions(txs);
@@ -52,8 +57,9 @@ export default function GreenShop() {
     load();
   }, []);
 
-  const isAdmin = user?.role === "admin";
-  const isManager = user?.role === "manager" || isAdmin;
+  const effectiveRole = profile?.role || user?.role;
+  const isAdmin = effectiveRole === "admin";
+  const isManager = effectiveRole === "manager" || effectiveRole === "supervisor" || isAdmin;
 
   const myPoints = transactions.reduce((s, t) => s + (t.points || 0), 0);
   const myRedemptions = redemptions.filter(r => r.employee_id === user?.id);
