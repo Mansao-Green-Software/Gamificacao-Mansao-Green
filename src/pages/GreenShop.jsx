@@ -60,6 +60,7 @@ export default function GreenShop() {
   const effectiveRole = profile?.role || user?.role;
   const isAdmin = effectiveRole === "admin";
   const isManager = effectiveRole === "manager" || effectiveRole === "supervisor" || isAdmin;
+  const canEditRewards = isAdmin;
 
   const myPoints = transactions.reduce((s, t) => s + (t.points || 0), 0);
   const myRedemptions = redemptions.filter(r => r.employee_id === user?.id);
