@@ -68,7 +68,16 @@ export default function Employees() {
   };
 
   const saveEdit = async (id) => {
-    const updated = await base44.entities.EmployeeProfile.update(id, editForm);
+    const emp = employees.find(e => e.id === id);
+    await base44.entities.EmployeeProfile.update(id, editForm);
+    // Sincroniza o role do usuário real na plataforma
+    if (emp?.user_id) {
+      const allUsers = await base44.entities.User.list();
+      const linkedUser = allUsers.find(u => u.id === emp.user_id || u.email === emp.email);
+      if (linkedUser && editForm.role) {
+        await base44.entities.User.update(linkedUser.id, { role: editForm.role });
+      }
+    }
     setEmployees(prev => prev.map(e => e.id === id ? { ...e, ...editForm } : e));
     setEditing(null);
   };
