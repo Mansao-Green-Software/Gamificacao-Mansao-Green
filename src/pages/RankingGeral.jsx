@@ -30,9 +30,28 @@ const SECTOR_ICON_COLORS = {
 
 const medals = ["🥇", "🥈", "🥉"];
 
+const PERIODS = [
+  { key: "mensal", label: "Mensal" },
+  { key: "trimestral", label: "Trimestre (Abr-Jun)" },
+  { key: "anual", label: "Anual" },
+];
+
+function filterByPeriod(txs, period) {
+  const now = new Date();
+  const year = now.getFullYear();
+  return txs.filter(t => {
+    const d = new Date(t.created_date);
+    if (period === "mensal") return d.getMonth() === now.getMonth() && d.getFullYear() === year;
+    if (period === "trimestral") return [3, 4, 5].includes(d.getMonth()) && d.getFullYear() === year;
+    if (period === "anual") return d.getFullYear() === year;
+    return true;
+  });
+}
+
 export default function RankingGeral() {
   const [user, setUser] = useState(null);
   const [selectedSector, setSelectedSector] = useState("geral");
+  const [selectedPeriod, setSelectedPeriod] = useState("mensal");
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
