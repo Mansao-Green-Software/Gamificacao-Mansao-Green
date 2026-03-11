@@ -255,9 +255,11 @@ export default function GreenShop() {
                 return (
                   <div key={reward.id} className={`bg-gray-800 border rounded-2xl overflow-hidden flex flex-col ${outOfStock ? "opacity-50 border-gray-700" : canAfford ? "border-gray-700 hover:border-green-600 transition-colors" : "border-gray-700 opacity-75"}`}>
                     {reward.image_url ? (
-                      <img src={reward.image_url} alt={reward.title} className="w-full h-40 object-cover" />
+                      <div className="w-full aspect-[4/5] overflow-hidden">
+                        <img src={reward.image_url} alt={reward.title} className="w-full h-full object-cover" />
+                      </div>
                     ) : (
-                      <div className="w-full h-40 bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                      <div className="w-full aspect-[4/5] bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
                         <ShoppingBag className="w-12 h-12 text-gray-600" />
                       </div>
                     )}
