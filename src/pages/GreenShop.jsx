@@ -192,7 +192,7 @@ export default function GreenShop() {
       </div>
 
       {/* Create form */}
-      {showForm && isManager && (
+      {showForm && canEditRewards && (
         <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
           <h3 className="text-white font-bold mb-4">Novo Prêmio</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
