@@ -153,7 +153,7 @@ export default function GreenShop() {
           </h1>
           <p className="text-gray-400 text-sm mt-1">Troque seus pontos por prêmios incríveis</p>
         </div>
-        {isManager && (
+        {canEditRewards && (
           <button
             onClick={() => setShowForm(!showForm)}
             className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium text-sm transition-colors"
