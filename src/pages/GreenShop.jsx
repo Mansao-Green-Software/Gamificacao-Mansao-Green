@@ -109,6 +109,21 @@ export default function GreenShop() {
     setConfirmReward(null);
   };
 
+  const handleEditReward = (reward) => {
+    setEditingReward(reward.id);
+    setEditForm({ title: reward.title, description: reward.description || "", points_cost: String(reward.points_cost), stock: reward.stock != null ? String(reward.stock) : "", category: reward.category || "Outros", image_url: reward.image_url || "" });
+  };
+
+  const handleSaveEditReward = async () => {
+    await base44.entities.Reward.update(editingReward, {
+      ...editForm,
+      points_cost: parseInt(editForm.points_cost),
+      stock: editForm.stock ? parseInt(editForm.stock) : null,
+    });
+    setRewards(prev => prev.map(r => r.id === editingReward ? { ...r, ...editForm, points_cost: parseInt(editForm.points_cost), stock: editForm.stock ? parseInt(editForm.stock) : null } : r));
+    setEditingReward(null);
+  };
+
   const handleUpdateStatus = async (redemptionId, newStatus) => {
     await base44.entities.RewardRedemption.update(redemptionId, { status: newStatus });
     setRedemptions(prev => prev.map(r => r.id === redemptionId ? { ...r, status: newStatus } : r));
