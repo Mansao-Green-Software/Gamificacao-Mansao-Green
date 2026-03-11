@@ -70,7 +70,7 @@ export default function RankingGeral() {
       ]);
       setTransactions(txs);
       const profileMap = {};
-      profs.forEach(p => { profileMap[p.user_id] = p; });
+      profs.forEach(p => { profileMap[p.id] = p; });
       setProfiles(profileMap);
       setLoading(false);
     };
