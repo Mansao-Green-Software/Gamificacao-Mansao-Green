@@ -32,6 +32,8 @@ export default function GreenShop() {
   const [redeeming, setRedeeming] = useState(null);
   const [confirmReward, setConfirmReward] = useState(null);
   const [filterCategory, setFilterCategory] = useState("Todos");
+  const [editingReward, setEditingReward] = useState(null);
+  const [editForm, setEditForm] = useState({});
 
   useEffect(() => {
     const load = async () => {
