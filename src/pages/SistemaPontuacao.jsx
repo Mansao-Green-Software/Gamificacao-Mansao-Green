@@ -54,7 +54,7 @@ export default function SistemaPontuacao() {
 
   const isAdminOrManager = user?.role === "admin" || user?.role === "manager" || user?.role === "supervisor";
 
-  const availableSectors = isAdminOrManager ? ["Todos", ...SECTORS] : [user?.sector].filter(Boolean);
+  const availableSectors = isAdminOrManager ? SECTORS : [user?.sector].filter(Boolean);
 
   const filteredMissions = missions.filter(m => {
     const sectorMatch = selectedSector === "Todos"
