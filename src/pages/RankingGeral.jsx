@@ -232,7 +232,7 @@ export default function RankingGeral() {
                       <span className="text-xl w-8 text-center shrink-0">
                         {medals[idx] !== undefined ? medals[idx] : <span className="text-gray-500 font-bold text-sm">{idx + 1}</span>}
                       </span>
-                      <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden shrink-0 flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-full bg-gray-700 overflow-hidden shrink-0 flex items-center justify-center">
                         {emp.photo_url ? (
                           <img src={emp.photo_url} alt={emp.name} className="w-full h-full object-cover" />
                         ) : (
