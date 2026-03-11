@@ -237,15 +237,33 @@ export default function Employees() {
                       )}
                     </td>
                     <td className="px-5 py-3">
-                      {editing === emp.id ? (
-                        <input
-                          value={editForm.full_name}
-                          onChange={e => setEditForm(p => ({ ...p, full_name: e.target.value }))}
-                          className="bg-gray-900 border border-gray-600 text-white rounded-lg px-2 py-1 text-sm"
-                        />
-                      ) : (
-                        <span className="text-white text-sm font-medium">{emp.full_name}</span>
-                      )}
+                     {editing === emp.id ? (
+                       <div className="space-y-1.5">
+                         <input
+                           value={editForm.full_name}
+                           onChange={e => setEditForm(p => ({ ...p, full_name: e.target.value }))}
+                           placeholder="Nome completo"
+                           className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-2 py-1 text-sm"
+                         />
+                         <input
+                           value={editForm.email}
+                           onChange={e => setEditForm(p => ({ ...p, email: e.target.value }))}
+                           placeholder="Email"
+                           className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-2 py-1 text-sm"
+                         />
+                         <input
+                           value={editForm.user_id}
+                           onChange={e => setEditForm(p => ({ ...p, user_id: e.target.value }))}
+                           placeholder="User ID (vínculo de conta)"
+                           className="w-full bg-gray-900 border border-gray-600 text-gray-400 rounded-lg px-2 py-1 text-xs"
+                         />
+                       </div>
+                     ) : (
+                       <div>
+                         <span className="text-white text-sm font-medium">{emp.full_name}</span>
+                         {emp.email && <p className="text-gray-500 text-xs mt-0.5">{emp.email}</p>}
+                       </div>
+                     )}
                     </td>
                     <td className="px-5 py-3">
                       {editing === emp.id ? (
