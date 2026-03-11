@@ -71,16 +71,18 @@ export default function RankingGeral() {
 
   const isAdminOrManager = user?.role === "admin" || user?.role === "manager";
 
+  const periodTxs = filterByPeriod(transactions, selectedPeriod);
+
   const getSectorPoints = () => {
     const pts = {};
-    transactions.forEach(t => {
+    periodTxs.forEach(t => {
       if (t.sector) pts[t.sector] = (pts[t.sector] || 0) + (t.points || 0);
     });
     return SECTORS.map(s => ({ sector: s, points: pts[s] || 0 })).sort((a, b) => b.points - a.points);
   };
 
   const getEmployeeRanking = (sector) => {
-    const filtered = sector && sector !== "geral" ? transactions.filter(t => t.sector === sector) : transactions;
+    const filtered = sector && sector !== "geral" ? periodTxs.filter(t => t.sector === sector) : periodTxs;
     const pts = {};
     const names = {};
     const sectors = {};
