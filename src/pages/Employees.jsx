@@ -64,7 +64,7 @@ export default function Employees() {
 
   const startEdit = (emp) => {
     setEditing(emp.id);
-    setEditForm({ full_name: emp.full_name, sector: emp.sector, role: emp.role, photo_url: emp.photo_url || "" });
+    setEditForm({ full_name: emp.full_name, email: emp.email || "", user_id: emp.user_id || "", sector: emp.sector, role: emp.role, photo_url: emp.photo_url || "" });
   };
 
   const saveEdit = async (id) => {
