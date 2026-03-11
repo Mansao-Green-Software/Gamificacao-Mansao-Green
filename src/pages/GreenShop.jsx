@@ -262,6 +262,7 @@ export default function GreenShop() {
                       <div className="w-full aspect-[4/5] bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
                         <ShoppingBag className="w-12 h-12 text-gray-600" />
                       </div>
+                    )}
                     <div className="p-4 flex flex-col flex-1 gap-3">
                       <div>
                         <div className="flex items-start justify-between gap-2">
