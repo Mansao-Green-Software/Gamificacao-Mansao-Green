@@ -293,9 +293,14 @@ export default function GreenShop() {
                         </button>
                       )}
                       {isManager && (
-                        <button onClick={() => handleDelete(reward.id)} className="w-full py-2 rounded-xl text-sm font-medium text-red-400 hover:bg-red-900/20 transition-colors border border-red-900/30">
-                          Remover
-                        </button>
+                        <div className="flex gap-2">
+                          <button onClick={() => handleEditReward(reward)} className="flex-1 py-2 rounded-xl text-sm font-medium text-blue-400 hover:bg-blue-900/20 transition-colors border border-blue-900/30 flex items-center justify-center gap-1">
+                            <Edit2 className="w-3.5 h-3.5" /> Editar
+                          </button>
+                          <button onClick={() => handleDelete(reward.id)} className="flex-1 py-2 rounded-xl text-sm font-medium text-red-400 hover:bg-red-900/20 transition-colors border border-red-900/30">
+                            Remover
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
