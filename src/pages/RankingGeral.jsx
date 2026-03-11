@@ -229,9 +229,16 @@ export default function RankingGeral() {
                         "bg-gray-900/50"
                       }`}
                     >
-                      <span className="text-xl w-8 text-center">
+                      <span className="text-xl w-8 text-center shrink-0">
                         {medals[idx] !== undefined ? medals[idx] : <span className="text-gray-500 font-bold text-sm">{idx + 1}</span>}
                       </span>
+                      <div className="w-9 h-9 rounded-full bg-gray-700 overflow-hidden shrink-0 flex items-center justify-center">
+                        {emp.photo_url ? (
+                          <img src={emp.photo_url} alt={emp.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-gray-400 text-sm font-bold">{emp.name?.[0]?.toUpperCase()}</span>
+                        )}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-white font-medium text-sm truncate">{emp.name}</p>
                         <div className="h-1.5 bg-gray-700 rounded-full mt-1.5 overflow-hidden">
