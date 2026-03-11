@@ -100,7 +100,7 @@ export default function RankingGeral() {
       sectors[t.employee_id] = t.sector;
     });
     return Object.entries(pts)
-      .map(([id, points]) => ({ id, name: names[id], points, sector: sectors[id] }))
+      .map(([id, points]) => ({ id, name: names[id], points, sector: sectors[id], photo_url: profiles[id]?.photo_url }))
       .sort((a, b) => b.points - a.points);
   };
 
