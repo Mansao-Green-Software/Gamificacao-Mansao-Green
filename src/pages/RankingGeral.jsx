@@ -112,12 +112,25 @@ export default function RankingGeral() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Trophy className="w-6 h-6 text-amber-400" />
-          Ranking
-        </h1>
-        <p className="text-gray-400 text-sm mt-1">Performance por setor</p>
+      <div className="flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Trophy className="w-6 h-6 text-amber-400" />
+            Ranking
+          </h1>
+          <p className="text-gray-400 text-sm mt-1">Performance por setor</p>
+        </div>
+        <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1">
+          {PERIODS.map(p => (
+            <button
+              key={p.key}
+              onClick={() => setSelectedPeriod(p.key)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${selectedPeriod === p.key ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex gap-4 items-start">
