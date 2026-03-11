@@ -55,6 +55,8 @@ export default function RankingGeral() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [profiles, setProfiles] = useState({});
+
   useEffect(() => {
     const load = async () => {
       const u = await base44.auth.me();
@@ -62,8 +64,14 @@ export default function RankingGeral() {
       if (u.role !== "admin" && u.role !== "manager") {
         setSelectedSector(u.sector);
       }
-      const txs = await base44.entities.PointTransaction.list("-created_date", 1000);
+      const [txs, profs] = await Promise.all([
+        base44.entities.PointTransaction.list("-created_date", 1000),
+        base44.entities.EmployeeProfile.list(),
+      ]);
       setTransactions(txs);
+      const profileMap = {};
+      profs.forEach(p => { profileMap[p.user_id] = p; });
+      setProfiles(profileMap);
       setLoading(false);
     };
     load();
