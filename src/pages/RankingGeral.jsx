@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Trophy, Users, BarChart2 } from "lucide-react";
 
-const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Gestão de IA"];
+const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Gestão de IA", "Affiliates"];
 
 const SECTOR_COLORS = {
   "Social Media": "from-pink-500 to-rose-600",
@@ -14,6 +14,7 @@ const SECTOR_COLORS = {
   "Contingência": "from-red-500 to-rose-600",
   "Comercial": "from-yellow-500 to-amber-600",
   "Financeiro": "from-emerald-500 to-green-600",
+  "Affiliates": "from-violet-500 to-fuchsia-600",
 };
 
 const SECTOR_ICON_COLORS = {
@@ -26,6 +27,7 @@ const SECTOR_ICON_COLORS = {
   "Contingência": "bg-red-500/20 text-red-400",
   "Comercial": "bg-yellow-500/20 text-yellow-400",
   "Financeiro": "bg-emerald-500/20 text-emerald-400",
+  "Affiliates": "bg-violet-500/20 text-violet-400",
 };
 
 const medals = ["🥇", "🥈", "🥉"];
