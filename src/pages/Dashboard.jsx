@@ -131,33 +131,92 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Sector ranking */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-white font-bold flex items-center gap-2">
-            <Medal className="w-5 h-5 text-amber-400" />
-            Ranking de Setores
-          </h2>
-          <Link to={createPageUrl("RankingGeral")} className="text-green-400 text-sm hover:underline">Ver tudo</Link>
-        </div>
-        <div className="space-y-3">
-          {sectorRanking.slice(0, 5).map((item, idx) => {
-            const medals = ["🥇", "🥈", "🥉"];
-            const isMe = item.sector === mySector;
-            return (
-              <div key={item.sector} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
-                <span className="text-xl w-8 text-center">{medals[idx] || `${idx + 1}`}</span>
-                <div className={`flex-1 h-2 rounded-full bg-gray-700 overflow-hidden`}>
-                  <div
-                    className={`h-full rounded-full bg-gradient-to-r ${SECTOR_COLORS[item.sector] || "from-green-500 to-teal-500"}`}
-                    style={{ width: sectorRanking[0].points > 0 ? `${(item.points / sectorRanking[0].points) * 100}%` : "0%" }}
-                  />
+      {/* Rankings grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top 5 Setores */}
+        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-white font-bold flex items-center gap-2">
+              <Medal className="w-5 h-5 text-amber-400" />
+              Top 5 Setores
+            </h2>
+            <Link to={createPageUrl("RankingGeral")} className="text-green-400 text-sm hover:underline">Ver tudo</Link>
+          </div>
+          <div className="space-y-3">
+            {sectorRanking.slice(0, 5).map((item, idx) => {
+              const medals = ["🥇", "🥈", "🥉"];
+              const isMe = item.sector === mySector;
+              return (
+                <div key={item.sector} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
+                  <span className="text-xl w-8 text-center">{medals[idx] || `${idx + 1}`}</span>
+                  <div className={`flex-1 h-2 rounded-full bg-gray-700 overflow-hidden`}>
+                    <div
+                      className={`h-full rounded-full bg-gradient-to-r ${SECTOR_COLORS[item.sector] || "from-green-500 to-teal-500"}`}
+                      style={{ width: sectorRanking[0].points > 0 ? `${(item.points / sectorRanking[0].points) * 100}%` : "0%" }}
+                    />
+                  </div>
+                  <span className="text-white text-sm font-medium w-24 truncate">{item.sector}</span>
+                  <span className="text-green-400 font-bold text-sm">{item.points.toLocaleString()} pts</span>
                 </div>
-                <span className="text-white text-sm font-medium w-24 truncate">{item.sector}</span>
-                <span className="text-green-400 font-bold text-sm">{item.points.toLocaleString()} pts</span>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Top 5 MG (Colaboradores) */}
+        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-white font-bold flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-amber-400" />
+              Top 5 MG
+            </h2>
+            <Link to={createPageUrl("RankingGeral")} className="text-green-400 text-sm hover:underline">Ver tudo</Link>
+          </div>
+          <div className="space-y-3">
+            {(() => {
+              const empPoints = {};
+              const empNames = {};
+              const empPhotos = {};
+              transactions.forEach(t => {
+                empPoints[t.employee_id] = (empPoints[t.employee_id] || 0) + t.points;
+                empNames[t.employee_id] = t.employee_name;
+                const emp = employees.find(e => e.user_id === t.employee_id);
+                if (emp?.photo_url) empPhotos[t.employee_id] = emp.photo_url;
+              });
+              const topEmployees = Object.entries(empPoints)
+                .map(([id, points]) => ({ id, name: empNames[id], points, photo: empPhotos[id] }))
+                .sort((a, b) => b.points - a.points)
+                .slice(0, 5);
+              const medals = ["🥇", "🥈", "🥉"];
+              const maxPoints = topEmployees[0]?.points || 1;
+              
+              return topEmployees.map((emp, idx) => {
+                const isMe = emp.id === user?.id;
+                return (
+                  <div key={emp.id} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
+                    <span className="text-xl w-8 text-center">{medals[idx] || `${idx + 1}`}</span>
+                    <div className="w-8 h-8 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0">
+                      {emp.photo ? (
+                        <img src={emp.photo} alt={emp.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-gray-400 text-xs font-bold">{emp.name?.[0]?.toUpperCase()}</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-medium truncate">{emp.name}</p>
+                      <div className="h-1.5 bg-gray-700 rounded-full mt-1 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-green-500 to-teal-500"
+                          style={{ width: `${(emp.points / maxPoints) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="text-green-400 font-bold text-sm shrink-0">{emp.points.toLocaleString()} pts</span>
+                  </div>
+                );
+              });
+            })()}
+          </div>
         </div>
       </div>
 
