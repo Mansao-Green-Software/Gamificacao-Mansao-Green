@@ -4,7 +4,7 @@ import { Trophy, Star, Target, TrendingUp, Medal } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
-const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Gestão de IA", "Affiliates"];
+const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Gestão de IA", "Affiliates", "Administrativo"];
 
 const SECTOR_COLORS = {
   "Social Media": "from-pink-500 to-rose-600",
@@ -17,6 +17,7 @@ const SECTOR_COLORS = {
   "Comercial": "from-yellow-500 to-amber-600",
   "Financeiro": "from-emerald-500 to-green-600",
   "Affiliates": "from-violet-500 to-fuchsia-600",
+  "Administrativo": "from-slate-500 to-gray-600",
 };
 
 export default function Dashboard() {
