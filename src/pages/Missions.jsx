@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Target, Plus, Trash2, CheckCircle } from "lucide-react";
 
-const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Gestão de IA", "Affiliates", "Administrativo", "Todos"];
+const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Gestão de IA", "Affiliates", "Administrativo", "Gerência", "Todos"];
 
 export default function Missions() {
   const [user, setUser] = useState(null);
