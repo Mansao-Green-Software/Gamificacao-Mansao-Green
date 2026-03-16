@@ -95,7 +95,9 @@ export default function RankingGeral() {
     load();
   }, []);
 
-  const isAdminOrManager = user?.role === "admin" || user?.role === "manager";
+  const myProfile = Object.values(profiles).find(p => p.user_id === user?.id || p.email === user?.email);
+  const effectiveRole = myProfile?.role || user?.role;
+  const isAdminOrManager = effectiveRole === "admin" || effectiveRole === "manager";
 
   const periodTxs = filterByPeriod(transactions, selectedPeriod);
 

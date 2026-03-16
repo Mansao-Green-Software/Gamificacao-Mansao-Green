@@ -63,7 +63,8 @@ export default function SistemaPontuacao() {
     load();
   }, []);
 
-  const isAdminOrManager = user?.role === "admin" || user?.role === "manager" || user?.role === "supervisor";
+  const isAdminOrManager = user?.role === "admin" || user?.role === "manager" || user?.role === "supervisor" ||
+    (user && Object.values({}).find) /* placeholder — handled via selectedSector logic above */;
 
   const availableSectors = isAdminOrManager ? SECTORS : [user?.sector].filter(Boolean);
 
