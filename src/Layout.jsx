@@ -6,7 +6,7 @@ import { Trophy, Users, Target, LayoutDashboard, LogOut, Menu, X, Crown, Star, S
 
 const SECTORS = [
   "Social Media", "Audiovisual", "Tráfego", "Líder de Projeto",
-  "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Gestão de IA", "Affiliates", "Administrativo", "Gerência"
+  "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Gestão de IA", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais"
 ];
 
 export default function Layout({ children, currentPageName }) {
