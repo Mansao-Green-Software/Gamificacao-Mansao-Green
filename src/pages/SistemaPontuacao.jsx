@@ -63,10 +63,11 @@ export default function SistemaPontuacao() {
     load();
   }, []);
 
-  const isAdminOrManager = user?.role === "admin" || user?.role === "manager" || user?.role === "supervisor" ||
-    (user && Object.values({}).find) /* placeholder — handled via selectedSector logic above */;
+  const myProfileData = user ? (missions.length >= 0 ? null : null) : null; // resolved via useEffect
+  const effectiveRoleDisplay = user?.role;
+  const isAdminOrManager = effectiveRoleDisplay === "admin" || effectiveRoleDisplay === "manager" || effectiveRoleDisplay === "supervisor";
 
-  const availableSectors = isAdminOrManager ? SECTORS : [user?.sector].filter(Boolean);
+  const availableSectors = isAdminOrManager ? SECTORS : [selectedSector].filter(Boolean);
 
   const filteredMissions = missions.filter(m => {
     const sectorMatch = m.sector === selectedSector || m.sector === "Todos";
