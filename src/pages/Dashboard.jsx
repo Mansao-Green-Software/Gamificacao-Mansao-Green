@@ -180,7 +180,7 @@ export default function Dashboard() {
               transactions.forEach(t => {
                 empPoints[t.employee_id] = (empPoints[t.employee_id] || 0) + t.points;
                 empNames[t.employee_id] = t.employee_name;
-                const emp = employees.find(e => e.user_id === t.employee_id);
+                const emp = employees.find(e => e.user_id === t.employee_id || e.id === t.employee_id);
                 if (emp?.photo_url) empPhotos[t.employee_id] = emp.photo_url;
               });
               const topEmployees = Object.entries(empPoints)
