@@ -75,9 +75,6 @@ export default function RankingGeral() {
     const load = async () => {
       const u = await base44.auth.me();
       setUser(u);
-      if (u.role !== "admin" && u.role !== "manager") {
-        setSelectedSector(u.sector);
-      }
       const [txs, profs] = await Promise.all([
         base44.entities.PointTransaction.list("-created_date", 1000),
         base44.entities.EmployeeProfile.list(),
@@ -86,6 +83,13 @@ export default function RankingGeral() {
       const profileMap = {};
       profs.forEach(p => { profileMap[p.id] = p; });
       setProfiles(profileMap);
+
+      const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
+      const effectiveRole = myProfile?.role || u.role;
+      const isAdminOrManagerLocal = effectiveRole === "admin" || effectiveRole === "manager";
+      if (!isAdminOrManagerLocal) {
+        setSelectedSector(myProfile?.sector || u.sector);
+      }
       setLoading(false);
     };
     load();

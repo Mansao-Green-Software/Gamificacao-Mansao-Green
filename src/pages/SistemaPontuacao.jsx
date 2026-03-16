@@ -49,11 +49,15 @@ export default function SistemaPontuacao() {
     const load = async () => {
       const u = await base44.auth.me();
       setUser(u);
-      const ms = await base44.entities.Mission.filter({ is_active: true });
+      const [ms, profs] = await Promise.all([
+        base44.entities.Mission.filter({ is_active: true }),
+        base44.entities.EmployeeProfile.list(),
+      ]);
       setMissions(ms);
-      // Default: setor do usuário, ou primeiro setor se admin
-      const isAdminOrManager = u.role === "admin" || u.role === "manager" || u.role === "supervisor";
-      setSelectedSector(isAdminOrManager ? SECTORS[0] : u.sector);
+      const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
+      const effectiveRole = myProfile?.role || u.role;
+      const isAdminOrManagerLocal = effectiveRole === "admin" || effectiveRole === "manager" || effectiveRole === "supervisor";
+      setSelectedSector(isAdminOrManagerLocal ? SECTORS[0] : (myProfile?.sector || u.sector));
       setLoading(false);
     };
     load();
