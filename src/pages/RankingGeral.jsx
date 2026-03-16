@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Trophy, Users, BarChart2 } from "lucide-react";
 
-const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Gestão de IA", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais"];
+const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Gestão de IA", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "TV Green", "Feira FC"];
 
 const SECTOR_COLORS = {
   "Social Media": "from-pink-500 to-rose-600",
@@ -19,6 +19,8 @@ const SECTOR_COLORS = {
   "Gerência": "from-indigo-500 to-blue-600",
   "Saúde e Bem Estar": "from-teal-500 to-cyan-600",
   "Serviços Gerais": "from-orange-500 to-amber-600",
+  "TV Green": "from-green-600 to-emerald-700",
+  "Feira FC": "from-lime-500 to-green-600",
 };
 
 const SECTOR_ICON_COLORS = {
@@ -36,6 +38,8 @@ const SECTOR_ICON_COLORS = {
   "Gerência": "bg-indigo-500/20 text-indigo-400",
   "Saúde e Bem Estar": "bg-teal-500/20 text-teal-400",
   "Serviços Gerais": "bg-orange-500/20 text-orange-400",
+  "TV Green": "bg-green-600/20 text-green-400",
+  "Feira FC": "bg-lime-500/20 text-lime-400",
 };
 
 const medals = ["🥇", "🥈", "🥉"];
