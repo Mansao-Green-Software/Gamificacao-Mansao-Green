@@ -36,6 +36,7 @@ const SECTOR_COLORS = {
 
 export default function SistemaPontuacao() {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [missions, setMissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSector, setSelectedSector] = useState(null);
@@ -55,6 +56,7 @@ export default function SistemaPontuacao() {
       ]);
       setMissions(ms);
       const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
+      setProfile(myProfile || null);
       const effectiveRole = myProfile?.role || u.role;
       const isAdminOrManagerLocal = effectiveRole === "admin" || effectiveRole === "manager" || effectiveRole === "supervisor";
       setSelectedSector(isAdminOrManagerLocal ? SECTORS[0] : (myProfile?.sector || u.sector));
@@ -63,9 +65,8 @@ export default function SistemaPontuacao() {
     load();
   }, []);
 
-  const myProfileData = user ? (missions.length >= 0 ? null : null) : null; // resolved via useEffect
-  const effectiveRoleDisplay = user?.role;
-  const isAdminOrManager = effectiveRoleDisplay === "admin" || effectiveRoleDisplay === "manager" || effectiveRoleDisplay === "supervisor";
+  const effectiveRole = profile?.role || user?.role;
+  const isAdminOrManager = effectiveRole === "admin" || effectiveRole === "manager" || effectiveRole === "supervisor";
 
   const availableSectors = isAdminOrManager ? SECTORS : [selectedSector].filter(Boolean);
 
