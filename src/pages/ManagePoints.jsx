@@ -47,10 +47,12 @@ export default function ManagePoints() {
     setSaving(true);
 
     const emp = employees.find(e => e.user_id === form.employee_id || e.id === form.employee_id);
+    const isManagerRole = emp?.role === "manager" || emp?.role === "supervisor" || emp?.role === "admin";
+    const transactionSector = isManagerRole ? "Gerência" : (emp?.sector || user?.sector);
     const tx = await base44.entities.PointTransaction.create({
       employee_id: emp?.user_id || form.employee_id,
       employee_name: emp?.full_name || "Desconhecido",
-      sector: emp?.sector || user?.sector,
+      sector: transactionSector,
       points: parseInt(form.points),
       type: "manual",
       description: form.description || "Pontuação manual",
