@@ -32,7 +32,13 @@ export default function ManagePoints() {
       const myProfile = emps.find(p => p.user_id === u.id || p.email === u.email);
       const mySector = myProfile?.sector;
 
-      const filtered = (isAdmin && !mySector) ? emps : emps.filter(e => e.sector === mySector && e.role !== "admin");
+      const isGerencia = mySector === "Gerência";
+      const filtered = (isAdmin && !mySector)
+        ? emps
+        : emps.filter(e => {
+            if (isGerencia) return e.role === "manager" || e.role === "supervisor";
+            return e.sector === mySector && e.role !== "admin";
+          });
       setEmployees(filtered);
       const filteredTxs = (isAdmin && !mySector) ? txs : txs.filter(t => t.sector === mySector);
       setTransactions(filteredTxs);
