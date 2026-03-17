@@ -29,11 +29,11 @@ export default function ManagePoints() {
       const myProfile = emps.find(p => p.user_id === u.id || p.email === u.email);
       const mySector = myProfile?.sector;
 
-      const filtered = isAdmin ? emps : emps.filter(e => e.sector === mySector && e.role !== "admin");
+      const filtered = (isAdmin && !mySector) ? emps : emps.filter(e => e.sector === mySector && e.role !== "admin");
       setEmployees(filtered);
-      const filteredTxs = isAdmin ? txs : txs.filter(t => t.sector === mySector);
+      const filteredTxs = (isAdmin && !mySector) ? txs : txs.filter(t => t.sector === mySector);
       setTransactions(filteredTxs);
-      const filteredMissions = isAdmin ? ms : ms.filter(m => m.sector === mySector || m.sector === "Todos");
+      const filteredMissions = (isAdmin && !mySector) ? ms : ms.filter(m => m.sector === mySector || m.sector === "Todos");
       setMissions(filteredMissions);
       setLoading(false);
     };
