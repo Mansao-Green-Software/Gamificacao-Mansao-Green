@@ -224,6 +224,62 @@ export default function ManagePoints() {
         </div>
       )}
 
+      {/* History All tab - Admin only */}
+      {tab === "historyAll" && isAdmin && (
+        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <h3 className="text-white font-bold flex items-center gap-2">
+              <History className="w-4 h-4 text-green-400" />
+              Histórico Geral de Pontuações
+            </h3>
+            <select
+              value={historyFilter}
+              onChange={e => setHistoryFilter(e.target.value)}
+              className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-green-500"
+            >
+              <option value="Todos">Todos os setores</option>
+              {["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "TV Green", "Feira FC"].map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+          {allTransactions.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-8">Nenhuma pontuação registrada ainda.</p>
+          ) : (() => {
+            const filtered = historyFilter === "Todos" ? allTransactions : allTransactions.filter(t => t.sector === historyFilter);
+            return filtered.length === 0 ? (
+              <p className="text-gray-500 text-sm text-center py-8">Nenhuma pontuação neste setor.</p>
+            ) : (
+              <div className="space-y-2 max-h-[600px] overflow-y-auto">
+                {filtered.map(tx => (
+                  <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-white text-sm font-medium truncate">{tx.employee_name}</p>
+                        <span className="text-xs px-2 py-0.5 bg-gray-700 text-gray-400 rounded-full shrink-0">{tx.sector}</span>
+                      </div>
+                      <p className="text-gray-500 text-xs truncate">{tx.description || tx.mission_title || "—"}</p>
+                      <p className="text-gray-600 text-xs">por {tx.awarded_by_name} · {new Date(tx.created_date).toLocaleDateString("pt-BR")}</p>
+                    </div>
+                    <div className="flex items-center gap-3 ml-3">
+                      <span className={`font-bold text-sm ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>
+                        {tx.points >= 0 ? "+" : ""}{tx.points}
+                      </span>
+                      <button
+                        onClick={() => handleDeleteTx(tx.id)}
+                        className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
       {/* History tab */}
       {tab === "history" && (
         <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
