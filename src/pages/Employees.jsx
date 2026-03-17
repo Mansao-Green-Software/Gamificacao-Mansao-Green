@@ -189,6 +189,25 @@ export default function Employees() {
             >
               {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
             </select>
+            <div className="col-span-2">
+              <label className="text-gray-400 text-xs mb-2 block">Setores extras que gerencia (opcional)</label>
+              <div className="flex flex-wrap gap-2">
+                {SECTORS.filter(s => s !== form.sector).map(s => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => toggleExtraSector(s, "form")}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
+                      form.extra_sectors.includes(s)
+                        ? "bg-green-500 border-green-500 text-white"
+                        : "bg-gray-900 border-gray-600 text-gray-400 hover:text-white"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
           <div className="flex gap-3 mt-4">
             <button onClick={handleCreate} className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm font-medium transition-colors">
