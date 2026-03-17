@@ -10,6 +10,8 @@ export default function ManagePoints() {
   const [missions, setMissions] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [tab, setTab] = useState("add");
+  const [allTransactions, setAllTransactions] = useState([]);
+  const [historyFilter, setHistoryFilter] = useState("Todos");
   const [form, setForm] = useState({ employee_id: "", points: "", description: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
