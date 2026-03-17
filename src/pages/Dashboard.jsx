@@ -52,9 +52,10 @@ export default function Dashboard() {
       setProfile(myProfile || null);
       const sector = myProfile?.sector;
 
-      // My points
-      const myTxs = txs.filter(t => t.employee_id === u.id);
-      const total = myTxs.reduce((s, t) => s + (t.points || 0), 0);
+      // My points - match by user id OR employee name (fallback for profiles without user_id linked)
+      const myProfile2 = emps.find(p => p.user_id === u.id || p.email === u.email);
+      const myTxs2 = txs.filter(t => t.employee_id === u.id || t.employee_name === u.full_name || (myProfile2 && t.employee_id === myProfile2.id));
+      const total = myTxs2.reduce((s, t) => s + (t.points || 0), 0);
       setMyPoints(total);
 
       // My rank in sector
