@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Star, Target, TrendingUp, Medal } from "lucide-react";
+import { Trophy, Star, Target, TrendingUp, Medal, History, TrendingDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
