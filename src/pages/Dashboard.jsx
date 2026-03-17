@@ -118,6 +118,65 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* TAB: Meus Pontos */}
+      {activeTab === "mypoints" && (
+        <div className="space-y-4">
+          {/* Resumo */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
+              <p className="text-gray-400 text-xs mb-1">Total Ganho</p>
+              <p className="text-2xl font-bold text-green-400">+{myTxs.filter(t => t.points > 0).reduce((s, t) => s + t.points, 0).toLocaleString()}</p>
+            </div>
+            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
+              <p className="text-gray-400 text-xs mb-1">Total Descontado</p>
+              <p className="text-2xl font-bold text-red-400">{myTxs.filter(t => t.points < 0).reduce((s, t) => s + t.points, 0).toLocaleString()}</p>
+            </div>
+            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5 col-span-2 sm:col-span-1">
+              <p className="text-gray-400 text-xs mb-1">Saldo Atual</p>
+              <p className="text-2xl font-bold text-white">{myPoints.toLocaleString()} pts</p>
+            </div>
+          </div>
+
+          {/* Histórico */}
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+            <h2 className="text-white font-bold mb-4 flex items-center gap-2">
+              <History className="w-5 h-5 text-green-400" />
+              Histórico de Pontuações
+            </h2>
+            {myTxs.length === 0 ? (
+              <p className="text-gray-500 text-sm text-center py-10">Nenhuma pontuação registrada ainda.</p>
+            ) : (
+              <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                {myTxs.map(tx => (
+                  <div key={tx.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${tx.points >= 0 ? "bg-green-900/40" : "bg-red-900/40"}`}>
+                      {tx.points >= 0
+                        ? <TrendingUp className="w-4 h-4 text-green-400" />
+                        : <TrendingDown className="w-4 h-4 text-red-400" />
+                      }
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-medium truncate">
+                        {tx.mission_title || tx.description || "Pontuação manual"}
+                      </p>
+                      <p className="text-gray-500 text-xs mt-0.5">
+                        por {tx.awarded_by_name || "Sistema"} · {new Date(tx.created_date).toLocaleDateString("pt-BR")}
+                      </p>
+                    </div>
+                    <span className={`font-bold text-sm shrink-0 ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>
+                      {tx.points >= 0 ? "+" : ""}{tx.points}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB: Visão Geral */}
+      {activeTab === "overview" && <>
+
       {/* My stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
