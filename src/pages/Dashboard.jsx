@@ -80,7 +80,7 @@ export default function Dashboard() {
     load();
   }, []);
 
-  const recentTxs = transactions.filter(t => t.employee_id === user?.id).slice(0, 5);
+  const myTxs = transactions.filter(t => t.employee_id === user?.id);
   const isAdmin = user?.role === "admin";
   const isManager = user?.role === "manager" || isAdmin;
   const mySector = profile?.sector;
