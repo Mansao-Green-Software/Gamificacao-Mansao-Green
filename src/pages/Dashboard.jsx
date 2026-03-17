@@ -97,9 +97,25 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">Olá, {user?.full_name?.split(" ")[0]} 👋</h1>
-        <p className="text-gray-400 text-sm mt-1">Bem-vindo ao Gamificação Mansão Green</p>
+      <div className="flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Olá, {user?.full_name?.split(" ")[0]} 👋</h1>
+          <p className="text-gray-400 text-sm mt-1">Bem-vindo ao Gamificação Mansão Green</p>
+        </div>
+        <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1">
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "overview" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
+          >
+            Visão Geral
+          </button>
+          <button
+            onClick={() => setActiveTab("mypoints")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "mypoints" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
+          >
+            Meus Pontos
+          </button>
+        </div>
       </div>
 
       {/* My stats */}
