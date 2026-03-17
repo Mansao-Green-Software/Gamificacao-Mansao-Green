@@ -301,25 +301,27 @@ export default function Dashboard() {
       </div>
 
       {/* Recent transactions */}
-      {recentTxs.length > 0 && (
+      {myTxs.length > 0 && (
         <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
           <h2 className="text-white font-bold mb-4 flex items-center gap-2">
             <Target className="w-5 h-5 text-green-400" />
             Últimas Pontuações Recebidas
           </h2>
           <div className="space-y-2">
-            {recentTxs.map(tx => (
+            {myTxs.slice(0, 5).map(tx => (
               <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
                 <div>
                   <p className="text-white text-sm font-medium">{tx.mission_title || tx.description || "Pontuação manual"}</p>
                   <p className="text-gray-500 text-xs">por {tx.awarded_by_name || "Admin"}</p>
                 </div>
-                <span className="text-green-400 font-bold">+{tx.points}</span>
+                <span className={`font-bold ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>{tx.points >= 0 ? "+" : ""}{tx.points}</span>
               </div>
             ))}
           </div>
         </div>
       )}
+
+      </>}
     </div>
   );
 }
