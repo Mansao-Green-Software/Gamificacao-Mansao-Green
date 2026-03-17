@@ -64,7 +64,25 @@ export default function Employees() {
 
   const startEdit = (emp) => {
     setEditing(emp.id);
-    setEditForm({ full_name: emp.full_name, email: emp.email || "", user_id: emp.user_id || "", sector: emp.sector, role: emp.role, photo_url: emp.photo_url || "" });
+    setEditForm({ full_name: emp.full_name, email: emp.email || "", user_id: emp.user_id || "", sector: emp.sector, role: emp.role, photo_url: emp.photo_url || "", extra_sectors: emp.extra_sectors || [] });
+  };
+
+  const toggleExtraSector = (sector, target) => {
+    if (target === "form") {
+      setForm(p => ({
+        ...p,
+        extra_sectors: p.extra_sectors.includes(sector)
+          ? p.extra_sectors.filter(s => s !== sector)
+          : [...p.extra_sectors, sector]
+      }));
+    } else {
+      setEditForm(p => ({
+        ...p,
+        extra_sectors: p.extra_sectors.includes(sector)
+          ? p.extra_sectors.filter(s => s !== sector)
+          : [...p.extra_sectors, sector]
+      }));
+    }
   };
 
   const saveEdit = async (id) => {
