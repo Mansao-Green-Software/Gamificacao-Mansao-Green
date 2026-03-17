@@ -119,6 +119,14 @@ export default function ManagePoints() {
         >
           Histórico
         </button>
+        {isAdmin && (
+          <button
+            onClick={() => setTab("historyAll")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "historyAll" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
+          >
+            Histórico Geral
+          </button>
+        )}
       </div>
 
       {/* Add points tab */}
