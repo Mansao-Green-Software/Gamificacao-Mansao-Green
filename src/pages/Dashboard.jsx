@@ -66,7 +66,7 @@ export default function Dashboard() {
           empPoints[t.employee_id] = (empPoints[t.employee_id] || 0) + t.points;
         });
         const sorted = Object.entries(empPoints).sort((a, b) => b[1] - a[1]);
-        const rank = sorted.findIndex(([id]) => id === u.id) + 1;
+        const rank = sorted.findIndex(([id]) => id === u.id || id === myProfile2?.id || id === u.full_name) + 1;
         setMyRank(rank || null);
       }
 
