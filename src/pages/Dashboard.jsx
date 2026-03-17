@@ -82,7 +82,8 @@ export default function Dashboard() {
     load();
   }, []);
 
-  const myTxs = transactions.filter(t => t.employee_id === user?.id);
+  const myProfile3 = employees.find(p => p.user_id === user?.id || p.email === user?.email);
+  const myTxs = transactions.filter(t => t.employee_id === user?.id || t.employee_name === user?.full_name || (myProfile3 && t.employee_id === myProfile3.id));
   const isAdmin = user?.role === "admin";
   const isManager = user?.role === "manager" || isAdmin;
   const mySector = profile?.sector;
