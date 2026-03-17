@@ -34,6 +34,7 @@ export default function Dashboard() {
   const [myRank, setMyRank] = useState(null);
   const [sectorRanking, setSectorRanking] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     const load = async () => {
