@@ -33,16 +33,19 @@ export default function ManagePoints() {
       const mySector = myProfile?.sector;
 
       const isGerencia = mySector === "Gerência";
+      const myExtraSectors = myProfile?.extra_sectors || [];
+      const allMySectors = mySector ? [mySector, ...myExtraSectors] : [];
+
       const filtered = (isAdmin && !mySector)
         ? emps
         : emps.filter(e => {
             if (isGerencia) return e.role === "manager" || e.role === "supervisor";
-            return e.sector === mySector && e.role !== "admin";
+            return allMySectors.includes(e.sector) && e.role !== "admin";
           });
       setEmployees(filtered);
-      const filteredTxs = (isAdmin && !mySector) ? txs : txs.filter(t => t.sector === mySector);
+      const filteredTxs = (isAdmin && !mySector) ? txs : txs.filter(t => allMySectors.includes(t.sector));
       setTransactions(filteredTxs);
-      const filteredMissions = (isAdmin && !mySector) ? ms : ms.filter(m => m.sector === mySector || m.sector === "Todos");
+      const filteredMissions = (isAdmin && !mySector) ? ms : ms.filter(m => allMySectors.includes(m.sector) || m.sector === "Todos");
       setMissions(filteredMissions);
       if (isAdmin) setAllTransactions(allTxs);
       setLoading(false);
