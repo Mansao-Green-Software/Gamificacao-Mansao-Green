@@ -38,6 +38,7 @@ export default function ManagePoints() {
       setTransactions(filteredTxs);
       const filteredMissions = (isAdmin && !mySector) ? ms : ms.filter(m => m.sector === mySector || m.sector === "Todos");
       setMissions(filteredMissions);
+      if (isAdmin) setAllTransactions(allTxs);
       setLoading(false);
     };
     load();
