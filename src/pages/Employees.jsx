@@ -308,15 +308,45 @@ export default function Employees() {
                     </td>
                     <td className="px-5 py-3">
                       {editing === emp.id ? (
-                        <select
-                          value={editForm.sector}
-                          onChange={e => setEditForm(p => ({ ...p, sector: e.target.value }))}
-                          className="bg-gray-900 border border-gray-600 text-white rounded-lg px-2 py-1 text-sm"
-                        >
-                          {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
+                        <div className="space-y-2">
+                          <select
+                            value={editForm.sector}
+                            onChange={e => setEditForm(p => ({ ...p, sector: e.target.value }))}
+                            className="bg-gray-900 border border-gray-600 text-white rounded-lg px-2 py-1 text-sm w-full"
+                          >
+                            {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                          <div>
+                            <p className="text-gray-500 text-xs mb-1">Setores extras:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {SECTORS.filter(s => s !== editForm.sector).map(s => (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  onClick={() => toggleExtraSector(s, "edit")}
+                                  className={`px-2 py-0.5 rounded text-xs transition-all border ${
+                                    (editForm.extra_sectors || []).includes(s)
+                                      ? "bg-green-500 border-green-500 text-white"
+                                      : "bg-gray-800 border-gray-600 text-gray-400 hover:text-white"
+                                  }`}
+                                >
+                                  {s}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
                       ) : (
-                        <span className="text-gray-300 text-sm">{emp.sector}</span>
+                        <div>
+                          <span className="text-gray-300 text-sm">{emp.sector}</span>
+                          {emp.extra_sectors?.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {emp.extra_sectors.map(s => (
+                                <span key={s} className="text-xs px-1.5 py-0.5 bg-blue-900/40 text-blue-300 rounded">{s}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="px-5 py-3">
