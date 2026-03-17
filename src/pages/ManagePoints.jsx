@@ -27,6 +27,7 @@ export default function ManagePoints() {
         base44.entities.EmployeeProfile.list(),
         base44.entities.PointTransaction.list("-created_date", 200),
         base44.entities.Mission.filter({ is_active: true }),
+        isAdmin ? base44.entities.PointTransaction.list("-created_date", 1000) : Promise.resolve([]),
       ]);
       const myProfile = emps.find(p => p.user_id === u.id || p.email === u.email);
       const mySector = myProfile?.sector;
