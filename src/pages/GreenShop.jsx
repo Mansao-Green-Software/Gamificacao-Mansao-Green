@@ -70,8 +70,9 @@ export default function GreenShop() {
 
   const myPoints = transactions.reduce((s, t) => s + (t.points || 0), 0);
   const myRedemptions = redemptions.filter(r => r.employee_id === user?.id);
+  // availablePoints já é calculado pelas transações (que incluem débitos negativos de resgates)
+  const availablePoints = myPoints;
   const spentPoints = myRedemptions.filter(r => r.status !== "cancelado").reduce((s, r) => s + (r.points_spent || 0), 0);
-  const availablePoints = myPoints - spentPoints;
 
   const activeRewards = rewards.filter(r => r.is_active);
   const filteredRewards = filterCategory === "Todos" ? activeRewards : activeRewards.filter(r => r.category === filterCategory);
