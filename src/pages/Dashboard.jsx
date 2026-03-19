@@ -70,9 +70,9 @@ export default function Dashboard() {
         setMyRank(rank || null);
       }
 
-      // Sector ranking
+      // Sector ranking (excluir resgates da Green Shop)
       const sectorPoints = {};
-      txs.forEach(t => {
+      txs.filter(t => !t.description?.startsWith("Resgate:")).forEach(t => {
         if (t.sector) sectorPoints[t.sector] = (sectorPoints[t.sector] || 0) + t.points;
       });
       const ranked = SECTORS.map(s => ({ sector: s, points: sectorPoints[s] || 0 })).sort((a, b) => b.points - a.points);
