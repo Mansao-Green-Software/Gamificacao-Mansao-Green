@@ -288,19 +288,17 @@ export default function GreenShop() {
                           <span className="text-xs text-gray-500">{reward.stock} em estoque</span>
                         )}
                       </div>
-                      {!isManager && (
-                        <button
-                          onClick={() => setConfirmReward(reward)}
-                          disabled={!canAfford || outOfStock || redeeming === reward.id}
-                          className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                            outOfStock ? "bg-gray-700 text-gray-500 cursor-not-allowed" :
-                            canAfford ? "bg-green-500 hover:bg-green-600 text-white" :
-                            "bg-gray-700 text-gray-500 cursor-not-allowed"
-                          }`}
-                        >
-                          {outOfStock ? "Esgotado" : !canAfford ? "Pontos insuficientes" : "Resgatar"}
-                        </button>
-                      )}
+                      <button
+                        onClick={() => setConfirmReward(reward)}
+                        disabled={!canAfford || outOfStock || redeeming === reward.id}
+                        className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                          outOfStock ? "bg-gray-700 text-gray-500 cursor-not-allowed" :
+                          canAfford ? "bg-green-500 hover:bg-green-600 text-white" :
+                          "bg-gray-700 text-gray-500 cursor-not-allowed"
+                        }`}
+                      >
+                        {outOfStock ? "Esgotado" : !canAfford ? "Pontos insuficientes" : "Resgatar"}
+                      </button>
                       {canEditRewards && (
                         <div className="flex gap-2">
                           <button onClick={() => handleEditReward(reward)} className="flex-1 py-2 rounded-xl text-sm font-medium text-blue-400 hover:bg-blue-900/20 transition-colors border border-blue-900/30 flex items-center justify-center gap-1">
