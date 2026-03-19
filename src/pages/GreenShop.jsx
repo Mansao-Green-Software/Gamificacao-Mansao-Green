@@ -41,14 +41,20 @@ export default function GreenShop() {
     const load = async () => {
       const u = await base44.auth.me();
       setUser(u);
-      const [rws, reds, txs, profiles] = await Promise.all([
+      const [rws, reds, allTxs, profiles] = await Promise.all([
         base44.entities.Reward.list(),
         base44.entities.RewardRedemption.list("-created_date", 200),
-        base44.entities.PointTransaction.filter({ employee_id: u.id }),
+        base44.entities.PointTransaction.list("-created_date", 1000),
         base44.entities.EmployeeProfile.list(),
       ]);
       const found = profiles.find(p => p.user_id === u.id || p.email === u.email);
       setProfile(found);
+      // Filtrar transações do usuário atual (por user id ou por employee_id do profile)
+      const txs = allTxs.filter(t =>
+        t.employee_id === u.id ||
+        t.employee_name === u.full_name ||
+        (found && t.employee_id === found.id)
+      );
       setRewards(rws);
       setRedemptions(reds);
       setTransactions(txs);
