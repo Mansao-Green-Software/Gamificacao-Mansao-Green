@@ -91,10 +91,11 @@ export default function GreenShop() {
   const handleRedeem = async (reward) => {
     if (availablePoints < reward.points_cost) return;
     setRedeeming(reward.id);
+    const sector = profile?.sector || user.sector;
     const redemption = await base44.entities.RewardRedemption.create({
       employee_id: user.id,
       employee_name: user.full_name,
-      sector: user.sector,
+      sector,
       reward_id: reward.id,
       reward_title: reward.title,
       points_spent: reward.points_cost,
@@ -104,7 +105,7 @@ export default function GreenShop() {
     await base44.entities.PointTransaction.create({
       employee_id: user.id,
       employee_name: user.full_name,
-      sector: user.sector,
+      sector,
       points: -reward.points_cost,
       type: "manual",
       description: `Resgate: ${reward.title}`,
