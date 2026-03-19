@@ -101,16 +101,19 @@ export default function RankingGeral() {
 
   const periodTxs = filterByPeriod(transactions, selectedPeriod);
 
+  // Excluir transações de resgate da Green Shop do ranking
+  const rankingTxs = periodTxs.filter(t => !t.description?.startsWith("Resgate:"));
+
   const getSectorPoints = () => {
     const pts = {};
-    periodTxs.forEach(t => {
+    rankingTxs.forEach(t => {
       if (t.sector) pts[t.sector] = (pts[t.sector] || 0) + (t.points || 0);
     });
     return SECTORS.map(s => ({ sector: s, points: pts[s] || 0 })).sort((a, b) => b.points - a.points);
   };
 
   const getEmployeeRanking = (sector) => {
-    const filtered = sector && sector !== "geral" ? periodTxs.filter(t => t.sector === sector) : periodTxs;
+    const filtered = sector && sector !== "geral" ? rankingTxs.filter(t => t.sector === sector) : rankingTxs;
     const pts = {};
     const names = {};
     const sectors = {};
