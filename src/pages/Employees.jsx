@@ -198,7 +198,7 @@ export default function Employees() {
                     type="button"
                     onClick={() => toggleExtraSector(s, "form")}
                     className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
-                      form.extra_sectors.includes(s)
+                      (form.extra_sectors || []).includes(s)
                         ? "bg-green-500 border-green-500 text-white"
                         : "bg-gray-900 border-gray-600 text-gray-400 hover:text-white"
                     }`}
