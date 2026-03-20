@@ -75,10 +75,15 @@ export default function Dashboard() {
         emps.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
       );
       const sectorPoints = {};
-      txs.filter(t => !t.description?.startsWith("Resgate:") && !excludedFromSector.has(t.employee_id)).forEach(t => {
-        if (t.sector) sectorPoints[t.sector] = (sectorPoints[t.sector] || 0) + t.points;
+      txs.filter(t => !t.description?.startsWith("Resgate:")).forEach(t => {
+        if (!t.sector) return;
+        if (excludedFromSector.has(t.employee_id)) {
+          sectorPoints["Supervisor"] = (sectorPoints["Supervisor"] || 0) + t.points;
+        } else {
+          sectorPoints[t.sector] = (sectorPoints[t.sector] || 0) + t.points;
+        }
       });
-      const ranked = SECTORS.map(s => ({ sector: s, points: sectorPoints[s] || 0 })).sort((a, b) => b.points - a.points);
+      const ranked = [...SECTORS, "Supervisor"].map(s => ({ sector: s, points: sectorPoints[s] || 0 })).sort((a, b) => b.points - a.points);
       setSectorRanking(ranked);
       setLoading(false);
     };
