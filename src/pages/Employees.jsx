@@ -386,14 +386,21 @@ export default function Employees() {
                           )}
                         </div>
                       ) : (
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          emp.role === "admin" ? "bg-red-900/50 text-red-300" :
-                          emp.role === "manager" ? "bg-blue-900/50 text-blue-300" :
-                          emp.role === "supervisor" ? "bg-purple-900/50 text-purple-300" :
-                          "bg-gray-700 text-gray-300"
-                        }`}>
-                          {ROLES.find(r => r.value === emp.role)?.label || "Colaborador"}
-                        </span>
+                        <div className="flex flex-col gap-1">
+                          <span className={`text-xs px-2 py-0.5 rounded-full w-fit ${
+                            emp.role === "admin" ? "bg-red-900/50 text-red-300" :
+                            emp.role === "manager" ? "bg-blue-900/50 text-blue-300" :
+                            emp.role === "supervisor" ? "bg-purple-900/50 text-purple-300" :
+                            "bg-gray-700 text-gray-300"
+                          }`}>
+                            {ROLES.find(r => r.value === emp.role)?.label || "Colaborador"}
+                          </span>
+                          {emp.role === "supervisor" && (
+                            <span className={`text-xs px-2 py-0.5 rounded-full w-fit ${emp.include_in_sector_ranking !== false ? "bg-green-900/40 text-green-400" : "bg-gray-700 text-gray-500"}`}>
+                              {emp.include_in_sector_ranking !== false ? "✓ no ranking do setor" : "✗ fora do setor"}
+                            </span>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="px-5 py-3">
