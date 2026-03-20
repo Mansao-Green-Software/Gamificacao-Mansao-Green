@@ -85,7 +85,10 @@ export default function RankingGeral() {
       setTransactions(txs);
       setAllProfiles(profs);
       const profileMap = {};
-      profs.forEach(p => { profileMap[p.id] = p; });
+      profs.forEach(p => {
+        profileMap[p.id] = p;
+        if (p.user_id) profileMap[p.user_id] = p;
+      });
       setProfiles(profileMap);
 
       const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
