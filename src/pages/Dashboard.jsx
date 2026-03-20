@@ -70,9 +70,12 @@ export default function Dashboard() {
         setMyRank(rank || null);
       }
 
-      // Sector ranking (excluir resgates da Green Shop)
+      // Sector ranking (excluir resgates da Green Shop e supervisores fora do setor)
+      const excludedFromSector = new Set(
+        emps.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
+      );
       const sectorPoints = {};
-      txs.filter(t => !t.description?.startsWith("Resgate:")).forEach(t => {
+      txs.filter(t => !t.description?.startsWith("Resgate:") && !excludedFromSector.has(t.employee_id)).forEach(t => {
         if (t.sector) sectorPoints[t.sector] = (sectorPoints[t.sector] || 0) + t.points;
       });
       const ranked = SECTORS.map(s => ({ sector: s, points: sectorPoints[s] || 0 })).sort((a, b) => b.points - a.points);
