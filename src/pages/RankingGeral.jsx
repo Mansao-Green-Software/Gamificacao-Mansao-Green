@@ -154,7 +154,7 @@ export default function RankingGeral() {
   const employeeRanking = getEmployeeRanking(selectedSector);
   const maxEmpPts = employeeRanking[0]?.points || 1;
 
-  const availableSectors = isAdminOrManager ? SECTORS : [user?.sector].filter(Boolean);
+  const availableSectors = isAdminOrManager ? [...SECTORS, ...VIRTUAL_SECTORS] : [myProfile?.sector || user?.sector].filter(Boolean);
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
