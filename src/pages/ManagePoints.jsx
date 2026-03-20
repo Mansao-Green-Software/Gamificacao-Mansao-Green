@@ -80,8 +80,13 @@ export default function ManagePoints() {
   };
 
   const handleDeleteTx = async (id) => {
-    await base44.entities.PointTransaction.delete(id);
     setTransactions(prev => prev.filter(t => t.id !== id));
+    setAllTransactions(prev => prev.filter(t => t.id !== id));
+    try {
+      await base44.entities.PointTransaction.delete(id);
+    } catch (e) {
+      // já deletado ou não encontrado — ignora
+    }
   };
 
   const getEmployeeTotalPoints = (userId) => {
