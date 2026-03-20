@@ -72,6 +72,7 @@ export default function RankingGeral() {
   const [loading, setLoading] = useState(true);
 
   const [profiles, setProfiles] = useState({});
+  const [allProfiles, setAllProfiles] = useState([]);
 
   useEffect(() => {
     const load = async () => {
