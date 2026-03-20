@@ -134,7 +134,14 @@ export default function RankingGeral() {
         .sort((a, b) => b.points - a.points);
     }
 
-    const filtered = sector && sector !== "geral" ? rankingTxs.filter(t => t.sector === sector) : rankingTxs;
+    // Excluir supervisores que optaram por não participar do ranking do setor
+    const excludedSupervisorIds = new Set(
+      allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
+    );
+
+    const baseTxs = sector && sector !== "geral"
+      ? rankingTxs.filter(t => t.sector === sector && !excludedSupervisorIds.has(t.employee_id))
+      : rankingTxs;
     const pts = {};
     const names = {};
     const sectors = {};
