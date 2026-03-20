@@ -22,6 +22,7 @@ const SECTOR_COLORS = {
   "Serviços Gerais": "from-orange-500 to-amber-600",
   "TV Green": "from-green-600 to-emerald-700",
   "Feira FC": "from-lime-500 to-green-600",
+  "Supervisor": "from-cyan-500 to-blue-600",
 };
 
 const SECTOR_ICON_COLORS = {
