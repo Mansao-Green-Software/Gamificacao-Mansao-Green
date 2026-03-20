@@ -117,6 +117,23 @@ export default function RankingGeral() {
   };
 
   const getEmployeeRanking = (sector) => {
+    // Setor virtual "Supervisor": agrupa todos os colaboradores com role supervisor
+    if (sector === "Supervisor") {
+      const supervisorIds = new Set(
+        allProfiles.filter(p => p.role === "supervisor").map(p => p.user_id || p.id)
+      );
+      const filtered = rankingTxs.filter(t => supervisorIds.has(t.employee_id));
+      const pts = {};
+      const names = {};
+      filtered.forEach(t => {
+        pts[t.employee_id] = (pts[t.employee_id] || 0) + (t.points || 0);
+        names[t.employee_id] = t.employee_name;
+      });
+      return Object.entries(pts)
+        .map(([id, points]) => ({ id, name: names[id], points, photo_url: profiles[id]?.photo_url }))
+        .sort((a, b) => b.points - a.points);
+    }
+
     const filtered = sector && sector !== "geral" ? rankingTxs.filter(t => t.sector === sector) : rankingTxs;
     const pts = {};
     const names = {};
