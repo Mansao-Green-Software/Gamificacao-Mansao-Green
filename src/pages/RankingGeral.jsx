@@ -112,17 +112,21 @@ export default function RankingGeral() {
   const rankingTxs = periodTxs.filter(t => !t.description?.startsWith("Resgate:"));
 
   const getSectorPoints = () => {
-    // Supervisores que não participam do ranking do setor
+    // Supervisores que não participam do ranking do setor ficam no setor "Supervisor"
     const excludedFromSector = new Set(
       allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
     );
     const pts = {};
     rankingTxs.forEach(t => {
-      if (t.sector && !excludedFromSector.has(t.employee_id)) {
+      if (!t.sector) return;
+      if (excludedFromSector.has(t.employee_id)) {
+        // Conta no setor virtual Supervisor
+        pts["Supervisor"] = (pts["Supervisor"] || 0) + (t.points || 0);
+      } else {
         pts[t.sector] = (pts[t.sector] || 0) + (t.points || 0);
       }
     });
-    return SECTORS.map(s => ({ sector: s, points: pts[s] || 0 })).sort((a, b) => b.points - a.points);
+    return [...SECTORS, "Supervisor"].map(s => ({ sector: s, points: pts[s] || 0 })).sort((a, b) => b.points - a.points);
   };
 
   const getEmployeeRanking = (sector) => {
