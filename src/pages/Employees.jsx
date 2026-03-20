@@ -189,6 +189,20 @@ export default function Employees() {
             >
               {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
             </select>
+            {form.role === "supervisor" && (
+              <div className="col-span-2 flex items-center gap-3 p-3 bg-gray-900/50 rounded-xl border border-gray-700">
+                <input
+                  type="checkbox"
+                  id="include_sector_new"
+                  checked={form.include_in_sector_ranking}
+                  onChange={e => setForm(p => ({ ...p, include_in_sector_ranking: e.target.checked }))}
+                  className="w-4 h-4 accent-green-500 cursor-pointer"
+                />
+                <label htmlFor="include_sector_new" className="text-gray-300 text-sm cursor-pointer">
+                  Participar do ranking do setor cadastrado
+                </label>
+              </div>
+            )}
             <div className="col-span-2">
               <label className="text-gray-400 text-xs mb-2 block">Setores extras que gerencia (opcional)</label>
               <div className="flex flex-wrap gap-2">
