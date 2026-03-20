@@ -145,7 +145,7 @@ export default function RankingGeral() {
     const pts = {};
     const names = {};
     const sectors = {};
-    filtered.forEach(t => {
+    baseTxs.forEach(t => {
       pts[t.employee_id] = (pts[t.employee_id] || 0) + (t.points || 0);
       names[t.employee_id] = t.employee_name;
       sectors[t.employee_id] = t.sector;
