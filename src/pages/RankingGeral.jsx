@@ -120,7 +120,7 @@ export default function RankingGeral() {
     // Setor virtual "Supervisor": agrupa todos os colaboradores com role supervisor
     if (sector === "Supervisor") {
       const supervisorIds = new Set(
-        allProfiles.filter(p => p.role === "supervisor").map(p => p.user_id || p.id)
+        allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
       );
       const filtered = rankingTxs.filter(t => supervisorIds.has(t.employee_id));
       const pts = {};
