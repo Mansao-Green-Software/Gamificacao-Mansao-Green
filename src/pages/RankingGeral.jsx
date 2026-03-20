@@ -83,6 +83,7 @@ export default function RankingGeral() {
         base44.entities.EmployeeProfile.list(),
       ]);
       setTransactions(txs);
+      setAllProfiles(profs);
       const profileMap = {};
       profs.forEach(p => { profileMap[p.id] = p; });
       setProfiles(profileMap);
