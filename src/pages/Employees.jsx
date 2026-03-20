@@ -365,13 +365,26 @@ export default function Employees() {
                     </td>
                     <td className="px-5 py-3">
                       {editing === emp.id ? (
-                        <select
-                          value={editForm.role}
-                          onChange={e => setEditForm(p => ({ ...p, role: e.target.value }))}
-                          className="bg-gray-900 border border-gray-600 text-white rounded-lg px-2 py-1 text-sm"
-                        >
-                          {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-                        </select>
+                        <div className="space-y-2">
+                          <select
+                            value={editForm.role}
+                            onChange={e => setEditForm(p => ({ ...p, role: e.target.value }))}
+                            className="bg-gray-900 border border-gray-600 text-white rounded-lg px-2 py-1 text-sm"
+                          >
+                            {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                          </select>
+                          {editForm.role === "supervisor" && (
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={editForm.include_in_sector_ranking !== false}
+                                onChange={e => setEditForm(p => ({ ...p, include_in_sector_ranking: e.target.checked }))}
+                                className="w-3.5 h-3.5 accent-green-500"
+                              />
+                              <span className="text-gray-400 text-xs">Participar do ranking do setor</span>
+                            </label>
+                          )}
+                        </div>
                       ) : (
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
                           emp.role === "admin" ? "bg-red-900/50 text-red-300" :
