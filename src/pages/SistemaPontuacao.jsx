@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Zap, Star, Search, Pencil, Trash2, Check, X, Plus, ChevronDown, ChevronRight } from "lucide-react";
 
-const SECTORS = ["Administrativo", "Affiliates", "Audiovisual", "Comercial", "Contingência", "Feira FC", "Financeiro", "Gerência", "Líder de Projeto", "Saúde e Bem Estar", "Serviços Gerais", "Social Media", "Suporte", "Tipster", "Tráfego", "TV Green"];
+const SECTORS = ["Administrativo", "Affiliates", "Audiovisual", "Comercial", "Contingência", "Feira FC", "Financeiro", "Gerência", "Líder de Projeto", "Saúde e Bem Estar", "Serviços Gerais", "Social Media", "Suporte", "Supervisor", "Tipster", "Tráfego", "TV Green"];
 
 const CATEGORIES = [
   { key: "Performance & Resultados", emoji: "🚀", color: "text-orange-400 border-orange-700/50 bg-orange-900/20" },
