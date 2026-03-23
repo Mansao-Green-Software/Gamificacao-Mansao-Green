@@ -159,14 +159,16 @@ export default function SistemaPontuacao() {
         </div>
       )}
 
-      <div className="flex gap-4 items-start">
+      <div className="flex flex-col lg:flex-row gap-4 items-start">
+
         {/* Sidebar */}
-        <aside className="w-48 shrink-0 bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
+        <aside className="w-full lg:w-48 lg:shrink-0 bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
+          <div className="flex lg:flex-col overflow-x-auto lg:overflow-x-visible">
           {availableSectors.map((sector, idx) => (
             <button
               key={sector}
               onClick={() => setSelectedSector(sector)}
-              className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all border-b border-gray-700 last:border-0 ${
+              className={`shrink-0 lg:w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all border-b lg:border-b border-r lg:border-r-0 border-gray-700 last:border-0 whitespace-nowrap ${
                 selectedSector === sector
                   ? "bg-green-500 text-white"
                   : "text-gray-400 hover:text-white hover:bg-gray-700"
@@ -176,6 +178,7 @@ export default function SistemaPontuacao() {
               <span className="truncate text-left">{sector}</span>
             </button>
           ))}
+          </div>
         </aside>
 
         {/* Conteúdo */}
