@@ -10,6 +10,7 @@ const CATEGORIES = [
   { key: "Cultura & Atitude Green", emoji: "💚", color: "text-green-400 border-green-700/50 bg-green-900/20" },
   { key: "Bônus de Pontuação", emoji: "⭐", color: "text-yellow-400 border-yellow-700/50 bg-yellow-900/20" },
   { key: "Punições (Perda de Pontos)", emoji: "🔴", color: "text-red-400 border-red-700/50 bg-red-900/20" },
+  { key: "Participação em Ações", emoji: "🎯", color: "text-cyan-400 border-cyan-700/50 bg-cyan-900/20" },
 ];
 
 const SECTOR_COLORS = {
