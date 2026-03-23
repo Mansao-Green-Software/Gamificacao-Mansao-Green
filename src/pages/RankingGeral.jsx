@@ -208,13 +208,15 @@ export default function RankingGeral() {
         </div>
       </div>
 
-      <div className="flex gap-4 items-start">
-        {/* Sidebar de setores */}
-        <aside className="w-48 shrink-0 bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
+      <div className="flex flex-col lg:flex-row gap-4 items-start">
+
+        {/* Sidebar de setores - horizontal scroll no mobile */}
+        <aside className="w-full lg:w-48 lg:shrink-0 bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
+          <div className="flex lg:flex-col overflow-x-auto lg:overflow-x-visible">
           {isAdminOrManager && (
             <button
               onClick={() => setSelectedSector("geral")}
-              className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all border-b border-gray-700 ${
+              className={`shrink-0 lg:shrink flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all border-b lg:border-b border-r lg:border-r-0 border-gray-700 whitespace-nowrap ${
                 selectedSector === "geral"
                   ? "bg-green-500 text-white"
                   : "text-gray-400 hover:text-white hover:bg-gray-700"
@@ -228,7 +230,7 @@ export default function RankingGeral() {
             <button
               key={sector}
               onClick={() => setSelectedSector(sector)}
-              className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all border-b border-gray-700 last:border-0 ${
+              className={`shrink-0 lg:shrink-0 lg:w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all border-b lg:border-b border-r lg:border-r-0 border-gray-700 last:border-0 whitespace-nowrap ${
                 selectedSector === sector
                   ? "bg-green-500 text-white"
                   : "text-gray-400 hover:text-white hover:bg-gray-700"
@@ -238,6 +240,7 @@ export default function RankingGeral() {
               <span className="truncate text-left">{sector}</span>
             </button>
           ))}
+          </div>
         </aside>
 
         {/* Conteúdo principal */}
@@ -299,7 +302,7 @@ export default function RankingGeral() {
                       <span className="text-xl w-8 text-center shrink-0">
                         {medals[idx] !== undefined ? medals[idx] : <span className="text-gray-500 font-bold text-sm">{idx + 1}</span>}
                       </span>
-                      <div className="w-16 h-16 rounded-full bg-gray-700 overflow-hidden shrink-0 flex items-center justify-center">
+                      <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-gray-700 overflow-hidden shrink-0 flex items-center justify-center">
                         {emp.photo_url ? (
                           <img src={emp.photo_url} alt={emp.name} className="w-full h-full object-cover" />
                         ) : (
