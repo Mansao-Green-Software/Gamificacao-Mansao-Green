@@ -117,16 +117,19 @@ export default function RankingGeral() {
       allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
     );
     const pts = {};
+    const employees = {};
     rankingTxs.forEach(t => {
       if (!t.sector) return;
-      if (excludedFromSector.has(t.employee_id)) {
-        // Conta no setor virtual Supervisor
-        pts["Supervisor"] = (pts["Supervisor"] || 0) + (t.points || 0);
-      } else {
-        pts[t.sector] = (pts[t.sector] || 0) + (t.points || 0);
-      }
+      const sectorKey = excludedFromSector.has(t.employee_id) ? "Supervisor" : t.sector;
+      pts[sectorKey] = (pts[sectorKey] || 0) + (t.points || 0);
+      if (!employees[sectorKey]) employees[sectorKey] = new Set();
+      employees[sectorKey].add(t.employee_id);
     });
-    return [...SECTORS, "Supervisor"].map(s => ({ sector: s, points: pts[s] || 0 })).sort((a, b) => b.points - a.points);
+    return [...SECTORS, "Supervisor"].map(s => {
+      const total = pts[s] || 0;
+      const count = employees[s]?.size || 1;
+      return { sector: s, points: Math.round(total / count) };
+    }).sort((a, b) => b.points - a.points);
   };
 
   const getEmployeeRanking = (sector) => {

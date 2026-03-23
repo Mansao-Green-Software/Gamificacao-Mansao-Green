@@ -70,20 +70,24 @@ export default function Dashboard() {
         setMyRank(rank || null);
       }
 
-      // Sector ranking (excluir resgates da Green Shop e supervisores fora do setor)
+      // Sector ranking por MÉDIA de pontos por colaborador
       const excludedFromSector = new Set(
         emps.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
       );
       const sectorPoints = {};
+      const sectorEmployees = {};
       txs.filter(t => !t.description?.startsWith("Resgate:")).forEach(t => {
         if (!t.sector) return;
-        if (excludedFromSector.has(t.employee_id)) {
-          sectorPoints["Supervisor"] = (sectorPoints["Supervisor"] || 0) + t.points;
-        } else {
-          sectorPoints[t.sector] = (sectorPoints[t.sector] || 0) + t.points;
-        }
+        const sectorKey = excludedFromSector.has(t.employee_id) ? "Supervisor" : t.sector;
+        sectorPoints[sectorKey] = (sectorPoints[sectorKey] || 0) + t.points;
+        if (!sectorEmployees[sectorKey]) sectorEmployees[sectorKey] = new Set();
+        sectorEmployees[sectorKey].add(t.employee_id);
       });
-      const ranked = [...SECTORS, "Supervisor"].map(s => ({ sector: s, points: sectorPoints[s] || 0 })).sort((a, b) => b.points - a.points);
+      const ranked = [...SECTORS, "Supervisor"].map(s => {
+        const total = sectorPoints[s] || 0;
+        const count = sectorEmployees[s]?.size || 1;
+        return { sector: s, points: Math.round(total / count) };
+      }).sort((a, b) => b.points - a.points);
       setSectorRanking(ranked);
       setLoading(false);
     };
