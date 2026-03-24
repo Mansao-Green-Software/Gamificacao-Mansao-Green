@@ -93,10 +93,7 @@ export default function RankingGeral() {
 
       const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
       const effectiveRole = myProfile?.role || u.role;
-      const isAdminOrManagerLocal = effectiveRole === "admin" || effectiveRole === "manager";
-      if (!isAdminOrManagerLocal) {
-        setSelectedSector(myProfile?.sector || u.sector);
-      }
+      setSelectedSector("geral");
       setLoading(false);
     };
     load();
@@ -213,19 +210,17 @@ export default function RankingGeral() {
         {/* Sidebar de setores - horizontal scroll no mobile */}
         <aside className="w-full lg:w-48 lg:shrink-0 bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
           <div className="flex lg:flex-col overflow-x-auto lg:overflow-x-visible">
-          {isAdminOrManager && (
-            <button
-              onClick={() => setSelectedSector("geral")}
-              className={`shrink-0 lg:shrink flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all border-b lg:border-b border-r lg:border-r-0 border-gray-700 whitespace-nowrap ${
-                selectedSector === "geral"
-                  ? "bg-green-500 text-white"
-                  : "text-gray-400 hover:text-white hover:bg-gray-700"
-              }`}
-            >
-              <BarChart2 className="w-4 h-4 shrink-0" />
-              <span>Geral</span>
-            </button>
-          )}
+          <button
+            onClick={() => setSelectedSector("geral")}
+            className={`shrink-0 lg:shrink flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all border-b lg:border-b border-r lg:border-r-0 border-gray-700 whitespace-nowrap ${
+              selectedSector === "geral"
+                ? "bg-green-500 text-white"
+                : "text-gray-400 hover:text-white hover:bg-gray-700"
+            }`}
+          >
+            <BarChart2 className="w-4 h-4 shrink-0" />
+            <span>Geral</span>
+          </button>
           {availableSectors.map(sector => (
             <button
               key={sector}
@@ -246,7 +241,7 @@ export default function RankingGeral() {
         {/* Conteúdo principal */}
         <div className="flex-1 min-w-0">
           {/* View Geral - ranking de setores */}
-          {selectedSector === "geral" && isAdminOrManager && (
+          {selectedSector === "geral" && (
             <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
               <h2 className="text-white font-bold mb-5 flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-amber-400" />
