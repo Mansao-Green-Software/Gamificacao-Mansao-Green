@@ -104,7 +104,9 @@ export default function Employees() {
     setEditing(null);
   };
 
-  const filtered = employees.filter(e => filterSector === "Todos" || e.sector === filterSector);
+  const filtered = employees
+    .filter(e => filterSector === "Todos" || e.sector === filterSector)
+    .sort((a, b) => a.full_name.localeCompare(b.full_name, "pt-BR"));
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
