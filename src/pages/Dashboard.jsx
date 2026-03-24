@@ -271,14 +271,16 @@ export default function Dashboard() {
               const empPoints = {};
               const empNames = {};
               const empPhotos = {};
+              const empSectors = {};
               transactions.forEach(t => {
                 empPoints[t.employee_id] = (empPoints[t.employee_id] || 0) + t.points;
                 empNames[t.employee_id] = t.employee_name;
+                empSectors[t.employee_id] = t.sector;
                 const emp = employees.find(e => e.user_id === t.employee_id || e.id === t.employee_id);
                 if (emp?.photo_url) empPhotos[t.employee_id] = emp.photo_url;
               });
               const topEmployees = Object.entries(empPoints)
-                .map(([id, points]) => ({ id, name: empNames[id], points, photo: empPhotos[id] }))
+                .map(([id, points]) => ({ id, name: empNames[id], points, photo: empPhotos[id], sector: empSectors[id] }))
                 .sort((a, b) => b.points - a.points)
                 .slice(0, 5);
               const medals = ["🥇", "🥈", "🥉"];
@@ -298,6 +300,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-white text-sm font-medium truncate">{emp.name}</p>
+                      {emp.sector && <p className="text-gray-500 text-xs truncate">{emp.sector}</p>}
                       <div className="h-1.5 bg-gray-700 rounded-full mt-1 overflow-hidden">
                         <div
                           className="h-full rounded-full bg-gradient-to-r from-green-500 to-teal-500"
