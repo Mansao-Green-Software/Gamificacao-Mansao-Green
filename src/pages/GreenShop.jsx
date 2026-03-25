@@ -144,6 +144,11 @@ export default function GreenShop() {
     setRedemptions(prev => prev.map(r => r.id === redemptionId ? { ...r, status: newStatus } : r));
   };
 
+  const handleDeleteRedemption = async (redemptionId) => {
+    await base44.entities.RewardRedemption.delete(redemptionId);
+    setRedemptions(prev => prev.filter(r => r.id !== redemptionId));
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="w-10 h-10 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
@@ -390,6 +395,12 @@ export default function GreenShop() {
                         <option value="entregue">Entregue</option>
                         <option value="cancelado">Cancelado</option>
                       </select>
+                      <button
+                        onClick={() => handleDeleteRedemption(r.id)}
+                        className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 );
