@@ -70,8 +70,17 @@ export default function ManagePoints() {
   }, []);
 
   const selectedEmployee = employees.find(e => e.user_id === form.employee_id || e.id === form.employee_id);
+
+  const getEffectiveSector = (emp) => {
+    if (!emp) return null;
+    if (emp.role === "manager" || emp.role === "admin") return "Gerência";
+    if (emp.role === "supervisor") return "Supervisor";
+    return emp.sector;
+  };
+
   const filteredMissions = missions.filter(m => {
-    const sectorMatch = !selectedEmployee || m.sector === selectedEmployee.sector || m.sector === "Todos";
+    const effectiveSector = getEffectiveSector(selectedEmployee);
+    const sectorMatch = !selectedEmployee || m.sector === effectiveSector || m.sector === "Todos";
     const searchMatch = !missionSearch || m.title.toLowerCase().includes(missionSearch.toLowerCase());
     return sectorMatch && searchMatch;
   });
