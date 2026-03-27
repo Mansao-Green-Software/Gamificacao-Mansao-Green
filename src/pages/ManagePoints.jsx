@@ -69,11 +69,19 @@ export default function ManagePoints() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const filteredMissions = missions.filter(m =>
-    !missionSearch || m.title.toLowerCase().includes(missionSearch.toLowerCase())
-  );
+  const selectedEmployee = employees.find(e => e.user_id === form.employee_id || e.id === form.employee_id);
+  const filteredMissions = missions.filter(m => {
+    const sectorMatch = !selectedEmployee || m.sector === selectedEmployee.sector || m.sector === "Todos";
+    const searchMatch = !missionSearch || m.title.toLowerCase().includes(missionSearch.toLowerCase());
+    return sectorMatch && searchMatch;
+  });
 
   const selectedMission = missions.find(m => m.id === form.mission_id);
+
+  const handleEmployeeChange = (employeeId) => {
+    setForm(p => ({ ...p, employee_id: employeeId, mission_id: "", points: "", description: "" }));
+    setMissionSearch("");
+  };
 
   const handleAddPoints = async () => {
     if (!form.employee_id || !form.points) return;
@@ -177,7 +185,7 @@ export default function ManagePoints() {
                 <label className="text-gray-400 text-xs mb-1.5 block">Colaborador</label>
                 <select
                   value={form.employee_id}
-                  onChange={e => setForm(p => ({ ...p, employee_id: e.target.value }))}
+                  onChange={e => handleEmployeeChange(e.target.value)}
                   className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
                 >
                   <option value="">Selecione o colaborador</option>
