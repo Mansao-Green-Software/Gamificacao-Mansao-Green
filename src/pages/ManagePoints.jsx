@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Star, Plus, History, Trash2 } from "lucide-react";
+import { Star, Plus, History, Trash2, Search, X, ChevronDown } from "lucide-react";
 
 const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Gestão de IA"];
 
@@ -12,7 +12,10 @@ export default function ManagePoints() {
   const [tab, setTab] = useState("add");
   const [allTransactions, setAllTransactions] = useState([]);
   const [historyFilter, setHistoryFilter] = useState("Todos");
-  const [form, setForm] = useState({ employee_id: "", points: "", description: "" });
+  const [form, setForm] = useState({ employee_id: "", points: "", description: "", mission_id: "" });
+  const [missionSearch, setMissionSearch] = useState("");
+  const [missionDropdownOpen, setMissionDropdownOpen] = useState(false);
+  const missionDropdownRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -54,6 +57,23 @@ export default function ManagePoints() {
   }, []);
 
   const isAdmin = user?.role === "admin";
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (missionDropdownRef.current && !missionDropdownRef.current.contains(e.target)) {
+        setMissionDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const filteredMissions = missions.filter(m =>
+    !missionSearch || m.title.toLowerCase().includes(missionSearch.toLowerCase())
+  );
+
+  const selectedMission = missions.find(m => m.id === form.mission_id);
 
   const handleAddPoints = async () => {
     if (!form.employee_id || !form.points) return;
@@ -168,19 +188,66 @@ export default function ManagePoints() {
               </div>
               <div>
                 <label className="text-gray-400 text-xs mb-1.5 block">Selecionar Tarefa (opcional)</label>
-                <select
-                  onChange={e => {
-                    const mission = missions.find(m => m.id === e.target.value);
-                    if (mission) setForm(p => ({ ...p, points: String(mission.points), description: mission.title }));
-                    else setForm(p => ({ ...p, points: "", description: "" }));
-                  }}
-                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
-                >
-                  <option value="">— Pontuação manual —</option>
-                  {missions.map(m => (
-                    <option key={m.id} value={m.id}>{m.title} ({m.points > 0 ? "+" : ""}{m.points} pts)</option>
-                  ))}
-                </select>
+                <div className="relative" ref={missionDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => { setMissionDropdownOpen(o => !o); setMissionSearch(""); }}
+                    className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 flex items-center justify-between gap-2 text-left"
+                  >
+                    <span className={selectedMission ? "text-white" : "text-gray-500"}>
+                      {selectedMission ? `${selectedMission.title} (${selectedMission.points > 0 ? "+" : ""}${selectedMission.points} pts)` : "— Pontuação manual —"}
+                    </span>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {selectedMission && (
+                        <span onClick={e => { e.stopPropagation(); setForm(p => ({ ...p, mission_id: "", points: "", description: "" })); }} className="p-0.5 hover:text-red-400 transition-colors">
+                          <X className="w-3.5 h-3.5" />
+                        </span>
+                      )}
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    </div>
+                  </button>
+
+                  {missionDropdownOpen && (
+                    <div className="absolute z-50 mt-1 w-full bg-gray-900 border border-gray-600 rounded-xl shadow-xl overflow-hidden">
+                      <div className="p-2 border-b border-gray-700">
+                        <div className="relative">
+                          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
+                          <input
+                            autoFocus
+                            value={missionSearch}
+                            onChange={e => setMissionSearch(e.target.value)}
+                            placeholder="Buscar tarefa..."
+                            className="w-full bg-gray-800 text-white text-sm rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:border-green-500 border border-gray-700"
+                          />
+                        </div>
+                      </div>
+                      <div className="max-h-56 overflow-y-auto">
+                        <button
+                          type="button"
+                          onClick={() => { setForm(p => ({ ...p, mission_id: "", points: "", description: "" })); setMissionDropdownOpen(false); }}
+                          className="w-full text-left px-4 py-2.5 text-sm text-gray-400 hover:bg-gray-800 transition-colors"
+                        >
+                          — Pontuação manual —
+                        </button>
+                        {filteredMissions.length === 0 ? (
+                          <p className="text-gray-500 text-sm text-center py-4">Nenhuma tarefa encontrada</p>
+                        ) : (
+                          filteredMissions.map(m => (
+                            <button
+                              key={m.id}
+                              type="button"
+                              onClick={() => { setForm(p => ({ ...p, mission_id: m.id, points: String(m.points), description: m.title })); setMissionDropdownOpen(false); }}
+                              className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-800 transition-colors flex items-center justify-between gap-2 ${ form.mission_id === m.id ? "bg-green-900/30 text-green-300" : "text-white" }`}
+                            >
+                              <span className="truncate">{m.title}</span>
+                              <span className={`shrink-0 text-xs font-bold ${m.points >= 0 ? "text-green-400" : "text-red-400"}`}>{m.points > 0 ? "+" : ""}{m.points} pts</span>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               <div>
                 <label className="text-gray-400 text-xs mb-1.5 block">Pontos</label>
