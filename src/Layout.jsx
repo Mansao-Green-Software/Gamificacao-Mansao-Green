@@ -101,7 +101,7 @@ export default function Layout({ children, currentPageName }) {
                 )}
               </div>
               <div className="min-w-0">
-                <p className="text-white text-sm font-medium truncate">{user.full_name}</p>
+                <p className="text-white text-sm font-medium truncate">{profile?.full_name || user.full_name}</p>
                 {(profile?.sector || user.sector) && <p className="text-green-400 text-xs truncate">{profile?.sector || user.sector}</p>}
                 <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-300">
                   {(() => {
