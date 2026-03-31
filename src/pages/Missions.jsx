@@ -16,6 +16,7 @@ const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto",
 export default function Missions() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [allProfiles, setAllProfiles] = useState([]);
   const [missions, setMissions] = useState([]);
   const [requests, setRequests] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -42,6 +43,7 @@ export default function Missions() {
       ]);
       setMissions(ms);
       setRequests(reqs);
+      setAllProfiles(profs);
       const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
       setProfile(myProfile || null);
       setLoading(false);
@@ -115,9 +117,7 @@ export default function Missions() {
 
   const handleApprove = async (request) => {
     setApproving(request.id);
-    // Busca o nome cadastrado no perfil do colaborador
-    const allProfs = await base44.entities.EmployeeProfile.list();
-    const empProfile = allProfs.find(p => p.user_id === request.employee_id || p.id === request.employee_id);
+    const empProfile = allProfiles.find(p => p.user_id === request.employee_id || p.id === request.employee_id);
     const empName = empProfile?.full_name || request.employee_name;
     const empId = empProfile?.user_id || request.employee_id;
     await base44.entities.MissionRequest.update(request.id, { status: "aprovado", employee_name: empName });
