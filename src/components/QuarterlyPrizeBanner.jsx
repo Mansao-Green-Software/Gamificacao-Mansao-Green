@@ -62,11 +62,11 @@ export default function QuarterlyPrizeBanner({ isAdmin }) {
         {/* Icon / Image */}
         <div className="shrink-0">
           {prize?.image_url ? (
-            <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-amber-500/50">
+            <div className="w-48 h-32 rounded-xl overflow-hidden border-2 border-amber-500/50">
               <img src={prize.image_url} alt={prize.title} className="w-full h-full object-cover" />
             </div>
           ) : (
-            <div className="w-24 h-24 rounded-xl bg-amber-900/50 border-2 border-amber-600/50 flex items-center justify-center">
+            <div className="w-48 h-32 rounded-xl bg-amber-900/50 border-2 border-amber-600/50 flex items-center justify-center">
               <Gift className="w-10 h-10 text-amber-400" />
             </div>
           )}
