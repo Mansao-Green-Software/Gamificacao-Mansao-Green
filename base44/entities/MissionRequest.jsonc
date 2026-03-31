@@ -32,7 +32,10 @@
     "notes": {
       "type": "string"
     },
-    "attachment_urls": {
+    "justification": {
+      "type": "string"
+    },
+    "attachments": {
       "type": "array",
       "items": {
         "type": "string"
