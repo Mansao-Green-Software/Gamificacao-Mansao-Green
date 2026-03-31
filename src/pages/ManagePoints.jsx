@@ -74,7 +74,6 @@ export default function ManagePoints() {
   const getEffectiveSector = (emp) => {
     if (!emp) return null;
     if (emp.role === "manager" || emp.role === "admin") return "Gerência";
-    if (emp.role === "supervisor") return "Supervisor";
     return emp.sector;
   };
 
