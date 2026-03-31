@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Target, Plus, Trash2, CheckCircle, Clock, XCircle, Bell, Camera, X, Image } from "lucide-react";
+import { Target, Plus, Trash2, CheckCircle, Clock, XCircle, Bell, Camera, X, Image, ChevronDown, ChevronRight } from "lucide-react";
+
+const CATEGORIES = [
+  { key: "Performance & Resultados", emoji: "🚀", color: "border-orange-700/50 bg-orange-900/20" },
+  { key: "Disciplina & Organização", emoji: "📋", color: "border-blue-700/50 bg-blue-900/20" },
+  { key: "Cultura & Atitude Green", emoji: "💚", color: "border-green-700/50 bg-green-900/20" },
+  { key: "Bônus de Pontuação", emoji: "⭐", color: "border-yellow-700/50 bg-yellow-900/20" },
+  { key: "Punições (Perda de Pontos)", emoji: "🔴", color: "border-red-700/50 bg-red-900/20" },
+  { key: "Participação em Ações", emoji: "🎯", color: "border-cyan-700/50 bg-cyan-900/20" },
+];
 
 const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "TV Green", "Feira FC", "Todos"];
 
@@ -15,6 +24,8 @@ export default function Missions() {
   const [tab, setTab] = useState("missoes");
   const [submitting, setSubmitting] = useState(null);
   const [approving, setApproving] = useState(null);
+  const [collapsedCategories, setCollapsedCategories] = useState({});
+  const toggleCategory = (cat) => setCollapsedCategories(p => ({ ...p, [cat]: !p[cat] }));
   const [requestModal, setRequestModal] = useState(null);
   const [justification, setJustification] = useState("");
   const [attachments, setAttachments] = useState([]);
@@ -232,15 +243,35 @@ export default function Missions() {
             <p>Nenhuma missão disponível para o seu setor ainda.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {visibleMissions.map(mission => {
+          <div className="space-y-4">
+            {CATEGORIES.map(cat => {
+              const catMissions = visibleMissions.filter(m => (m.category || "Performance & Resultados") === cat.key);
+              if (catMissions.length === 0) return null;
+              const collapsed = collapsedCategories[cat.key];
+              return (
+                <div key={cat.key} className={`border rounded-2xl overflow-hidden ${cat.color}`}>
+                  <button
+                    onClick={() => toggleCategory(cat.key)}
+                    className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-black/10 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{cat.emoji}</span>
+                      <span className="font-bold text-sm text-white">{cat.key}</span>
+                      <span className="text-xs px-2 py-0.5 bg-black/20 rounded-full text-white/70">{catMissions.length}</span>
+                    </div>
+                    {collapsed ? <ChevronRight className="w-4 h-4 text-white/60" /> : <ChevronDown className="w-4 h-4 text-white/60" />}
+                  </button>
+                  {!collapsed && (
+                    <div className="bg-gray-800 border-t border-gray-700">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+                        {catMissions.map(mission => {
               const req = myRequestMap[mission.id];
               const approved = req?.status === "aprovado";
               const pending = req?.status === "pendente";
               const rejected = req?.status === "rejeitado";
 
               return (
-                <div key={mission.id} className={`bg-gray-800 border rounded-2xl p-5 flex flex-col gap-3 ${approved ? "border-green-700/50" : "border-gray-700"}`}>
+                <div key={mission.id} className={`bg-gray-900/60 border rounded-2xl p-5 flex flex-col gap-3 ${approved ? "border-green-700/50" : "border-gray-700"}`}>
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="text-white font-bold text-sm">{mission.title}</h3>
@@ -268,11 +299,17 @@ export default function Missions() {
                       </button>
                     )}
                     {isManager && (
-                      <button onClick={() => handleDelete(mission.id)} className="p-2 text-red-400 hover:bg-red-900/20 rounded-xl transition-colors ml-auto">
+                      <button onClick={() => handleDelete(mission.id)} className="p-2 text-red-400 hover:bg-red-900/20 rounded-xl transition-colors shrink-0 ml-auto">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
+                </div>
+              );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
