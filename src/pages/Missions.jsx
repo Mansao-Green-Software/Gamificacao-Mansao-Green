@@ -98,7 +98,7 @@ export default function Missions() {
     if (!requestModal) return;
     setSubmitting(requestModal.id);
     const req = await base44.entities.MissionRequest.create({
-      employee_id: user.id,
+      employee_id: profile?.user_id || user.id,
       employee_name: profile?.full_name || user.full_name,
       sector: mySector,
       mission_id: requestModal.id,
