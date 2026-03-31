@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Target, Plus, Trash2, CheckCircle, Clock, XCircle, Bell } from "lucide-react";
+import { Target, Plus, Trash2, CheckCircle, Clock, XCircle, Bell, Camera, X } from "lucide-react";
 
 const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "TV Green", "Feira FC", "Todos"];
 
@@ -13,8 +13,12 @@ export default function Missions() {
   const [form, setForm] = useState({ title: "", description: "", points: "", sector: "" });
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("missoes");
-  const [submitting, setSubmitting] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const [approving, setApproving] = useState(null);
+  const [requestModal, setRequestModal] = useState(null);
+  const [justificativa, setJustificativa] = useState("");
+  const [attachments, setAttachments] = useState([]);
+  const [uploadingImg, setUploadingImg] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -47,12 +51,10 @@ export default function Missions() {
     return allMySectors.includes(m.sector) || m.sector === "Todos";
   });
 
-  // Requests for current employee
   const myRequests = requests.filter(r => r.employee_id === user?.id);
   const myRequestMap = {};
   myRequests.forEach(r => { myRequestMap[r.mission_id] = r; });
 
-  // Pending requests visible to manager
   const pendingRequests = isManager
     ? requests.filter(r => {
         if (r.status !== "pendente") return false;
@@ -63,10 +65,24 @@ export default function Missions() {
 
   const pendingCount = pendingRequests.length;
 
-  const handleRequestPoints = async (mission) => {
-    const existing = myRequestMap[mission.id];
-    if (existing) return;
-    setSubmitting(mission.id);
+  const openRequestModal = (mission) => {
+    setRequestModal(mission);
+    setJustificativa("");
+    setAttachments([]);
+  };
+
+  const handleUploadImage = async (file) => {
+    if (!file) return;
+    setUploadingImg(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setAttachments(prev => [...prev, file_url]);
+    setUploadingImg(false);
+  };
+
+  const handleRequestPoints = async () => {
+    const mission = requestModal;
+    if (!mission) return;
+    setSubmitting(true);
     const req = await base44.entities.MissionRequest.create({
       employee_id: user.id,
       employee_name: user.full_name,
@@ -75,9 +91,12 @@ export default function Missions() {
       mission_title: mission.title,
       mission_points: mission.points,
       status: "pendente",
+      notes: justificativa,
+      attachment_urls: attachments,
     });
     setRequests(prev => [req, ...prev]);
-    setSubmitting(null);
+    setSubmitting(false);
+    setRequestModal(null);
   };
 
   const handleApprove = async (request) => {
@@ -235,8 +254,8 @@ export default function Missions() {
                   <div className="flex gap-2 mt-auto">
                     {!isManager && (
                       <button
-                        onClick={() => !req && handleRequestPoints(mission)}
-                        disabled={!!req || submitting === mission.id}
+                        onClick={() => !req && openRequestModal(mission)}
+                        disabled={!!req}
                         className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
                           approved ? "bg-green-900/40 text-green-400 cursor-not-allowed" :
                           pending ? "bg-amber-900/40 text-amber-400 cursor-not-allowed" :
@@ -244,7 +263,7 @@ export default function Missions() {
                           "bg-green-500 hover:bg-green-400 text-black font-semibold"
                         }`}
                       >
-                        {approved ? "✓ Aprovado" : pending ? "⏳ Aguardando aprovação" : rejected ? "✗ Rejeitado" : submitting === mission.id ? "..." : "Solicitar pontuação"}
+                        {approved ? "✓ Aprovado" : pending ? "⏳ Aguardando aprovação" : rejected ? "✗ Rejeitado" : "Solicitar pontuação"}
                       </button>
                     )}
                     {isManager && (
@@ -258,6 +277,66 @@ export default function Missions() {
             })}
           </div>
         )
+      )}
+
+      {/* Modal de solicitação */}
+      {requestModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white font-bold text-lg">Solicitar Pontuação</h3>
+              <button onClick={() => setRequestModal(null)} className="text-gray-400 hover:text-white"><X className="w-5 h-5" /></button>
+            </div>
+            <p className="text-gray-300 text-sm font-medium mb-1">{requestModal.title}</p>
+            <p className="text-green-400 font-bold mb-4">{requestModal.points > 0 ? "+" : ""}{requestModal.points} pts</p>
+            <div className="space-y-4">
+              <div>
+                <label className="text-gray-400 text-xs mb-1.5 block">Justificativa</label>
+                <textarea
+                  value={justificativa}
+                  onChange={e => setJustificativa(e.target.value)}
+                  placeholder="Descreva como você concluiu esta tarefa..."
+                  rows={3}
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 resize-none"
+                />
+              </div>
+              <div>
+                <label className="text-gray-400 text-xs mb-1.5 block">Anexos (imagens)</label>
+                <div className="flex flex-wrap gap-2">
+                  {attachments.map((url, i) => (
+                    <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-600">
+                      <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                      <button
+                        onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))}
+                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/70 rounded-full flex items-center justify-center text-white"
+                      >
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </div>
+                  ))}
+                  <label className="w-16 h-16 rounded-lg border border-dashed border-gray-600 flex items-center justify-center cursor-pointer hover:border-green-500 transition-colors">
+                    {uploadingImg ? (
+                      <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Camera className="w-5 h-5 text-gray-500" />
+                    )}
+                    <input type="file" accept="image/*" className="hidden" onChange={e => handleUploadImage(e.target.files[0])} />
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={handleRequestPoints}
+                disabled={submitting || uploadingImg}
+                className="flex-1 py-2.5 bg-green-500 hover:bg-green-400 text-black font-semibold rounded-xl text-sm transition-colors disabled:opacity-50"
+              >
+                {submitting ? "Enviando..." : "Enviar Solicitação"}
+              </button>
+              <button onClick={() => setRequestModal(null)} className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm transition-colors">Cancelar</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* TAB: Minhas Solicitações (employee) */}
@@ -276,6 +355,7 @@ export default function Missions() {
                   <div>
                     <p className="text-white font-medium text-sm">{r.mission_title}</p>
                     <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
+                    {r.notes && <p className="text-gray-400 text-xs italic mt-0.5">"{r.notes}"</p>}
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={`font-bold text-sm ${r.mission_points >= 0 ? "text-green-400" : "text-red-400"}`}>{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
@@ -297,7 +377,6 @@ export default function Missions() {
       {/* TAB: Solicitações (manager) */}
       {tab === "solicitacoes" && isManager && (
         <div className="space-y-4">
-          {/* Pendentes */}
           <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
             <h3 className="text-white font-bold mb-4 flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-400" />
@@ -309,30 +388,42 @@ export default function Missions() {
             ) : (
               <div className="space-y-3">
                 {pendingRequests.map(r => (
-                  <div key={r.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl flex-wrap gap-3">
-                    <div>
-                      <p className="text-white font-medium text-sm">{r.mission_title}</p>
-                      <p className="text-gray-400 text-xs">{r.employee_name} · {r.sector}</p>
-                      <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
+                  <div key={r.id} className="p-4 bg-gray-900/50 rounded-xl space-y-3">
+                    <div className="flex items-start justify-between flex-wrap gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium text-sm">{r.mission_title}</p>
+                        <p className="text-gray-400 text-xs">{r.employee_name} · {r.sector}</p>
+                        <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
+                        {r.notes && <p className="text-gray-300 text-xs mt-1.5 italic">"{r.notes}"</p>}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-green-400 font-bold text-sm">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
+                        <button
+                          onClick={() => handleApprove(r)}
+                          disabled={approving === r.id}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                        >
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          {approving === r.id ? "..." : "Aprovar"}
+                        </button>
+                        <button
+                          onClick={() => handleReject(r)}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          Rejeitar
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-green-400 font-bold text-sm">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
-                      <button
-                        onClick={() => handleApprove(r)}
-                        disabled={approving === r.id}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
-                      >
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        {approving === r.id ? "..." : "Aprovar"}
-                      </button>
-                      <button
-                        onClick={() => handleReject(r)}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
-                      >
-                        <XCircle className="w-3.5 h-3.5" />
-                        Rejeitar
-                      </button>
-                    </div>
+                    {r.attachment_urls?.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {r.attachment_urls.map((url, i) => (
+                          <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                            <img src={url} alt="anexo" className="w-16 h-16 rounded-lg object-cover border border-gray-600 hover:border-green-500 transition-colors" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

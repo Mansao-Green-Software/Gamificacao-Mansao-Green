@@ -31,6 +31,12 @@
     },
     "notes": {
       "type": "string"
+    },
+    "attachment_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "required": [
