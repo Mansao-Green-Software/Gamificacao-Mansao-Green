@@ -1,0 +1,91 @@
+{
+  "name": "EmployeeProfile",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "sector": {
+      "type": "string",
+      "enum": [
+        "Social Media",
+        "Audiovisual",
+        "Tr\u00e1fego",
+        "L\u00edder de Projeto",
+        "Tipster",
+        "Suporte",
+        "Conting\u00eancia",
+        "Comercial",
+        "Financeiro",
+        "Affiliates",
+        "Administrativo",
+        "Ger\u00eancia",
+        "Sa\u00fade e Bem Estar",
+        "Servi\u00e7os Gerais",
+        "TV Green",
+        "Feira FC",
+        "TI",
+        "IA/Automa\u00e7\u00e3o"
+      ]
+    },
+    "extra_sectors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Social Media",
+          "Audiovisual",
+          "Tr\u00e1fego",
+          "L\u00edder de Projeto",
+          "Tipster",
+          "Suporte",
+          "Conting\u00eancia",
+          "Comercial",
+          "Financeiro",
+          "Affiliates",
+          "Administrativo",
+          "Ger\u00eancia",
+          "Sa\u00fade e Bem Estar",
+          "Servi\u00e7os Gerais",
+          "TV Green",
+          "Feira FC",
+          "TI",
+          "IA/Automa\u00e7\u00e3o"
+        ]
+      },
+      "description": "Setores adicionais que este colaborador gerencia"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "manager",
+        "supervisor",
+        "user"
+      ],
+      "default": "user"
+    },
+    "photo_url": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "include_in_sector_ranking": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o supervisor participa do ranking do setor em que est\u00e1 cadastrado"
+    }
+  },
+  "required": [
+    "user_id",
+    "full_name"
+  ]
+}

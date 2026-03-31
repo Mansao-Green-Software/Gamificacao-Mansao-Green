@@ -1,0 +1,60 @@
+{
+  "name": "Mission",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "points": {
+      "type": "number"
+    },
+    "sector": {
+      "type": "string",
+      "enum": [
+        "Social Media",
+        "Audiovisual",
+        "Tr\u00e1fego",
+        "L\u00edder de Projeto",
+        "Tipster",
+        "Suporte",
+        "Conting\u00eancia",
+        "Comercial",
+        "Financeiro",
+        "Affiliates",
+        "Administrativo",
+        "Ger\u00eancia",
+        "Sa\u00fade e Bem Estar",
+        "Servi\u00e7os Gerais",
+        "TV Green",
+        "Feira FC",
+        "TI",
+        "Supervisor",
+        "IA/Automa\u00e7\u00e3o",
+        "Todos"
+      ]
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Performance & Resultados",
+        "Disciplina & Organiza\u00e7\u00e3o",
+        "Cultura & Atitude Green",
+        "B\u00f4nus de Pontua\u00e7\u00e3o",
+        "Puni\u00e7\u00f5es (Perda de Pontos)",
+        "Participa\u00e7\u00e3o em A\u00e7\u00f5es"
+      ],
+      "default": "Performance & Resultados"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "title",
+    "points"
+  ]
+}

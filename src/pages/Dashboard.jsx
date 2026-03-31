@@ -5,7 +5,7 @@ import QuarterlyPrizeBanner from "../components/QuarterlyPrizeBanner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
-const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "TV Green", "Feira FC"];
+const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "TV Green", "Feira FC", "IA/Automação"];
 
 const SECTOR_COLORS = {
   "Social Media": "from-pink-500 to-rose-600",

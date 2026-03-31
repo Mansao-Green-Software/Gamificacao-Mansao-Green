@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Trophy, Users, BarChart2 } from "lucide-react";
 
-const SECTORS = ["Administrativo", "Affiliates", "Audiovisual", "Comercial", "Contingência", "Feira FC", "Financeiro", "Gerência", "Líder de Projeto", "Saúde e Bem Estar", "Serviços Gerais", "Social Media", "Suporte", "TI", "Tipster", "Tráfego", "TV Green"];
+const SECTORS = ["Administrativo", "Affiliates", "Audiovisual", "Comercial", "Contingência", "Feira FC", "Financeiro", "Gerência", "IA/Automação", "Líder de Projeto", "Saúde e Bem Estar", "Serviços Gerais", "Social Media", "Suporte", "TI", "Tipster", "Tráfego", "TV Green"];
 const VIRTUAL_SECTORS = ["Supervisor"]; // setores virtuais baseados em função
 
 const SECTOR_COLORS = {
