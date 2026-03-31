@@ -58,45 +58,45 @@ export default function QuarterlyPrizeBanner({ isAdmin }) {
       {/* Background glow */}
       <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-yellow-400/10 to-amber-500/5" />
 
-      <div className="relative p-5 flex flex-col sm:flex-row items-center gap-5">
-        {/* Icon / Image */}
-        <div className="shrink-0">
-          {prize?.image_url ? (
-            <div className="w-48 h-32 rounded-xl overflow-hidden border-2 border-amber-500/50">
-              <img src={prize.image_url} alt={prize.title} className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <div className="w-48 h-32 rounded-xl bg-amber-900/50 border-2 border-amber-600/50 flex items-center justify-center">
-              <Gift className="w-10 h-10 text-amber-400" />
-            </div>
-          )}
-        </div>
-
+      <div className="relative flex flex-col sm:flex-row min-h-[180px]">
         {/* Content */}
-        <div className="flex-1 text-center sm:text-left">
-          <div className="flex items-center gap-2 justify-center sm:justify-start mb-1">
+        <div className="flex-1 p-6 flex flex-col justify-center">
+          <div className="flex items-center gap-2 mb-2">
             <Trophy className="w-4 h-4 text-amber-400" />
             <span className="text-amber-400 text-xs font-bold uppercase tracking-wider">
               Prêmio do {prize?.quarter || "Trimestre"}
             </span>
           </div>
-          <h2 className="text-white text-xl font-bold leading-tight">
+          <h2 className="text-white text-2xl font-bold leading-tight">
             {prize?.title || "Configure o prêmio do trimestre"}
           </h2>
           {prize?.description && (
             <p className="text-amber-200/70 text-sm mt-1">{prize.description}</p>
           )}
-          <div className="flex items-center gap-1.5 mt-2 justify-center sm:justify-start">
+          <div className="flex items-center gap-1.5 mt-3">
             <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
             <span className="text-amber-300 text-xs font-medium">Para o 1º lugar no ranking do trimestre</span>
           </div>
         </div>
 
-        {/* Admin actions */}
+        {/* Image */}
+        <div className="relative sm:w-64 h-48 sm:h-auto shrink-0">
+          {prize?.image_url ? (
+            <img src={prize.image_url} alt={prize.title} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-amber-900/30 flex items-center justify-center">
+              <Gift className="w-16 h-16 text-amber-600/50" />
+            </div>
+          )}
+          {/* Gradient overlay on left edge */}
+          <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-amber-950/80 to-transparent" />
+        </div>
+
+        {/* Admin button */}
         {isAdmin && !editing && (
           <button
             onClick={openEdit}
-            className="shrink-0 p-2 text-amber-400 hover:bg-amber-900/40 rounded-xl transition-colors border border-amber-700/40"
+            className="absolute top-3 right-3 p-2 text-amber-400 hover:bg-amber-900/40 rounded-xl transition-colors border border-amber-700/40 bg-black/30"
           >
             {prize ? <Edit2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           </button>
