@@ -130,18 +130,25 @@ export default function RankingGeral() {
     }).sort((a, b) => b.points - a.points);
   };
 
+  // Normaliza employee_id: se o ID bate com user_id de algum perfil, retorna esse user_id; senão retorna o próprio id
+  const normalizeId = (employeeId) => {
+    const p = allProfiles.find(p => p.user_id === employeeId || p.id === employeeId);
+    return p?.user_id || employeeId;
+  };
+
   const getEmployeeRanking = (sector) => {
     // Setor virtual "Supervisor": agrupa todos os colaboradores com role supervisor
     if (sector === "Supervisor") {
       const supervisorIds = new Set(
         allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
       );
-      const filtered = rankingTxs.filter(t => supervisorIds.has(t.employee_id));
+      const filtered = rankingTxs.filter(t => supervisorIds.has(normalizeId(t.employee_id)));
       const pts = {};
       const names = {};
       filtered.forEach(t => {
-        pts[t.employee_id] = (pts[t.employee_id] || 0) + (t.points || 0);
-        names[t.employee_id] = t.employee_name;
+        const nid = normalizeId(t.employee_id);
+        pts[nid] = (pts[nid] || 0) + (t.points || 0);
+        names[nid] = t.employee_name;
       });
       return Object.entries(pts)
         .map(([id, points]) => ({ id, name: profiles[id]?.full_name || names[id], points, photo_url: profiles[id]?.photo_url }))
@@ -154,15 +161,16 @@ export default function RankingGeral() {
     );
 
     const baseTxs = sector && sector !== "geral"
-      ? rankingTxs.filter(t => t.sector === sector && !excludedSupervisorIds.has(t.employee_id))
-      : rankingTxs;
+      ? rankingTxs.filter(t => t.sector === sector && !excludedSupervisorIds.has(normalizeId(t.employee_id)))
+      : rankingTxs.filter(t => !excludedSupervisorIds.has(normalizeId(t.employee_id)));
     const pts = {};
     const names = {};
     const sectors = {};
     baseTxs.forEach(t => {
-      pts[t.employee_id] = (pts[t.employee_id] || 0) + (t.points || 0);
-      names[t.employee_id] = t.employee_name;
-      sectors[t.employee_id] = t.sector;
+      const nid = normalizeId(t.employee_id);
+      pts[nid] = (pts[nid] || 0) + (t.points || 0);
+      names[nid] = t.employee_name;
+      sectors[nid] = t.sector;
     });
     return Object.entries(pts)
       .map(([id, points]) => ({ id, name: profiles[id]?.full_name || names[id], points, sector: sectors[id], photo_url: profiles[id]?.photo_url }))
