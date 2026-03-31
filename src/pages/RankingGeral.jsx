@@ -144,7 +144,7 @@ export default function RankingGeral() {
         names[t.employee_id] = t.employee_name;
       });
       return Object.entries(pts)
-        .map(([id, points]) => ({ id, name: names[id], points, photo_url: profiles[id]?.photo_url }))
+        .map(([id, points]) => ({ id, name: profiles[id]?.full_name || names[id], points, photo_url: profiles[id]?.photo_url }))
         .sort((a, b) => b.points - a.points);
     }
 
@@ -165,7 +165,7 @@ export default function RankingGeral() {
       sectors[t.employee_id] = t.sector;
     });
     return Object.entries(pts)
-      .map(([id, points]) => ({ id, name: names[id], points, sector: sectors[id], photo_url: profiles[id]?.photo_url }))
+      .map(([id, points]) => ({ id, name: profiles[id]?.full_name || names[id], points, sector: sectors[id], photo_url: profiles[id]?.photo_url }))
       .sort((a, b) => b.points - a.points);
   };
 
