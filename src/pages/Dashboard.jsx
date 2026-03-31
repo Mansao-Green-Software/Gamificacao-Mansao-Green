@@ -123,13 +123,13 @@ export default function Dashboard() {
         <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "overview" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "overview" ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
           >
             Visão Geral
           </button>
           <button
             onClick={() => setActiveTab("mypoints")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "mypoints" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "mypoints" ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
           >
             Meus Pontos
           </button>

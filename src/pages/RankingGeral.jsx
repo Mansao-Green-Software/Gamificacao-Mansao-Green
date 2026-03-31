@@ -198,7 +198,7 @@ export default function RankingGeral() {
             <button
               key={p.key}
               onClick={() => setSelectedPeriod(p.key)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${selectedPeriod === p.key ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${selectedPeriod === p.key ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
             >
               {p.label}
             </button>
@@ -215,7 +215,7 @@ export default function RankingGeral() {
             onClick={() => setSelectedSector("geral")}
             className={`shrink-0 lg:shrink flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all border-b lg:border-b border-r lg:border-r-0 border-gray-700 whitespace-nowrap ${
               selectedSector === "geral"
-                ? "bg-green-500 text-white"
+                ? "bg-green-500 text-black"
                 : "text-gray-400 hover:text-white hover:bg-gray-700"
             }`}
           >
@@ -228,7 +228,7 @@ export default function RankingGeral() {
               onClick={() => setSelectedSector(sector)}
               className={`shrink-0 lg:shrink-0 lg:w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all border-b lg:border-b border-r lg:border-r-0 border-gray-700 last:border-0 whitespace-nowrap ${
                 selectedSector === sector
-                  ? "bg-green-500 text-white"
+                  ? "bg-green-500 text-black"
                   : "text-gray-400 hover:text-white hover:bg-gray-700"
               }`}
             >

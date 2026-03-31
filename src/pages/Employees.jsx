@@ -242,7 +242,7 @@ export default function Employees() {
           <button
             key={s}
             onClick={() => setFilterSector(s)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filterSector === s ? "bg-green-500 text-white" : "bg-gray-800 text-gray-400 hover:text-white border border-gray-700"}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filterSector === s ? "bg-green-500 text-black" : "bg-gray-800 text-gray-400 hover:text-white border border-gray-700"}`}
           >
             {s}
           </button>

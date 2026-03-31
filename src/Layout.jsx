@@ -126,7 +126,7 @@ export default function Layout({ children, currentPageName }) {
                 to={createPageUrl(page)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? "bg-green-500 text-white shadow-lg shadow-green-500/20"
+                    ? "bg-green-500 text-black shadow-lg shadow-green-500/20"
                     : "text-gray-400 hover:text-white hover:bg-gray-800"
                 }`}
               >
@@ -172,7 +172,7 @@ export default function Layout({ children, currentPageName }) {
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
                   currentPageName === page
-                    ? "bg-green-500 text-white"
+                    ? "bg-green-500 text-black"
                     : "text-gray-400 hover:text-white hover:bg-gray-800"
                 }`}
               >

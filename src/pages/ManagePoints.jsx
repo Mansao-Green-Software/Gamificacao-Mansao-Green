@@ -160,20 +160,20 @@ export default function ManagePoints() {
       <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1 w-fit">
         <button
           onClick={() => setTab("add")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "add" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "add" ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
         >
           Adicionar Pontos
         </button>
         <button
           onClick={() => setTab("history")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "history" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "history" ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
         >
           Histórico
         </button>
         {isAdmin && (
           <button
             onClick={() => setTab("historyAll")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "historyAll" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "historyAll" ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
           >
             Histórico Geral
           </button>
