@@ -115,10 +115,14 @@ export default function Missions() {
 
   const handleApprove = async (request) => {
     setApproving(request.id);
-    await base44.entities.MissionRequest.update(request.id, { status: "aprovado" });
+    // Busca o nome cadastrado no perfil do colaborador
+    const allProfs = await base44.entities.EmployeeProfile.list();
+    const empProfile = allProfs.find(p => p.user_id === request.employee_id || p.id === request.employee_id);
+    const empName = empProfile?.full_name || request.employee_name;
+    await base44.entities.MissionRequest.update(request.id, { status: "aprovado", employee_name: empName });
     await base44.entities.PointTransaction.create({
       employee_id: request.employee_id,
-      employee_name: request.employee_name,
+      employee_name: empName,
       sector: request.sector,
       points: request.mission_points,
       type: "mission",
