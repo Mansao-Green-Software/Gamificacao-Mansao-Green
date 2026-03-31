@@ -1,0 +1,43 @@
+{
+  "name": "MissionRequest",
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string"
+    },
+    "employee_name": {
+      "type": "string"
+    },
+    "sector": {
+      "type": "string"
+    },
+    "mission_id": {
+      "type": "string"
+    },
+    "mission_title": {
+      "type": "string"
+    },
+    "mission_points": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "aprovado",
+        "rejeitado"
+      ],
+      "default": "pendente"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "employee_id",
+    "employee_name",
+    "mission_id",
+    "mission_title",
+    "mission_points"
+  ]
+}
