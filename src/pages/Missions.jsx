@@ -252,22 +252,20 @@ export default function Missions() {
                     <span className="ml-auto text-xs px-2 py-0.5 bg-gray-700 text-gray-300 rounded-full">{mission.sector}</span>
                   </div>
                   <div className="flex gap-2 mt-auto">
-                    {!isManager && (
-                      <button
-                        onClick={() => !req && openRequestModal(mission)}
-                        disabled={!!req}
-                        className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
-                          approved ? "bg-green-900/40 text-green-400 cursor-not-allowed" :
-                          pending ? "bg-amber-900/40 text-amber-400 cursor-not-allowed" :
-                          rejected ? "bg-gray-700 text-gray-400 cursor-not-allowed" :
-                          "bg-green-500 hover:bg-green-400 text-black font-semibold"
-                        }`}
-                      >
-                        {approved ? "✓ Aprovado" : pending ? "⏳ Aguardando aprovação" : rejected ? "✗ Rejeitado" : "Solicitar pontuação"}
-                      </button>
-                    )}
+                    <button
+                      onClick={() => !req && openRequestModal(mission)}
+                      disabled={!!req}
+                      className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
+                        approved ? "bg-green-900/40 text-green-400 cursor-not-allowed" :
+                        pending ? "bg-amber-900/40 text-amber-400 cursor-not-allowed" :
+                        rejected ? "bg-gray-700 text-gray-400 cursor-not-allowed" :
+                        "bg-green-500 hover:bg-green-400 text-black font-semibold"
+                      }`}
+                    >
+                      {approved ? "✓ Aprovado" : pending ? "⏳ Aguardando aprovação" : rejected ? "✗ Rejeitado" : "Solicitar pontuação"}
+                    </button>
                     {isManager && (
-                      <button onClick={() => handleDelete(mission.id)} className="p-2 text-red-400 hover:bg-red-900/20 rounded-xl transition-colors ml-auto">
+                      <button onClick={() => handleDelete(mission.id)} className="p-2 text-red-400 hover:bg-red-900/20 rounded-xl transition-colors shrink-0">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}
