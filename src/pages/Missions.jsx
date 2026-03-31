@@ -119,9 +119,10 @@ export default function Missions() {
     const allProfs = await base44.entities.EmployeeProfile.list();
     const empProfile = allProfs.find(p => p.user_id === request.employee_id || p.id === request.employee_id);
     const empName = empProfile?.full_name || request.employee_name;
+    const empId = empProfile?.user_id || request.employee_id;
     await base44.entities.MissionRequest.update(request.id, { status: "aprovado", employee_name: empName });
     await base44.entities.PointTransaction.create({
-      employee_id: request.employee_id,
+      employee_id: empId,
       employee_name: empName,
       sector: request.sector,
       points: request.mission_points,
