@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Trophy, Star, Target, TrendingUp, Medal, History, TrendingDown } from "lucide-react";
+import QuarterlyPrizeBanner from "../components/QuarterlyPrizeBanner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -110,6 +111,9 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Quarterly Prize Banner */}
+      <QuarterlyPrizeBanner isAdmin={isAdmin} />
+
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
