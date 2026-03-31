@@ -36,9 +36,12 @@ export default function GreenShop() {
   const [editForm, setEditForm] = useState({});
 
   const [profile, setProfile] = useState(null);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
+  const load = async () => {
+    setError(false);
+    setLoading(true);
+    try {
       const u = await base44.auth.me();
       setUser(u);
       const [rws, reds, allTxs, profiles] = await Promise.all([
@@ -49,7 +52,6 @@ export default function GreenShop() {
       ]);
       const found = profiles.find(p => p.user_id === u.id || p.email === u.email);
       setProfile(found);
-      // Filtrar transações do usuário atual (por user id ou por employee_id do profile)
       const txs = allTxs.filter(t =>
         t.employee_id === u.id ||
         t.employee_name === u.full_name ||
@@ -58,8 +60,14 @@ export default function GreenShop() {
       setRewards(rws);
       setRedemptions(reds);
       setTransactions(txs);
+    } catch (e) {
+      setError(true);
+    } finally {
       setLoading(false);
-    };
+    }
+  };
+
+  useEffect(() => {
     load();
   }, []);
 
@@ -152,6 +160,13 @@ export default function GreenShop() {
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="w-10 h-10 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+
+  if (error) return (
+    <div className="flex flex-col items-center justify-center h-64 gap-4">
+      <p className="text-gray-400 text-sm">Erro ao carregar a loja. Verifique sua conexão.</p>
+      <button onClick={load} className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm font-medium transition-colors">Tentar novamente</button>
     </div>
   );
 
