@@ -100,7 +100,7 @@ export default function Missions() {
     if (!requestModal) return;
     setSubmitting(requestModal.id);
     const req = await base44.entities.MissionRequest.create({
-      employee_id: profile?.user_id || user.id,
+      employee_id: profile?.user_id || profile?.id || user.id,
       employee_name: profile?.full_name || user.full_name,
       sector: mySector,
       mission_id: requestModal.id,
@@ -119,7 +119,7 @@ export default function Missions() {
     setApproving(request.id);
     const empProfile = allProfiles.find(p => p.user_id === request.employee_id || p.id === request.employee_id);
     const empName = empProfile?.full_name || request.employee_name;
-    const empId = empProfile?.user_id || request.employee_id;
+    const empId = empProfile?.user_id || empProfile?.id || request.employee_id;
     await base44.entities.MissionRequest.update(request.id, { status: "aprovado", employee_name: empName });
     await base44.entities.PointTransaction.create({
       employee_id: empId,
