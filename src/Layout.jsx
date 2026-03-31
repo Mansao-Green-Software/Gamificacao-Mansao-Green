@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Users, Target, LayoutDashboard, LogOut, Menu, X, Crown, Star, ShoppingBag, Zap } from "lucide-react";
+import { Trophy, Users, Target, LayoutDashboard, LogOut, Menu, X, Crown, Star, ShoppingBag, Zap, Camera } from "lucide-react";
 
 const SECTORS = [
   "Social Media", "Audiovisual", "Tráfego", "Líder de Projeto",
@@ -13,7 +13,18 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem("app_logo_url") || "");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const location = useLocation();
+
+  const handleLogoUpload = async (file) => {
+    if (!file) return;
+    setUploadingLogo(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setLogoUrl(file_url);
+    localStorage.setItem("app_logo_url", file_url);
+    setUploadingLogo(false);
+  };
 
   useEffect(() => {
     base44.auth.me().then(async (u) => {
@@ -55,8 +66,22 @@ export default function Layout({ children, currentPageName }) {
       <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-gray-900 border-r border-gray-800 z-40">
         <div className="p-6 border-b border-gray-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center">
-              <Crown className="w-5 h-5 text-white" />
+            <div className="relative group w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center overflow-hidden shrink-0">
+              {logoUrl ? (
+                <img src={logoUrl} alt="logo" className="w-full h-full object-cover" />
+              ) : (
+                <Crown className="w-5 h-5 text-white" />
+              )}
+              {isAdmin && (
+                <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                  {uploadingLogo ? (
+                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Camera className="w-3.5 h-3.5 text-white" />
+                  )}
+                  <input type="file" accept="image/*" className="hidden" onChange={e => handleLogoUpload(e.target.files[0])} />
+                </label>
+              )}
             </div>
             <div>
               <h1 className="text-white font-bold text-sm leading-tight">Gamificação</h1>
