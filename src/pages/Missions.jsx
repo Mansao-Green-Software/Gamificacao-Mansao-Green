@@ -241,7 +241,7 @@ export default function Missions() {
                           approved ? "bg-green-900/40 text-green-400 cursor-not-allowed" :
                           pending ? "bg-amber-900/40 text-amber-400 cursor-not-allowed" :
                           rejected ? "bg-gray-700 text-gray-400 cursor-not-allowed" :
-                          "bg-green-500 hover:bg-green-400 text-gray-950 font-semibold"
+                          "bg-green-500 hover:bg-green-400 text-black font-semibold"
                         }`}
                       >
                         {approved ? "✓ Aprovado" : pending ? "⏳ Aguardando aprovação" : rejected ? "✗ Rejeitado" : submitting === mission.id ? "..." : "Solicitar pontuação"}
