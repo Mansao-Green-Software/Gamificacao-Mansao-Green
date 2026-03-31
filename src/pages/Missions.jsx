@@ -99,7 +99,7 @@ export default function Missions() {
     setSubmitting(requestModal.id);
     const req = await base44.entities.MissionRequest.create({
       employee_id: user.id,
-      employee_name: user.full_name,
+      employee_name: profile?.full_name || user.full_name,
       sector: mySector,
       mission_id: requestModal.id,
       mission_title: requestModal.title,
@@ -125,7 +125,7 @@ export default function Missions() {
       mission_id: request.mission_id,
       mission_title: request.mission_title,
       description: `Missão aprovada: ${request.mission_title}`,
-      awarded_by_name: user.full_name,
+      awarded_by_name: profile?.full_name || user.full_name,
     });
     setRequests(prev => prev.map(r => r.id === request.id ? { ...r, status: "aprovado" } : r));
     setApproving(null);
