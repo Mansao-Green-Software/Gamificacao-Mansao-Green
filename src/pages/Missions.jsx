@@ -65,7 +65,8 @@ export default function Missions() {
   });
 
   // Requests for current employee
-  const myRequests = requests.filter(r => r.employee_id === user?.id);
+  const myEmployeeId = profile?.user_id || profile?.id || user?.id;
+  const myRequests = requests.filter(r => r.employee_id === myEmployeeId || r.employee_id === user?.id);
   const myRequestMap = {};
   myRequests.forEach(r => { myRequestMap[r.mission_id] = r; });
 
