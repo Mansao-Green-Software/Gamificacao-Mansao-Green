@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Trophy, Users, BarChart2 } from "lucide-react";
+import { FaMedal } from 'react-icons/fa';
 
 const SECTORS = ["Administrativo", "Affiliates", "Audiovisual", "Comercial", "Contingência", "Feira FC", "Financeiro", "Gerência", "IA/Automação", "Líder de Projeto", "Saúde e Bem Estar", "Serviços Gerais", "Social Media", "Suporte", "TI", "Tipster", "Tráfego", "TV Green"];
 const VIRTUAL_SECTORS = ["Supervisor"]; // setores virtuais baseados em função
@@ -45,7 +46,12 @@ const SECTOR_ICON_COLORS = {
   "Feira FC": "bg-lime-500/20 text-lime-400",
 };
 
-const medals = ["🥇", "🥈", "🥉"];
+const getMedal = (idx) => {
+  if (idx === 0) return <FaMedal className="w-5 h-5 text-amber-400" />;
+  if (idx === 1) return <FaMedal className="w-5 h-5 text-slate-300" />;
+  if (idx === 2) return <FaMedal className="w-5 h-5 text-amber-700" />;
+  return <span className="text-gray-500 font-bold text-sm">{idx + 1}</span>;
+};
 
 const PERIODS = [
   { key: "mensal", label: "Mensal" },
@@ -261,7 +267,7 @@ export default function RankingGeral() {
                   <div key={item.sector}>
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg w-7">{medals[idx] || <span className="text-gray-500 text-sm font-bold">{idx + 1}</span>}</span>
+                        <span className="w-7 flex items-center justify-center">{getMedal(idx)}</span>
                         <button
                           onClick={() => setSelectedSector(item.sector)}
                           className="text-white font-medium hover:text-green-400 transition-colors text-sm"
@@ -303,9 +309,7 @@ export default function RankingGeral() {
                         "bg-gray-900/50"
                       }`}
                     >
-                      <span className="text-xl w-8 text-center shrink-0">
-                        {medals[idx] !== undefined ? medals[idx] : <span className="text-gray-500 font-bold text-sm">{idx + 1}</span>}
-                      </span>
+                      <span className="w-8 flex items-center justify-center shrink-0">{getMedal(idx)}</span>
                       <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-gray-700 overflow-hidden shrink-0 flex items-center justify-center">
                         {emp.photo_url ? (
                           <img src={emp.photo_url} alt={emp.name} className="w-full h-full object-cover" />

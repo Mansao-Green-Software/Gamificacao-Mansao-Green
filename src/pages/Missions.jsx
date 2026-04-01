@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Target, Plus, Trash2, CheckCircle, Clock, XCircle, Bell, Camera, X, Image, ChevronDown, ChevronRight } from "lucide-react";
+import { Target, Plus, Trash2, CheckCircle, Clock, XCircle, Bell, Camera, X, Image, ChevronDown, ChevronRight, RotateCcw } from "lucide-react";
+import { FaRocket, FaClipboardList, FaHeart, FaStar, FaExclamationCircle, FaBullseye, FaComment } from 'react-icons/fa';
 
 const CATEGORIES = [
-  { key: "Performance & Resultados", emoji: "🚀", color: "border-orange-700/50 bg-orange-900/20" },
-  { key: "Disciplina & Organização", emoji: "📋", color: "border-blue-700/50 bg-blue-900/20" },
-  { key: "Cultura & Atitude Green", emoji: "💚", color: "border-green-700/50 bg-green-900/20" },
-  { key: "Bônus de Pontuação", emoji: "⭐", color: "border-yellow-700/50 bg-yellow-900/20" },
-  { key: "Punições (Perda de Pontos)", emoji: "🔴", color: "border-red-700/50 bg-red-900/20" },
-  { key: "Participação em Ações", emoji: "🎯", color: "border-cyan-700/50 bg-cyan-900/20" },
+  { key: "Performance & Resultados", Icon: FaRocket, color: "border-orange-700/50 bg-orange-900/20" },
+  { key: "Disciplina & Organização", Icon: FaClipboardList, color: "border-blue-700/50 bg-blue-900/20" },
+  { key: "Cultura & Atitude Green", Icon: FaHeart, color: "border-green-700/50 bg-green-900/20" },
+  { key: "Bônus de Pontuação", Icon: FaStar, color: "border-yellow-700/50 bg-yellow-900/20" },
+  { key: "Punições (Perda de Pontos)", Icon: FaExclamationCircle, color: "border-red-700/50 bg-red-900/20" },
+  { key: "Participação em Ações", Icon: FaBullseye, color: "border-cyan-700/50 bg-cyan-900/20" },
 ];
 
 const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "TV Green", "Feira FC", "Todos"];
@@ -258,7 +259,7 @@ export default function Missions() {
                     className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-black/10 transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">{cat.emoji}</span>
+                      <cat.Icon className="w-4 h-4 text-white/80" />
                       <span className="font-bold text-sm text-white">{cat.key}</span>
                       <span className="text-xs px-2 py-0.5 bg-black/20 rounded-full text-white/70">{catMissions.length}</span>
                     </div>
@@ -293,12 +294,12 @@ export default function Missions() {
                       <button
                         onClick={() => !pending && openRequestModal(mission)}
                         disabled={pending}
-                        className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
+                        className={`flex items-center justify-center gap-1.5 flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
                           pending ? "bg-amber-900/40 text-amber-400 cursor-not-allowed" :
                           "bg-green-500 hover:bg-green-400 text-black font-semibold"
                         }`}
                       >
-                        {pending ? "⏳ Aguardando aprovação" : approved ? "↩ Solicitar novamente" : rejected ? "↩ Solicitar novamente" : submitting === mission.id ? "..." : "Solicitar pontuação"}
+                        {pending ? <><Clock className="w-3.5 h-3.5" /> Aguardando aprovação</> : (approved || rejected) ? <><RotateCcw className="w-3.5 h-3.5" /> Solicitar novamente</> : submitting === mission.id ? "..." : "Solicitar pontuação"}
                       </button>
                     )}
                     {isManager && (
@@ -394,12 +395,12 @@ export default function Missions() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={`font-bold text-sm ${r.mission_points >= 0 ? "text-green-400" : "text-red-400"}`}>{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                    <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
                       r.status === "aprovado" ? "bg-green-900/50 text-green-300" :
                       r.status === "rejeitado" ? "bg-red-900/50 text-red-300" :
                       "bg-amber-900/50 text-amber-300"
                     }`}>
-                      {r.status === "aprovado" ? "✓ Aprovado" : r.status === "rejeitado" ? "✗ Rejeitado" : "⏳ Pendente"}
+                      {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "rejeitado" ? <><XCircle className="w-3 h-3" /> Rejeitado</> : <><Clock className="w-3 h-3" /> Pendente</>}
                     </span>
                   </div>
                 </div>
@@ -430,7 +431,7 @@ export default function Missions() {
                       <p className="text-gray-400 text-xs">{r.employee_name} · {r.sector}</p>
                       <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
                       {r.justification && (
-                        <p className="text-gray-300 text-xs mt-1.5 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">💬 {r.justification}</p>
+                        <p className="flex items-center gap-1.5 text-gray-300 text-xs mt-1.5 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700"><FaComment className="text-gray-500 shrink-0" /> {r.justification}</p>
                       )}
                       {r.attachments?.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
@@ -480,8 +481,8 @@ export default function Missions() {
                         <p className="text-white text-sm">{r.mission_title}</p>
                         <p className="text-gray-500 text-xs">{r.employee_name} · {new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
                       </div>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
-                        {r.status === "aprovado" ? "✓ Aprovado" : "✗ Rejeitado"}
+                      <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
+                        {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
                       </span>
                     </div>
                   ))}

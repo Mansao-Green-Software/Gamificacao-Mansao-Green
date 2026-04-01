@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Trophy, Star, Target, TrendingUp, Medal, History, TrendingDown } from "lucide-react";
+import { FaMedal, FaHandPaper } from 'react-icons/fa';
 import QuarterlyPrizeBanner from "../components/QuarterlyPrizeBanner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -24,6 +25,13 @@ const SECTOR_COLORS = {
   "Serviços Gerais": "from-orange-500 to-amber-600",
   "TV Green": "from-green-600 to-emerald-700",
   "Feira FC": "from-lime-500 to-green-600",
+};
+
+const getMedal = (idx) => {
+  if (idx === 0) return <FaMedal className="w-5 h-5 text-amber-400" />;
+  if (idx === 1) return <FaMedal className="w-5 h-5 text-slate-300" />;
+  if (idx === 2) return <FaMedal className="w-5 h-5 text-amber-700" />;
+  return <span className="text-gray-500 font-bold text-sm">{idx + 1}</span>;
 };
 
 export default function Dashboard() {
@@ -117,7 +125,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Olá, {user?.full_name?.split(" ")[0]} 👋</h1>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">Olá, {user?.full_name?.split(" ")[0]} <FaHandPaper className="text-yellow-300 w-5 h-5" /></h1>
           <p className="text-gray-400 text-sm mt-1">Bem-vindo ao Gamificação Mansão Green</p>
         </div>
         <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1">
@@ -242,11 +250,10 @@ export default function Dashboard() {
           </div>
           <div className="space-y-3">
             {sectorRanking.slice(0, 5).map((item, idx) => {
-              const medals = ["🥇", "🥈", "🥉"];
               const isMe = item.sector === mySector;
               return (
                 <div key={item.sector} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
-                  <span className="text-xl w-8 text-center">{medals[idx] || `${idx + 1}`}</span>
+                  <span className="w-8 flex items-center justify-center">{getMedal(idx)}</span>
                   <div className={`flex-1 h-2 rounded-full bg-gray-700 overflow-hidden`}>
                     <div
                       className={`h-full rounded-full bg-gradient-to-r ${SECTOR_COLORS[item.sector] || "from-green-500 to-teal-500"}`}
@@ -287,14 +294,13 @@ export default function Dashboard() {
                 .map(([id, points]) => ({ id, name: empNames[id], points, photo: empPhotos[id], sector: empSectors[id] }))
                 .sort((a, b) => b.points - a.points)
                 .slice(0, 5);
-              const medals = ["🥇", "🥈", "🥉"];
               const maxPoints = topEmployees[0]?.points || 1;
               
               return topEmployees.map((emp, idx) => {
                 const isMe = emp.id === user?.id;
                 return (
                   <div key={emp.id} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
-                    <span className="text-xl w-8 text-center">{medals[idx] || `${idx + 1}`}</span>
+                    <span className="w-8 flex items-center justify-center">{getMedal(idx)}</span>
                     <div className="w-8 h-8 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0">
                       {emp.photo ? (
                         <img src={emp.photo} alt={emp.name} className="w-full h-full object-cover" />

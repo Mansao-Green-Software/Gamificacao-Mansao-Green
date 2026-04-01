@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Zap, Star, Search, Pencil, Trash2, Check, X, Plus, ChevronDown, ChevronRight } from "lucide-react";
+import { FaRocket, FaClipboardList, FaHeart, FaStar, FaExclamationCircle, FaBullseye } from 'react-icons/fa';
 
 const SECTORS = ["Administrativo", "Affiliates", "Audiovisual", "Comercial", "Contingência", "Feira FC", "Financeiro", "Gerência", "IA/Automação", "Líder de Projeto", "Saúde e Bem Estar", "Serviços Gerais", "Social Media", "Suporte", "Supervisor", "TI", "Tipster", "Tráfego", "TV Green"];
 
 const CATEGORIES = [
-  { key: "Performance & Resultados", emoji: "🚀", color: "text-orange-400 border-orange-700/50 bg-orange-900/20" },
-  { key: "Disciplina & Organização", emoji: "📋", color: "text-blue-400 border-blue-700/50 bg-blue-900/20" },
-  { key: "Cultura & Atitude Green", emoji: "💚", color: "text-green-400 border-green-700/50 bg-green-900/20" },
-  { key: "Bônus de Pontuação", emoji: "⭐", color: "text-yellow-400 border-yellow-700/50 bg-yellow-900/20" },
-  { key: "Punições (Perda de Pontos)", emoji: "🔴", color: "text-red-400 border-red-700/50 bg-red-900/20" },
-  { key: "Participação em Ações", emoji: "🎯", color: "text-cyan-400 border-cyan-700/50 bg-cyan-900/20" },
+  { key: "Performance & Resultados", Icon: FaRocket, color: "text-orange-400 border-orange-700/50 bg-orange-900/20" },
+  { key: "Disciplina & Organização", Icon: FaClipboardList, color: "text-blue-400 border-blue-700/50 bg-blue-900/20" },
+  { key: "Cultura & Atitude Green", Icon: FaHeart, color: "text-green-400 border-green-700/50 bg-green-900/20" },
+  { key: "Bônus de Pontuação", Icon: FaStar, color: "text-yellow-400 border-yellow-700/50 bg-yellow-900/20" },
+  { key: "Punições (Perda de Pontos)", Icon: FaExclamationCircle, color: "text-red-400 border-red-700/50 bg-red-900/20" },
+  { key: "Participação em Ações", Icon: FaBullseye, color: "text-cyan-400 border-cyan-700/50 bg-cyan-900/20" },
 ];
 
 const SECTOR_COLORS = {
@@ -150,7 +151,7 @@ export default function SistemaPontuacao() {
               <option value="Todos">Todos</option>
             </select>
             <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} className="col-span-2 bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500">
-              {CATEGORIES.map(c => <option key={c.key} value={c.key}>{c.emoji} {c.key}</option>)}
+              {CATEGORIES.map(c => <option key={c.key} value={c.key}>{c.key}</option>)}
             </select>
           </div>
           <div className="flex gap-3 mt-4">
@@ -231,7 +232,7 @@ export default function SistemaPontuacao() {
                       className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-black/10 transition-colors"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{cat.emoji}</span>
+                        <cat.Icon className="w-4 h-4" />
                         <span className="font-bold text-sm text-white">{cat.key}</span>
                         <span className="text-xs px-2 py-0.5 bg-black/20 rounded-full text-white/70">{items.length} {items.length === 1 ? "item" : "itens"}</span>
                       </div>
