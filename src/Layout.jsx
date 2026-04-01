@@ -173,21 +173,21 @@ export default function Layout({ children, currentPageName }) {
       </aside>
 
       {/* Mobile header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gray-900 border-b border-gray-800 px-4 py-3 flex items-center justify-between">
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-[60] bg-gray-900 border-b border-gray-800 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center">
             <Crown className="w-4 h-4 text-white" />
           </div>
           <span className="text-white font-bold text-sm">Mansão Green</span>
         </div>
-        <button onClick={() => setMobileOpen(!mobileOpen)} className="text-gray-400 hover:text-white">
+        <button onClick={() => setMobileOpen(!mobileOpen)} className="text-gray-400 hover:text-white p-2 -mr-2 rounded-lg">
           {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </header>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-gray-900 pt-16 overflow-y-auto">
+        <div className="lg:hidden fixed inset-0 z-50 bg-gray-900 pt-16 overflow-y-auto">
           {/* User info */}
           {user && (
             <div className="px-4 py-4 border-b border-gray-800 flex items-center gap-3">
@@ -258,7 +258,7 @@ export default function Layout({ children, currentPageName }) {
       )}
 
       {/* Main content */}
-      <main className="lg:ml-64 min-h-screen pt-16 lg:pt-0">
+      <main className="relative z-0 lg:ml-64 min-h-screen pt-16 lg:pt-0">
         <div className="p-4 lg:p-8">
           {children}
         </div>
