@@ -67,8 +67,9 @@ export default function Missions() {
   // Requests for current employee
   const myEmployeeId = profile?.user_id || profile?.id || user?.id;
   const myRequests = requests.filter(r => r.employee_id === myEmployeeId || r.employee_id === user?.id);
+  // Build map keeping only the NEWEST request per mission (list is sorted newest-first)
   const myRequestMap = {};
-  myRequests.forEach(r => { myRequestMap[r.mission_id] = r; });
+  myRequests.forEach(r => { if (!myRequestMap[r.mission_id]) myRequestMap[r.mission_id] = r; });
 
   // Pending requests visible to manager
   const pendingRequests = isManager
@@ -194,14 +195,12 @@ export default function Missions() {
         >
           Missões
         </button>
-        {!isManager && (
-          <button
-            onClick={() => setTab("minhas")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "minhas" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
-          >
-            Minhas Solicitações
-          </button>
-        )}
+        <button
+          onClick={() => setTab("minhas")}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "minhas" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
+        >
+          Minhas Solicitações
+        </button>
         {isManager && (
           <button
             onClick={() => setTab("solicitacoes")}
@@ -376,8 +375,8 @@ export default function Missions() {
         </div>
       )}
 
-      {/* TAB: Minhas Solicitações (employee) */}
-      {tab === "minhas" && !isManager && (
+      {/* TAB: Minhas Solicitações */}
+      {tab === "minhas" && (
         <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
           <h3 className="text-white font-bold mb-4 flex items-center gap-2">
             <Bell className="w-4 h-4 text-green-400" />
