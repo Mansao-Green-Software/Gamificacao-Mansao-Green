@@ -101,10 +101,11 @@ export default function Missions() {
   const handleSubmitRequest = async () => {
     if (!requestModal) return;
     setSubmitting(requestModal.id);
+    const requestSector = (effectiveRole === "manager" || effectiveRole === "admin") ? "Gerência" : mySector;
     const req = await base44.entities.MissionRequest.create({
       employee_id: profile?.user_id || profile?.id || user.id,
       employee_name: profile?.full_name || user.full_name,
-      sector: mySector,
+      sector: requestSector,
       mission_id: requestModal.id,
       mission_title: requestModal.title,
       mission_points: requestModal.points,
