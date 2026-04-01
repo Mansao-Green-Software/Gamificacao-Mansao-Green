@@ -253,6 +253,15 @@
   color: #15803d !important;
 }
 
+[data-theme="light"] .text-green-400 {
+  color: #15803d !important;
+}
+
+[data-theme="light"] .text-green-300,
+[data-theme="light"] .text-green-400 {
+  color: #15803d !important;
+}
+
 [data-theme="light"] .bg-gray-600\/30,
 [data-theme="light"] .bg-gray-700 {
   background-color: #e5e7eb !important;
