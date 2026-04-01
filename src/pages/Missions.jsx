@@ -62,6 +62,7 @@ export default function Missions() {
   const visibleMissions = missions.filter(m => {
     if (!m.is_active) return false;
     if (isAdmin) return true;
+    if (isManager && m.sector === "Gerência") return true;
     return allMySectors.includes(m.sector) || m.sector === "Todos";
   });
 
