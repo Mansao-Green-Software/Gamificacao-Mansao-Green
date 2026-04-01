@@ -54,7 +54,7 @@ export default function QuarterlyPrizeBanner({ isAdmin }) {
   if (!prize && !isAdmin) return null;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-amber-600/40">
+    <div data-theme="dark" className="relative overflow-hidden rounded-2xl border border-amber-600/40">
       {/* Background image or gradient */}
       {prize?.image_url ?
       <img src={prize.image_url} alt={prize.title} className="absolute inset-0 w-full h-full object-cover" /> :
