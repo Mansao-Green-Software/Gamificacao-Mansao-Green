@@ -290,7 +290,6 @@ export default function Missions() {
                     <span className="ml-auto text-xs px-2 py-0.5 bg-gray-700 text-gray-300 rounded-full">{mission.sector}</span>
                   </div>
                   <div className="flex gap-2 mt-auto">
-                    {!isManager && (
                       <button
                         onClick={() => !pending && openRequestModal(mission)}
                         disabled={pending}
@@ -301,9 +300,8 @@ export default function Missions() {
                       >
                         {pending ? <><Clock className="w-3.5 h-3.5" /> Aguardando aprovação</> : (approved || rejected) ? <><RotateCcw className="w-3.5 h-3.5" /> Solicitar novamente</> : submitting === mission.id ? "..." : "Solicitar pontuação"}
                       </button>
-                    )}
                     {isManager && (
-                      <button onClick={() => handleDelete(mission.id)} className="p-2 text-red-400 hover:bg-red-900/20 rounded-xl transition-colors shrink-0 ml-auto">
+                      <button onClick={() => handleDelete(mission.id)} className="p-2 text-red-400 hover:bg-red-900/20 rounded-xl transition-colors shrink-0">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}
