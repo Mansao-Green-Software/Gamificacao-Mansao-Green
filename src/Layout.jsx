@@ -187,7 +187,32 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-gray-900 pt-16">
+        <div className="lg:hidden fixed inset-0 z-40 bg-gray-900 pt-16 overflow-y-auto">
+          {/* User info */}
+          {user && (
+            <div className="px-4 py-4 border-b border-gray-800 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0">
+                {profile?.photo_url ? (
+                  <img src={profile.photo_url} alt={user.full_name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-gray-400 text-sm font-bold">{user.full_name?.[0]?.toUpperCase()}</span>
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="text-white text-sm font-medium truncate">{profile?.full_name || user.full_name}</p>
+                {(profile?.sector || user.sector) && <p className="text-green-400 text-xs truncate">{profile?.sector || user.sector}</p>}
+                <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-300">
+                  {(() => {
+                    const role = profile?.role || user.role;
+                    if (role === "admin") return "Admin";
+                    if (role === "manager") return "Gerente";
+                    if (role === "supervisor") return "Supervisor";
+                    return "Colaborador";
+                  })()}
+                </span>
+              </div>
+            </div>
+          )}
           <nav className="p-4 space-y-1">
             {navItems.map(({ label, page, icon: Icon }) => (
               <Link
@@ -204,9 +229,26 @@ export default function Layout({ children, currentPageName }) {
                 {label}
               </Link>
             ))}
+            {/* Theme toggle */}
+            <div className="flex items-center justify-between px-3 py-3 mt-2">
+              <div className="flex items-center gap-2 text-gray-400">
+                {theme === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-500" />}
+                <span className="text-sm font-medium">{theme === "dark" ? "Escuro" : "Claro"}</span>
+              </div>
+              <button
+                onClick={toggleTheme}
+                className={`relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none ${
+                  theme === "light" ? "bg-green-500" : "bg-gray-600"
+                }`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${
+                  theme === "light" ? "translate-x-5" : "translate-x-0"
+                }`} />
+              </button>
+            </div>
             <button
               onClick={() => base44.auth.logout()}
-              className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-all w-full mt-4"
+              className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-all w-full mt-2"
             >
               <LogOut className="w-4 h-4" />
               Sair
