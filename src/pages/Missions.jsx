@@ -6,10 +6,10 @@ import { FaRocket, FaClipboardList, FaHeart, FaStar, FaExclamationCircle, FaBull
 const CATEGORIES = [
   { key: "Performance & Resultados", Icon: FaRocket, color: "border-orange-700/50 bg-orange-900/20" },
   { key: "Disciplina & Organização", Icon: FaClipboardList, color: "border-blue-700/50 bg-blue-900/20" },
-  { key: "Cultura & Atitude Green", Icon: FaHeart, color: "border-green-700/50 bg-green-900/20" },
+  { key: "Cultura & Atitude Green", Icon: FaHeart, iconColor: "text-green-400", color: "border-green-700/50 bg-green-900/20" },
   { key: "Bônus de Pontuação", Icon: FaStar, color: "border-yellow-700/50 bg-yellow-900/20" },
-  { key: "Punições (Perda de Pontos)", Icon: FaExclamationCircle, color: "border-red-700/50 bg-red-900/20" },
-  { key: "Participação em Ações", Icon: FaBullseye, color: "border-cyan-700/50 bg-cyan-900/20" },
+  { key: "Punições (Perda de Pontos)", Icon: FaExclamationCircle, iconColor: "text-red-500", color: "border-red-700/50 bg-red-900/20" },
+  { key: "Participação em Ações", Icon: FaBullseye, iconColor: "text-white/80", color: "border-cyan-700/50 bg-cyan-900/20" },
 ];
 
 const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "TV Green", "Feira FC", "Todos"];
@@ -259,7 +259,7 @@ export default function Missions() {
                     className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-black/10 transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <cat.Icon className="w-4 h-4 text-white/80" />
+                      <cat.Icon className={`w-4 h-4 ${cat.iconColor || "text-white/80"}`} />
                       <span className="font-bold text-sm text-white">{cat.key}</span>
                       <span className="text-xs px-2 py-0.5 bg-black/20 rounded-full text-white/70">{catMissions.length}</span>
                     </div>

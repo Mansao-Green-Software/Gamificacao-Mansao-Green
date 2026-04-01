@@ -8,10 +8,10 @@ const SECTORS = ["Administrativo", "Affiliates", "Audiovisual", "Comercial", "Co
 const CATEGORIES = [
   { key: "Performance & Resultados", Icon: FaRocket, color: "text-orange-400 border-orange-700/50 bg-orange-900/20" },
   { key: "Disciplina & Organização", Icon: FaClipboardList, color: "text-blue-400 border-blue-700/50 bg-blue-900/20" },
-  { key: "Cultura & Atitude Green", Icon: FaHeart, color: "text-green-400 border-green-700/50 bg-green-900/20" },
+  { key: "Cultura & Atitude Green", Icon: FaHeart, iconColor: "text-green-400", color: "text-green-400 border-green-700/50 bg-green-900/20" },
   { key: "Bônus de Pontuação", Icon: FaStar, color: "text-yellow-400 border-yellow-700/50 bg-yellow-900/20" },
-  { key: "Punições (Perda de Pontos)", Icon: FaExclamationCircle, color: "text-red-400 border-red-700/50 bg-red-900/20" },
-  { key: "Participação em Ações", Icon: FaBullseye, color: "text-cyan-400 border-cyan-700/50 bg-cyan-900/20" },
+  { key: "Punições (Perda de Pontos)", Icon: FaExclamationCircle, iconColor: "text-red-500", color: "text-red-400 border-red-700/50 bg-red-900/20" },
+  { key: "Participação em Ações", Icon: FaBullseye, iconColor: "text-white/80", color: "text-cyan-400 border-cyan-700/50 bg-cyan-900/20" },
 ];
 
 const SECTOR_COLORS = {
@@ -232,7 +232,7 @@ export default function SistemaPontuacao() {
                       className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-black/10 transition-colors"
                     >
                       <div className="flex items-center gap-2">
-                        <cat.Icon className="w-4 h-4" />
+                        <cat.Icon className={`w-4 h-4 ${cat.iconColor || "text-white/80"}`} />
                         <span className="font-bold text-sm text-white">{cat.key}</span>
                         <span className="text-xs px-2 py-0.5 bg-black/20 rounded-full text-white/70">{items.length} {items.length === 1 ? "item" : "itens"}</span>
                       </div>
