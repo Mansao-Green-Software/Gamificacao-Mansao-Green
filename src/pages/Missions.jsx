@@ -81,8 +81,6 @@ export default function Missions() {
   const pendingCount = pendingRequests.length;
 
   const openRequestModal = (mission) => {
-    const existing = myRequestMap[mission.id];
-    if (existing) return;
     setRequestModal(mission);
     setJustification("");
     setAttachments([]);
