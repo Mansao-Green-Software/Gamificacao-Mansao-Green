@@ -62,7 +62,8 @@ export default function Missions() {
   const visibleMissions = missions.filter(m => {
     if (!m.is_active) return false;
     if (isAdmin) return true;
-    if (isManager && m.sector === "Gerência") return true;
+    if ((effectiveRole === "manager" || isAdmin) && m.sector === "Gerência") return true;
+    if (effectiveRole === "supervisor" && m.sector === "Supervisor") return true;
     return allMySectors.includes(m.sector) || m.sector === "Todos";
   });
 
@@ -101,7 +102,7 @@ export default function Missions() {
   const handleSubmitRequest = async () => {
     if (!requestModal) return;
     setSubmitting(requestModal.id);
-    const requestSector = (effectiveRole === "manager" || effectiveRole === "admin") ? "Gerência" : mySector;
+    const requestSector = (effectiveRole === "manager" || effectiveRole === "admin") ? "Gerência" : effectiveRole === "supervisor" ? "Supervisor" : mySector;
     const req = await base44.entities.MissionRequest.create({
       employee_id: profile?.user_id || profile?.id || user.id,
       employee_name: profile?.full_name || user.full_name,
