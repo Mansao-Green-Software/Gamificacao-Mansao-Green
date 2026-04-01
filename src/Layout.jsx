@@ -146,13 +146,22 @@ export default function Layout({ children, currentPageName }) {
         </nav>
 
         <div className="p-4 border-t border-gray-800 space-y-2">
-          <button
-            onClick={toggleTheme}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-all w-full"
-          >
-            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            {theme === "dark" ? "Tema Claro" : "Tema Escuro"}
-          </button>
+          <div className="flex items-center justify-between px-3 py-2.5">
+            <div className="flex items-center gap-2 text-gray-400">
+              {theme === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-500" />}
+              <span className="text-sm font-medium">{theme === "dark" ? "Escuro" : "Claro"}</span>
+            </div>
+            <button
+              onClick={toggleTheme}
+              className={`relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none ${
+                theme === "light" ? "bg-green-500" : "bg-gray-600"
+              }`}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${
+                theme === "light" ? "translate-x-5" : "translate-x-0"
+              }`} />
+            </button>
+          </div>
           <button
             onClick={() => base44.auth.logout()}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-all w-full"
