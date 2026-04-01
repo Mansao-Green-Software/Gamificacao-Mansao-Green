@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Users, Target, LayoutDashboard, LogOut, Menu, X, Crown, Star, ShoppingBag, Zap, Camera } from "lucide-react";
+import { Trophy, Users, Target, LayoutDashboard, LogOut, Menu, X, Crown, Star, ShoppingBag, Zap, Camera, Sun, Moon } from "lucide-react";
 
 const SECTORS = [
   "Social Media", "Audiovisual", "Tráfego", "Líder de Projeto",
@@ -15,7 +15,15 @@ export default function Layout({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem("app_logo_url") || "");
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem("app_theme") || "dark");
   const location = useLocation();
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("app_theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
 
   const handleLogoUpload = async (file) => {
     if (!file) return;
@@ -137,7 +145,14 @@ export default function Layout({ children, currentPageName }) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-800">
+        <div className="p-4 border-t border-gray-800 space-y-2">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-all w-full"
+          >
+            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {theme === "dark" ? "Tema Claro" : "Tema Escuro"}
+          </button>
           <button
             onClick={() => base44.auth.logout()}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-all w-full"
