@@ -6,12 +6,12 @@ import { FaRocket, FaClipboardList, FaHeart, FaStar, FaExclamationCircle, FaBull
 const SECTORS = ["Administrativo", "Affiliates", "Audiovisual", "Comercial", "Contingência", "Feira FC", "Financeiro", "Gerência", "IA/Automação", "Líder de Projeto", "Saúde e Bem Estar", "Serviços Gerais", "Social Media", "Suporte", "Supervisor", "TI", "Tipster", "Tráfego", "TV Green"];
 
 const CATEGORIES = [
-  { key: "Performance & Resultados", Icon: FaRocket, color: "text-orange-400 border-orange-700/50 bg-orange-900/20" },
-  { key: "Disciplina & Organização", Icon: FaClipboardList, color: "text-blue-400 border-blue-700/50 bg-blue-900/20" },
-  { key: "Cultura & Atitude Green", Icon: FaHeart, iconColor: "text-green-400", color: "text-green-400 border-green-700/50 bg-green-900/20" },
-  { key: "Bônus de Pontuação", Icon: FaStar, color: "text-yellow-400 border-yellow-700/50 bg-yellow-900/20" },
-  { key: "Punições (Perda de Pontos)", Icon: FaExclamationCircle, iconColor: "text-red-500", color: "text-red-400 border-red-700/50 bg-red-900/20" },
-  { key: "Participação em Ações", Icon: FaBullseye, iconColor: "text-white/80", color: "text-cyan-400 border-cyan-700/50 bg-cyan-900/20" },
+  { key: "Performance & Resultados", Icon: FaRocket, color: "text-orange-400 border-orange-700 bg-orange-700" },
+  { key: "Disciplina & Organização", Icon: FaClipboardList, color: "text-blue-400 border-blue-700 bg-blue-900" },
+  { key: "Cultura & Atitude Green", Icon: FaHeart, iconColor: "text-green-400", color: "text-green-400 border-green-700 bg-green-800" },
+  { key: "Bônus de Pontuação", Icon: FaStar, color: "text-yellow-400 border-yellow-700 bg-yellow-900" },
+  { key: "Punições (Perda de Pontos)", Icon: FaExclamationCircle, iconColor: "text-red-500", color: "text-red-400 border-red-700/50 bg-red-900" },
+  { key: "Participação em Ações", Icon: FaBullseye, iconColor: "text-white/80", color: "text-cyan-400 border-cyan-700/50 bg-cyan-900" },
 ];
 
 const SECTOR_COLORS = {
