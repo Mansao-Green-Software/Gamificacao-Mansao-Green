@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Users, BarChart2 } from "lucide-react";
+import { Trophy, Users, BarChart2, RotateCcw } from "lucide-react";
 import { FaMedal } from 'react-icons/fa';
 
 const SECTORS = ["Administrativo", "Affiliates", "Audiovisual", "Comercial", "Contingência", "Feira FC", "Financeiro", "Gerência", "IA/Automação", "Líder de Projeto", "Saúde e Bem Estar", "Serviços Gerais", "Social Media", "Suporte", "TI", "Tipster", "Tráfego", "TV Green"];
@@ -80,26 +80,36 @@ export default function RankingGeral() {
 
   const [profiles, setProfiles] = useState({});
   const [allProfiles, setAllProfiles] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadData = async (u) => {
+    const [txs, profs] = await Promise.all([
+      base44.entities.PointTransaction.list("-created_date", 1000),
+      base44.entities.EmployeeProfile.list(),
+    ]);
+    setTransactions(txs);
+    setAllProfiles(profs);
+    const profileMap = {};
+    profs.forEach(p => {
+      profileMap[p.id] = p;
+      if (p.user_id) profileMap[p.user_id] = p;
+    });
+    setProfiles(profileMap);
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadData(user);
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     const load = async () => {
       const u = await base44.auth.me();
       setUser(u);
-      const [txs, profs] = await Promise.all([
-        base44.entities.PointTransaction.list("-created_date", 1000),
-        base44.entities.EmployeeProfile.list(),
-      ]);
-      setTransactions(txs);
-      setAllProfiles(profs);
-      const profileMap = {};
-      profs.forEach(p => {
-        profileMap[p.id] = p;
-        if (p.user_id) profileMap[p.user_id] = p;
-      });
-      setProfiles(profileMap);
-
+      await loadData(u);
+      const profs = await base44.entities.EmployeeProfile.list();
       const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
-      const effectiveRole = myProfile?.role || u.role;
       setSelectedSector("geral");
       setLoading(false);
     };
@@ -207,16 +217,26 @@ export default function RankingGeral() {
           </h1>
           <p className="text-gray-400 text-sm mt-1">Performance por setor</p>
         </div>
-        <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1">
-          {PERIODS.map(p => (
-            <button
-              key={p.key}
-              onClick={() => setSelectedPeriod(p.key)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${selectedPeriod === p.key ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
-            >
-              {p.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+          >
+            <RotateCcw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+            {refreshing ? "Atualizando..." : "Atualizar"}
+          </button>
+          <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1">
+            {PERIODS.map(p => (
+              <button
+                key={p.key}
+                onClick={() => setSelectedPeriod(p.key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${selectedPeriod === p.key ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
