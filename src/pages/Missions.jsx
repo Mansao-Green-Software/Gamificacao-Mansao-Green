@@ -32,6 +32,8 @@ export default function Missions() {
   const [justification, setJustification] = useState("");
   const [attachments, setAttachments] = useState([]);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [rejectModal, setRejectModal] = useState(null);
+  const [rejectNote, setRejectNote] = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -53,6 +55,7 @@ export default function Missions() {
   }, []);
 
   const effectiveRole = profile?.role || user?.role;
+  const isGerenteViewer = user?.email === "igaming@gruporoyalty.com";
   const isAdmin = effectiveRole === "admin";
   const isManager = effectiveRole === "manager" || effectiveRole === "supervisor" || isAdmin;
   const mySector = profile?.sector || user?.sector;
@@ -140,9 +143,12 @@ export default function Missions() {
     setApproving(null);
   };
 
-  const handleReject = async (request) => {
-    await base44.entities.MissionRequest.update(request.id, { status: "rejeitado" });
-    setRequests(prev => prev.map(r => r.id === request.id ? { ...r, status: "rejeitado" } : r));
+  const handleReject = async () => {
+    if (!rejectModal) return;
+    await base44.entities.MissionRequest.update(rejectModal.id, { status: "rejeitado", notes: rejectNote });
+    setRequests(prev => prev.map(r => r.id === rejectModal.id ? { ...r, status: "rejeitado", notes: rejectNote } : r));
+    setRejectModal(null);
+    setRejectNote("");
   };
 
   const handleCreate = async () => {
@@ -205,6 +211,19 @@ export default function Missions() {
         >
           Minhas Solicitações
         </button>
+        {isGerenteViewer && (
+          <button
+            onClick={() => setTab("gerencia")}
+            className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "gerencia" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
+          >
+            Gerência
+            {requests.filter(r => r.status === "pendente" && r.sector === "Gerência").length > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                {requests.filter(r => r.status === "pendente" && r.sector === "Gerência").length}
+              </span>
+            )}
+          </button>
+        )}
         {isManager && (
           <button
             onClick={() => setTab("solicitacoes")}
@@ -322,6 +341,37 @@ export default function Missions() {
         )
       )}
 
+      {/* Reject Modal */}
+      {rejectModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md">
+            <h3 className="text-white font-bold text-lg mb-1">Rejeitar Solicitação</h3>
+            <p className="text-gray-400 text-sm mb-4">{rejectModal.mission_title} · <span className="text-red-400 font-bold">{rejectModal.employee_name}</span></p>
+            <div>
+              <label className="text-gray-400 text-xs mb-1.5 block">Motivo da rejeição (opcional)</label>
+              <textarea
+                value={rejectNote}
+                onChange={e => setRejectNote(e.target.value)}
+                placeholder="Explique o motivo da rejeição..."
+                rows={3}
+                className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-500 resize-none"
+              />
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={handleReject}
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm transition-colors"
+              >
+                Confirmar Rejeição
+              </button>
+              <button onClick={() => { setRejectModal(null); setRejectNote(""); }} className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Request Modal */}
       {requestModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -388,30 +438,118 @@ export default function Missions() {
             <p className="text-gray-500 text-sm text-center py-8">Você ainda não fez nenhuma solicitação.</p>
           ) : (
             <div className="space-y-3">
-              {myRequests.map(r => (
-                <div key={r.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl">
-                  <div>
-                    <p className="text-white font-medium text-sm">{r.mission_title}</p>
-                    <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`font-bold text-sm ${r.mission_points >= 0 ? "text-green-400" : "text-red-400"}`}>{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
-                    <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
-                      r.status === "aprovado" ? "bg-green-900/50 text-green-300" :
-                      r.status === "rejeitado" ? "bg-red-900/50 text-red-300" :
-                      "bg-amber-900/50 text-amber-300"
-                    }`}>
-                      {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "rejeitado" ? <><XCircle className="w-3 h-3" /> Rejeitado</> : <><Clock className="w-3 h-3" /> Pendente</>}
-                    </span>
-                  </div>
+            {myRequests.map(r => (
+            <div key={r.id} className="p-4 bg-gray-900/50 rounded-xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white font-medium text-sm">{r.mission_title}</p>
+                  <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
                 </div>
-              ))}
+                <div className="flex items-center gap-3">
+                  <span className={`font-bold text-sm ${r.mission_points >= 0 ? "text-green-400" : "text-red-400"}`}>{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
+                  <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
+                    r.status === "aprovado" ? "bg-green-900/50 text-green-300" :
+                    r.status === "rejeitado" ? "bg-red-900/50 text-red-300" :
+                    "bg-amber-900/50 text-amber-300"
+                  }`}>
+                    {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "rejeitado" ? <><XCircle className="w-3 h-3" /> Rejeitado</> : <><Clock className="w-3 h-3" /> Pendente</>}
+                  </span>
+                </div>
+              </div>
+              {r.status === "rejeitado" && r.notes && (
+                <p className="mt-2 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-3 py-2">Motivo: {r.notes}</p>
+              )}
+            </div>
+            ))}
             </div>
           )}
         </div>
       )}
 
       {/* TAB: Solicitações (manager) */}
+      {tab === "gerencia" && isGerenteViewer && (
+        <div className="space-y-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+            <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-amber-400" />
+              Solicitações da Gerência — Pendentes
+            </h3>
+            {(() => {
+              const gerentePending = requests.filter(r => r.status === "pendente" && r.sector === "Gerência");
+              if (gerentePending.length === 0) return <p className="text-gray-500 text-sm text-center py-8">Nenhuma solicitação pendente da Gerência.</p>;
+              return (
+                <div className="space-y-3">
+                  {gerentePending.map(r => (
+                    <div key={r.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl flex-wrap gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium text-sm">{r.mission_title}</p>
+                        <p className="text-gray-400 text-xs">{r.employee_name} · {r.sector}</p>
+                        <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
+                        {r.justification && (
+                          <p className="flex items-center gap-1.5 text-gray-300 text-xs mt-1.5 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">{r.justification}</p>
+                        )}
+                        {r.attachments?.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {r.attachments.map((url, idx) => (
+                              <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
+                                <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-green-400 font-bold text-sm">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
+                        <button
+                          onClick={() => handleApprove(r)}
+                          disabled={approving === r.id}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                        >
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          {approving === r.id ? "..." : "Aprovar"}
+                        </button>
+                        <button
+                          onClick={() => { setRejectModal(r); setRejectNote(""); }}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          Rejeitar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+          {(() => {
+            const gerenteHistory = requests.filter(r => r.status !== "pendente" && r.sector === "Gerência");
+            if (gerenteHistory.length === 0) return null;
+            return (
+              <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+                <h3 className="text-white font-bold mb-4">Histórico da Gerência</h3>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {gerenteHistory.map(r => (
+                    <div key={r.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
+                      <div>
+                        <p className="text-white text-sm">{r.mission_title}</p>
+                        <p className="text-gray-500 text-xs">{r.employee_name} · {new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
+                          {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
+                        </span>
+                        {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
       {tab === "solicitacoes" && isManager && (
         <div className="space-y-4">
           {/* Pendentes */}
@@ -455,7 +593,7 @@ export default function Missions() {
                         {approving === r.id ? "..." : "Aprovar"}
                       </button>
                       <button
-                        onClick={() => handleReject(r)}
+                        onClick={() => { setRejectModal(r); setRejectNote(""); }}
                         className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
                       >
                         <XCircle className="w-3.5 h-3.5" />
@@ -482,9 +620,12 @@ export default function Missions() {
                         <p className="text-white text-sm">{r.mission_title}</p>
                         <p className="text-gray-500 text-xs">{r.employee_name} · {new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
                       </div>
-                      <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
-                        {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
+                          {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
+                        </span>
+                        {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
+                      </div>
                     </div>
                   ))}
                 </div>
