@@ -53,6 +53,7 @@ export default function Missions() {
   }, []);
 
   const effectiveRole = profile?.role || user?.role;
+  const isGerenteViewer = user?.email === "igaming@gruporoyalty.com";
   const isAdmin = effectiveRole === "admin";
   const isManager = effectiveRole === "manager" || effectiveRole === "supervisor" || isAdmin;
   const mySector = profile?.sector || user?.sector;
@@ -205,6 +206,19 @@ export default function Missions() {
         >
           Minhas Solicitações
         </button>
+        {isGerenteViewer && (
+          <button
+            onClick={() => setTab("gerencia")}
+            className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "gerencia" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
+          >
+            Gerência
+            {requests.filter(r => r.status === "pendente" && r.sector === "Gerência").length > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                {requests.filter(r => r.status === "pendente" && r.sector === "Gerência").length}
+              </span>
+            )}
+          </button>
+        )}
         {isManager && (
           <button
             onClick={() => setTab("solicitacoes")}
@@ -412,6 +426,86 @@ export default function Missions() {
       )}
 
       {/* TAB: Solicitações (manager) */}
+      {tab === "gerencia" && isGerenteViewer && (
+        <div className="space-y-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+            <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-amber-400" />
+              Solicitações da Gerência — Pendentes
+            </h3>
+            {(() => {
+              const gerentePending = requests.filter(r => r.status === "pendente" && r.sector === "Gerência");
+              if (gerentePending.length === 0) return <p className="text-gray-500 text-sm text-center py-8">Nenhuma solicitação pendente da Gerência.</p>;
+              return (
+                <div className="space-y-3">
+                  {gerentePending.map(r => (
+                    <div key={r.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl flex-wrap gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium text-sm">{r.mission_title}</p>
+                        <p className="text-gray-400 text-xs">{r.employee_name} · {r.sector}</p>
+                        <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
+                        {r.justification && (
+                          <p className="flex items-center gap-1.5 text-gray-300 text-xs mt-1.5 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">{r.justification}</p>
+                        )}
+                        {r.attachments?.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {r.attachments.map((url, idx) => (
+                              <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
+                                <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-green-400 font-bold text-sm">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
+                        <button
+                          onClick={() => handleApprove(r)}
+                          disabled={approving === r.id}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                        >
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          {approving === r.id ? "..." : "Aprovar"}
+                        </button>
+                        <button
+                          onClick={() => handleReject(r)}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          Rejeitar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+          {(() => {
+            const gerenteHistory = requests.filter(r => r.status !== "pendente" && r.sector === "Gerência");
+            if (gerenteHistory.length === 0) return null;
+            return (
+              <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+                <h3 className="text-white font-bold mb-4">Histórico da Gerência</h3>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {gerenteHistory.map(r => (
+                    <div key={r.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
+                      <div>
+                        <p className="text-white text-sm">{r.mission_title}</p>
+                        <p className="text-gray-500 text-xs">{r.employee_name} · {new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
+                      </div>
+                      <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
+                        {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
       {tab === "solicitacoes" && isManager && (
         <div className="space-y-4">
           {/* Pendentes */}
