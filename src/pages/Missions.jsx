@@ -34,9 +34,28 @@ export default function Missions() {
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [rejectModal, setRejectModal] = useState(null);
   const [rejectNote, setRejectNote] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadData = async (showSpinner = false) => {
+    if (showSpinner) setRefreshing(true);
+    const u = user || await base44.auth.me();
+    if (!user) setUser(u);
+    const [ms, profs, reqs] = await Promise.all([
+      base44.entities.Mission.filter({ is_active: true }),
+      base44.entities.EmployeeProfile.list(),
+      base44.entities.MissionRequest.list("-created_date", 500),
+    ]);
+    setMissions(ms);
+    setRequests(reqs);
+    setAllProfiles(profs);
+    const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
+    setProfile(myProfile || null);
+    if (showSpinner) setRefreshing(false);
+    return u;
+  };
 
   useEffect(() => {
-    const load = async () => {
+    const init = async () => {
       const u = await base44.auth.me();
       setUser(u);
       const [ms, profs, reqs] = await Promise.all([
@@ -51,7 +70,7 @@ export default function Missions() {
       setProfile(myProfile || null);
       setLoading(false);
     };
-    load();
+    init();
   }, []);
 
   const effectiveRole = profile?.role || user?.role;
@@ -186,15 +205,25 @@ export default function Missions() {
           </h1>
           <p className="text-gray-400 text-sm mt-1">Solicite pontuação ao concluir uma tarefa</p>
         </div>
-        {isManager && (
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium text-sm transition-colors"
+            onClick={() => loadData(true)}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
           >
-            <Plus className="w-4 h-4" />
-            Nova Missão
+            <RotateCcw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+            {refreshing ? "Atualizando..." : "Atualizar"}
           </button>
-        )}
+          {isManager && (
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium text-sm transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Nova Missão
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Tabs */}
