@@ -347,6 +347,7 @@ export default function Missions() {
                         disabled={pending}
                         className={`flex items-center justify-center gap-1.5 flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
                           pending ? "bg-amber-900/40 text-amber-400 cursor-not-allowed" :
+                          (approved || rejected) ? "bg-gray-600 hover:bg-gray-500 text-white" :
                           "bg-green-500 hover:bg-green-400 text-black font-semibold"
                         }`}
                       >
