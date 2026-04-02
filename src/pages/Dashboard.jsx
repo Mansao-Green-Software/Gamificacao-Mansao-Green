@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Star, Target, TrendingUp, Medal, History, TrendingDown } from "lucide-react";
+import { Trophy, Star, Target, TrendingUp, Medal, History, TrendingDown, RotateCcw } from "lucide-react";
 import { FaMedal, FaHandPaper } from 'react-icons/fa';
 import QuarterlyPrizeBanner from "../components/QuarterlyPrizeBanner";
 import { Link } from "react-router-dom";
@@ -43,61 +43,62 @@ export default function Dashboard() {
   const [myRank, setMyRank] = useState(null);
   const [sectorRanking, setSectorRanking] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+
+  const loadData = async (u) => {
+    const [txs, emps] = await Promise.all([
+      base44.entities.PointTransaction.list("-created_date", 500),
+      base44.entities.EmployeeProfile.list(),
+    ]);
+    setTransactions(txs);
+    setEmployees(emps);
+    const myProfile = emps.find(p => p.user_id === u.id || p.email === u.email);
+    setProfile(myProfile || null);
+    const sector = myProfile?.sector;
+    const myProfile2 = myProfile;
+    const myTxs2 = txs.filter(t => t.employee_id === u.id || t.employee_name === u.full_name || (myProfile2 && t.employee_id === myProfile2.id));
+    const total = myTxs2.reduce((s, t) => s + (t.points || 0), 0);
+    setMyPoints(total);
+    if (sector) {
+      const sectorTxs = txs.filter(t => t.sector === sector);
+      const empPoints = {};
+      sectorTxs.forEach(t => { empPoints[t.employee_id] = (empPoints[t.employee_id] || 0) + t.points; });
+      const sorted = Object.entries(empPoints).sort((a, b) => b[1] - a[1]);
+      const rank = sorted.findIndex(([id]) => id === u.id || id === myProfile2?.id || id === u.full_name) + 1;
+      setMyRank(rank || null);
+    }
+    const excludedFromSector = new Set(
+      emps.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
+    );
+    const sectorPoints = {};
+    const sectorEmployees = {};
+    txs.filter(t => !t.description?.startsWith("Resgate:")).forEach(t => {
+      if (!t.sector) return;
+      const sectorKey = excludedFromSector.has(t.employee_id) ? "Supervisor" : t.sector;
+      sectorPoints[sectorKey] = (sectorPoints[sectorKey] || 0) + t.points;
+      if (!sectorEmployees[sectorKey]) sectorEmployees[sectorKey] = new Set();
+      sectorEmployees[sectorKey].add(t.employee_id);
+    });
+    const ranked = [...SECTORS, "Supervisor"].map(s => {
+      const total = sectorPoints[s] || 0;
+      const count = sectorEmployees[s]?.size || 1;
+      return { sector: s, points: Math.round(total / count) };
+    }).sort((a, b) => b.points - a.points);
+    setSectorRanking(ranked);
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadData(user);
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     const load = async () => {
       const u = await base44.auth.me();
       setUser(u);
-      const [txs, emps] = await Promise.all([
-        base44.entities.PointTransaction.list("-created_date", 500),
-        base44.entities.EmployeeProfile.list(),
-      ]);
-      setTransactions(txs);
-      setEmployees(emps);
-
-      // Find profile by user_id or email
-      const myProfile = emps.find(p => p.user_id === u.id || p.email === u.email);
-      setProfile(myProfile || null);
-      const sector = myProfile?.sector;
-
-      // My points - match by user id OR employee name (fallback for profiles without user_id linked)
-      const myProfile2 = emps.find(p => p.user_id === u.id || p.email === u.email);
-      const myTxs2 = txs.filter(t => t.employee_id === u.id || t.employee_name === u.full_name || (myProfile2 && t.employee_id === myProfile2.id));
-      const total = myTxs2.reduce((s, t) => s + (t.points || 0), 0);
-      setMyPoints(total);
-
-      // My rank in sector
-      if (sector) {
-        const sectorTxs = txs.filter(t => t.sector === sector);
-        const empPoints = {};
-        sectorTxs.forEach(t => {
-          empPoints[t.employee_id] = (empPoints[t.employee_id] || 0) + t.points;
-        });
-        const sorted = Object.entries(empPoints).sort((a, b) => b[1] - a[1]);
-        const rank = sorted.findIndex(([id]) => id === u.id || id === myProfile2?.id || id === u.full_name) + 1;
-        setMyRank(rank || null);
-      }
-
-      // Sector ranking por MÉDIA de pontos por colaborador
-      const excludedFromSector = new Set(
-        emps.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
-      );
-      const sectorPoints = {};
-      const sectorEmployees = {};
-      txs.filter(t => !t.description?.startsWith("Resgate:")).forEach(t => {
-        if (!t.sector) return;
-        const sectorKey = excludedFromSector.has(t.employee_id) ? "Supervisor" : t.sector;
-        sectorPoints[sectorKey] = (sectorPoints[sectorKey] || 0) + t.points;
-        if (!sectorEmployees[sectorKey]) sectorEmployees[sectorKey] = new Set();
-        sectorEmployees[sectorKey].add(t.employee_id);
-      });
-      const ranked = [...SECTORS, "Supervisor"].map(s => {
-        const total = sectorPoints[s] || 0;
-        const count = sectorEmployees[s]?.size || 1;
-        return { sector: s, points: Math.round(total / count) };
-      }).sort((a, b) => b.points - a.points);
-      setSectorRanking(ranked);
+      await loadData(u);
       setLoading(false);
     };
     load();
@@ -128,19 +129,29 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">Olá, {user?.full_name?.split(" ")[0]} <FaHandPaper className="text-yellow-300 w-5 h-5" /></h1>
           <p className="text-gray-400 text-sm mt-1">Bem-vindo ao Gamificação Mansão Green</p>
         </div>
-        <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1">
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setActiveTab("overview")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "overview" ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
           >
-            Visão Geral
+            <RotateCcw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+            {refreshing ? "Atualizando..." : "Atualizar"}
           </button>
-          <button
-            onClick={() => setActiveTab("mypoints")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "mypoints" ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
-          >
-            Meus Pontos
-          </button>
+          <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1">
+            <button
+              onClick={() => setActiveTab("overview")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "overview" ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
+            >
+              Visão Geral
+            </button>
+            <button
+              onClick={() => setActiveTab("mypoints")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "mypoints" ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
+            >
+              Meus Pontos
+            </button>
+          </div>
         </div>
       </div>
 
