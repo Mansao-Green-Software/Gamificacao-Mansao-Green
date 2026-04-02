@@ -539,7 +539,7 @@ export default function Missions() {
                         <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
                           {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
                         </span>
-                        {r.status === "rejeitado" && r.notes && <p className="text-red-400 text-xs max-w-[180px] text-right">{r.notes}</p>}
+                        {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
                       </div>
                     </div>
                   ))}
@@ -624,7 +624,7 @@ export default function Missions() {
                         <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
                           {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
                         </span>
-                        {r.status === "rejeitado" && r.notes && <p className="text-red-400 text-xs max-w-[180px] text-right">{r.notes}</p>}
+                        {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
                       </div>
                     </div>
                   ))}
