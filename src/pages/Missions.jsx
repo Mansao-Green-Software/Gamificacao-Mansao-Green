@@ -32,6 +32,8 @@ export default function Missions() {
   const [justification, setJustification] = useState("");
   const [attachments, setAttachments] = useState([]);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [rejectModal, setRejectModal] = useState(null);
+  const [rejectNote, setRejectNote] = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -141,9 +143,12 @@ export default function Missions() {
     setApproving(null);
   };
 
-  const handleReject = async (request) => {
-    await base44.entities.MissionRequest.update(request.id, { status: "rejeitado" });
-    setRequests(prev => prev.map(r => r.id === request.id ? { ...r, status: "rejeitado" } : r));
+  const handleReject = async () => {
+    if (!rejectModal) return;
+    await base44.entities.MissionRequest.update(rejectModal.id, { status: "rejeitado", notes: rejectNote });
+    setRequests(prev => prev.map(r => r.id === rejectModal.id ? { ...r, status: "rejeitado", notes: rejectNote } : r));
+    setRejectModal(null);
+    setRejectNote("");
   };
 
   const handleCreate = async () => {
@@ -336,6 +341,37 @@ export default function Missions() {
         )
       )}
 
+      {/* Reject Modal */}
+      {rejectModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md">
+            <h3 className="text-white font-bold text-lg mb-1">Rejeitar Solicitação</h3>
+            <p className="text-gray-400 text-sm mb-4">{rejectModal.mission_title} · <span className="text-red-400 font-bold">{rejectModal.employee_name}</span></p>
+            <div>
+              <label className="text-gray-400 text-xs mb-1.5 block">Motivo da rejeição (opcional)</label>
+              <textarea
+                value={rejectNote}
+                onChange={e => setRejectNote(e.target.value)}
+                placeholder="Explique o motivo da rejeição..."
+                rows={3}
+                className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-500 resize-none"
+              />
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={handleReject}
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm transition-colors"
+              >
+                Confirmar Rejeição
+              </button>
+              <button onClick={() => { setRejectModal(null); setRejectNote(""); }} className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Request Modal */}
       {requestModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -468,7 +504,7 @@ export default function Missions() {
                           {approving === r.id ? "..." : "Aprovar"}
                         </button>
                         <button
-                          onClick={() => handleReject(r)}
+                          onClick={() => { setRejectModal(r); setRejectNote(""); }}
                           className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
                         >
                           <XCircle className="w-3.5 h-3.5" />
@@ -494,9 +530,12 @@ export default function Missions() {
                         <p className="text-white text-sm">{r.mission_title}</p>
                         <p className="text-gray-500 text-xs">{r.employee_name} · {new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
                       </div>
-                      <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
-                        {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
+                          {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
+                        </span>
+                        {r.status === "rejeitado" && r.notes && <p className="text-red-400 text-xs max-w-[180px] text-right">{r.notes}</p>}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -549,7 +588,7 @@ export default function Missions() {
                         {approving === r.id ? "..." : "Aprovar"}
                       </button>
                       <button
-                        onClick={() => handleReject(r)}
+                        onClick={() => { setRejectModal(r); setRejectNote(""); }}
                         className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
                       >
                         <XCircle className="w-3.5 h-3.5" />
@@ -576,9 +615,12 @@ export default function Missions() {
                         <p className="text-white text-sm">{r.mission_title}</p>
                         <p className="text-gray-500 text-xs">{r.employee_name} · {new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
                       </div>
-                      <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
-                        {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
+                          {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
+                        </span>
+                        {r.status === "rejeitado" && r.notes && <p className="text-red-400 text-xs max-w-[180px] text-right">{r.notes}</p>}
+                      </div>
                     </div>
                   ))}
                 </div>
