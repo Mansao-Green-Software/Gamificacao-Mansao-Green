@@ -438,24 +438,29 @@ export default function Missions() {
             <p className="text-gray-500 text-sm text-center py-8">Você ainda não fez nenhuma solicitação.</p>
           ) : (
             <div className="space-y-3">
-              {myRequests.map(r => (
-                <div key={r.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl">
-                  <div>
-                    <p className="text-white font-medium text-sm">{r.mission_title}</p>
-                    <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`font-bold text-sm ${r.mission_points >= 0 ? "text-green-400" : "text-red-400"}`}>{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
-                    <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
-                      r.status === "aprovado" ? "bg-green-900/50 text-green-300" :
-                      r.status === "rejeitado" ? "bg-red-900/50 text-red-300" :
-                      "bg-amber-900/50 text-amber-300"
-                    }`}>
-                      {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "rejeitado" ? <><XCircle className="w-3 h-3" /> Rejeitado</> : <><Clock className="w-3 h-3" /> Pendente</>}
-                    </span>
-                  </div>
+            {myRequests.map(r => (
+            <div key={r.id} className="p-4 bg-gray-900/50 rounded-xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white font-medium text-sm">{r.mission_title}</p>
+                  <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
                 </div>
-              ))}
+                <div className="flex items-center gap-3">
+                  <span className={`font-bold text-sm ${r.mission_points >= 0 ? "text-green-400" : "text-red-400"}`}>{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
+                  <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
+                    r.status === "aprovado" ? "bg-green-900/50 text-green-300" :
+                    r.status === "rejeitado" ? "bg-red-900/50 text-red-300" :
+                    "bg-amber-900/50 text-amber-300"
+                  }`}>
+                    {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "rejeitado" ? <><XCircle className="w-3 h-3" /> Rejeitado</> : <><Clock className="w-3 h-3" /> Pendente</>}
+                  </span>
+                </div>
+              </div>
+              {r.status === "rejeitado" && r.notes && (
+                <p className="mt-2 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-3 py-2">Motivo: {r.notes}</p>
+              )}
+            </div>
+            ))}
             </div>
           )}
         </div>
