@@ -12,7 +12,7 @@ export default function ManagePoints() {
   const [tab, setTab] = useState("add");
   const [allTransactions, setAllTransactions] = useState([]);
   const [historyFilter, setHistoryFilter] = useState("Todos");
-  const [form, setForm] = useState({ employee_id: "", points: "", description: "", mission_id: "", frequency: "" });
+  const [form, setForm] = useState({ employee_id: "", points: "", description: "", mission_id: "" });
   const [missionSearch, setMissionSearch] = useState("");
   const [missionDropdownOpen, setMissionDropdownOpen] = useState(false);
   const missionDropdownRef = useRef(null);
@@ -87,7 +87,7 @@ export default function ManagePoints() {
   const selectedMission = missions.find(m => m.id === form.mission_id);
 
   const handleEmployeeChange = (employeeId) => {
-    setForm(p => ({ ...p, employee_id: employeeId, mission_id: "", points: "", description: "", frequency: "" }));
+    setForm(p => ({ ...p, employee_id: employeeId, mission_id: "", points: "", description: "" }));
     setMissionSearch("");
   };
 
@@ -98,7 +98,7 @@ export default function ManagePoints() {
     const emp = employees.find(e => e.user_id === form.employee_id || e.id === form.employee_id);
     const isManagerRole = emp?.role === "manager" || emp?.role === "admin";
     const transactionSector = isManagerRole ? "Gerência" : (emp?.sector || user?.sector);
-    const txData = {
+    const tx = await base44.entities.PointTransaction.create({
       employee_id: emp?.user_id || form.employee_id,
       employee_name: emp?.full_name || "Desconhecido",
       sector: transactionSector,
@@ -106,12 +106,10 @@ export default function ManagePoints() {
       type: "manual",
       description: form.description || "Pontuação manual",
       awarded_by_name: user?.full_name,
-    };
-    if (form.frequency) txData.frequency = form.frequency;
-    const tx = await base44.entities.PointTransaction.create(txData);
+    });
 
     setTransactions(prev => [tx, ...prev]);
-    setForm({ employee_id: "", points: "", description: "", mission_id: "", frequency: "" });
+    setForm({ employee_id: "", points: "", description: "" });
     setSaving(false);
     setSuccess(true);
     setTimeout(() => setSuccess(false), 2500);
@@ -228,7 +226,7 @@ export default function ManagePoints() {
                     </span>
                     <div className="flex items-center gap-1 shrink-0">
                       {selectedMission && (
-                        <span onClick={e => { e.stopPropagation(); setForm(p => ({ ...p, mission_id: "", points: "", description: "", frequency: "" })); }} className="p-0.5 hover:text-red-400 transition-colors">
+                        <span onClick={e => { e.stopPropagation(); setForm(p => ({ ...p, mission_id: "", points: "", description: "" })); }} className="p-0.5 hover:text-red-400 transition-colors">
                           <X className="w-3.5 h-3.5" />
                         </span>
                       )}
@@ -253,7 +251,7 @@ export default function ManagePoints() {
                       <div className="max-h-56 overflow-y-auto">
                         <button
                           type="button"
-                          onClick={() => { setForm(p => ({ ...p, mission_id: "", points: "", description: "", frequency: "" })); setMissionDropdownOpen(false); }}
+                          onClick={() => { setForm(p => ({ ...p, mission_id: "", points: "", description: "" })); setMissionDropdownOpen(false); }}
                           className="w-full text-left px-4 py-2.5 text-sm text-gray-400 hover:bg-gray-800 transition-colors"
                         >
                           — Pontuação manual —
@@ -265,7 +263,7 @@ export default function ManagePoints() {
                             <button
                               key={m.id}
                               type="button"
-                              onClick={() => { setForm(p => ({ ...p, mission_id: m.id, points: String(m.points), description: m.title, frequency: m.frequency || "" })); setMissionDropdownOpen(false); }}
+                              onClick={() => { setForm(p => ({ ...p, mission_id: m.id, points: String(m.points), description: m.title })); setMissionDropdownOpen(false); }}
                               className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-800 transition-colors flex items-center justify-between gap-2 ${ form.mission_id === m.id ? "bg-green-900/30 text-green-300" : "text-white" }`}
                             >
                               <div className="flex items-center gap-2 min-w-0 truncate">
@@ -305,19 +303,6 @@ export default function ManagePoints() {
                   placeholder="Ex: Superou meta do mês"
                   className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
                 />
-              </div>
-              <div>
-                <label className="text-gray-400 text-xs mb-1.5 block">Frequência da tarefa</label>
-                <select
-                  value={form.frequency}
-                  onChange={e => setForm(p => ({ ...p, frequency: e.target.value }))}
-                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
-                >
-                  <option value="">Selecionar frequência (opcional)</option>
-                  <option value="Diária">Diária</option>
-                  <option value="Semanal">Semanal</option>
-                  <option value="Mensal">Mensal</option>
-                </select>
               </div>
               <button
                 onClick={handleAddPoints}
@@ -389,13 +374,6 @@ export default function ManagePoints() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-white text-sm font-medium truncate">{tx.employee_name}</p>
                         <span className="text-xs px-2 py-0.5 bg-gray-700 text-gray-400 rounded-full shrink-0">{tx.sector}</span>
-                        {tx.frequency && (
-                          <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium shrink-0 ${
-                            tx.frequency === "Diária" ? "bg-blue-900/60 text-blue-300" :
-                            tx.frequency === "Semanal" ? "bg-purple-900/60 text-purple-300" :
-                            "bg-amber-900/60 text-amber-300"
-                          }`}>{tx.frequency}</span>
-                        )}
                       </div>
                       <p className="text-gray-500 text-xs truncate">{tx.description || tx.mission_title || "—"}</p>
                       <p className="text-gray-600 text-xs">por {tx.awarded_by_name} · {new Date(tx.created_date).toLocaleDateString("pt-BR")}</p>
@@ -433,16 +411,7 @@ export default function ManagePoints() {
               {transactions.map(tx => (
                 <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-white text-sm font-medium truncate">{tx.employee_name}</p>
-                      {tx.frequency && (
-                        <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium shrink-0 ${
-                          tx.frequency === "Diária" ? "bg-blue-900/60 text-blue-300" :
-                          tx.frequency === "Semanal" ? "bg-purple-900/60 text-purple-300" :
-                          "bg-amber-900/60 text-amber-300"
-                        }`}>{tx.frequency}</span>
-                      )}
-                    </div>
+                    <p className="text-white text-sm font-medium truncate">{tx.employee_name}</p>
                     <p className="text-gray-500 text-xs truncate">{tx.description || tx.mission_title || "—"}</p>
                     <p className="text-gray-600 text-xs">por {tx.awarded_by_name}</p>
                   </div>
