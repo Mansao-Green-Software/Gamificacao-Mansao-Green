@@ -210,8 +210,19 @@ export default function ManagePoints() {
                     onClick={() => { setMissionDropdownOpen(o => !o); setMissionSearch(""); }}
                     className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 flex items-center justify-between gap-2 text-left"
                   >
-                    <span className={selectedMission ? "text-white" : "text-gray-500"}>
-                      {selectedMission ? `${selectedMission.title} (${selectedMission.points > 0 ? "+" : ""}${selectedMission.points} pts)` : "— Pontuação manual —"}
+                    <span className={`flex items-center gap-2 min-w-0 truncate ${selectedMission ? "text-white" : "text-gray-500"}`}>
+                      {selectedMission ? (
+                        <>
+                          <span className="truncate">{selectedMission.title} ({selectedMission.points > 0 ? "+" : ""}{selectedMission.points} pts)</span>
+                          {selectedMission.frequency && (
+                            <span className={`shrink-0 text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                              selectedMission.frequency === "Diária" ? "bg-blue-900/60 text-blue-300" :
+                              selectedMission.frequency === "Semanal" ? "bg-purple-900/60 text-purple-300" :
+                              "bg-amber-900/60 text-amber-300"
+                            }`}>{selectedMission.frequency}</span>
+                          )}
+                        </>
+                      ) : "— Pontuação manual —"}
                     </span>
                     <div className="flex items-center gap-1 shrink-0">
                       {selectedMission && (
@@ -255,7 +266,16 @@ export default function ManagePoints() {
                               onClick={() => { setForm(p => ({ ...p, mission_id: m.id, points: String(m.points), description: m.title })); setMissionDropdownOpen(false); }}
                               className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-800 transition-colors flex items-center justify-between gap-2 ${ form.mission_id === m.id ? "bg-green-900/30 text-green-300" : "text-white" }`}
                             >
-                              <span className="truncate">{m.title}</span>
+                              <div className="flex items-center gap-2 min-w-0 truncate">
+                                <span className="truncate">{m.title}</span>
+                                {m.frequency && (
+                                  <span className={`shrink-0 text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                                    m.frequency === "Diária" ? "bg-blue-900/60 text-blue-300" :
+                                    m.frequency === "Semanal" ? "bg-purple-900/60 text-purple-300" :
+                                    "bg-amber-900/60 text-amber-300"
+                                  }`}>{m.frequency}</span>
+                                )}
+                              </div>
                               <span className={`shrink-0 text-xs font-bold ${m.points >= 0 ? "text-green-400" : "text-red-400"}`}>{m.points > 0 ? "+" : ""}{m.points} pts</span>
                             </button>
                           ))
