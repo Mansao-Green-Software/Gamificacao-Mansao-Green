@@ -97,13 +97,21 @@ export default function Missions() {
   const myRequestMap = {};
   myRequests.forEach(r => { if (!myRequestMap[r.mission_id]) myRequestMap[r.mission_id] = r; });
 
-  // Pending requests visible to manager
+  const myId = profile?.user_id || profile?.id || user?.id;
+
+  // Pending requests visible to manager/supervisor - respecting hierarchy
   const pendingRequests = isManager
     ? requests.filter(r => {
         if (r.status !== "pendente") return false;
+        if (r.employee_id === myId) return false; // nunca mostra própria solicitação
         if (isAdmin) return true;
+        if (effectiveRole === "supervisor") {
+          // Supervisores aprovam apenas colaboradores (não outros supervisores)
+          if (r.sector === "Supervisor") return false;
+          return allMySectors.includes(r.sector);
+        }
+        // Gerente: aprova colaboradores e supervisores do seu setor
         if (r.sector === "Supervisor") {
-          // Verifica se o supervisor pertence a um dos setores do gerente
           const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
           return empProfile && allMySectors.includes(empProfile.sector);
         }
@@ -148,8 +156,6 @@ export default function Missions() {
   };
 
   const handleApprove = async (request) => {
-    const myId = profile?.user_id || profile?.id || user?.id;
-    if (request.employee_id === myId) return;
     setApproving(request.id);
     const empProfile = allProfiles.find(p => p.user_id === request.employee_id || p.id === request.employee_id);
     const empName = empProfile?.full_name || request.employee_name;
@@ -629,27 +635,21 @@ export default function Missions() {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="text-green-400 font-bold text-sm">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
-                      {r.employee_id !== (profile?.user_id || profile?.id || user?.id) ? (
-                        <>
-                          <button
-                            onClick={() => handleApprove(r)}
-                            disabled={approving === r.id}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
-                          >
-                            <CheckCircle className="w-3.5 h-3.5" />
-                            {approving === r.id ? "..." : "Aprovar"}
-                          </button>
-                          <button
-                            onClick={() => { setRejectModal(r); setRejectNote(""); }}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
-                          >
-                            <XCircle className="w-3.5 h-3.5" />
-                            Rejeitar
-                          </button>
-                        </>
-                      ) : (
-                        <span className="text-xs text-gray-500 italic">Própria solicitação</span>
-                      )}
+                      <button
+                        onClick={() => handleApprove(r)}
+                        disabled={approving === r.id}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        {approving === r.id ? "..." : "Aprovar"}
+                      </button>
+                      <button
+                        onClick={() => { setRejectModal(r); setRejectNote(""); }}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        Rejeitar
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -659,7 +659,18 @@ export default function Missions() {
 
           {/* Histórico */}
           {(() => {
-            const history = requests.filter(r => r.status !== "pendente" && (isAdmin || allMySectors.includes(r.sector) || (r.sector === "Supervisor" && (() => { const emp = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id); return emp && allMySectors.includes(emp.sector); })())));
+            const history = requests.filter(r => {
+              if (r.status === "pendente") return false;
+              if (isAdmin) return true;
+              if (effectiveRole === "supervisor") {
+                return r.sector !== "Supervisor" && allMySectors.includes(r.sector);
+              }
+              if (r.sector === "Supervisor") {
+                const emp = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
+                return emp && allMySectors.includes(emp.sector);
+              }
+              return allMySectors.includes(r.sector);
+            });
             if (history.length === 0) return null;
             return (
               <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
