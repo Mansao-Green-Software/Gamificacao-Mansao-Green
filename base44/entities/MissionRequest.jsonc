@@ -35,6 +35,9 @@
     "justification": {
       "type": "string"
     },
+    "approved_by_name": {
+      "type": "string"
+    },
     "attachments": {
       "type": "array",
       "items": {
