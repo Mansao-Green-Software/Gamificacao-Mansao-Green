@@ -102,6 +102,7 @@ export default function Missions() {
     ? requests.filter(r => {
         if (r.status !== "pendente") return false;
         if (isAdmin) return true;
+        if (mySector === "Gerência" && r.sector === "Supervisor") return true;
         return allMySectors.includes(r.sector);
       })
     : [];
