@@ -160,7 +160,7 @@ export default function Missions() {
     const empProfile = allProfiles.find(p => p.user_id === request.employee_id || p.id === request.employee_id);
     const empName = empProfile?.full_name || request.employee_name;
     const empId = empProfile?.user_id || empProfile?.id || request.employee_id;
-    await base44.entities.MissionRequest.update(request.id, { status: "aprovado", employee_name: empName });
+    await base44.entities.MissionRequest.update(request.id, { status: "aprovado", employee_name: empName, approved_by_name: profile?.full_name || user.full_name });
     await base44.entities.PointTransaction.create({
       employee_id: empId,
       employee_name: empName,
@@ -172,7 +172,7 @@ export default function Missions() {
       description: `Missão aprovada: ${request.mission_title}`,
       awarded_by_name: profile?.full_name || user.full_name,
     });
-    setRequests(prev => prev.map(r => r.id === request.id ? { ...r, status: "aprovado" } : r));
+    setRequests(prev => prev.map(r => r.id === request.id ? { ...r, status: "aprovado", approved_by_name: profile?.full_name || user.full_name } : r));
     setApproving(null);
   };
 
@@ -498,13 +498,18 @@ export default function Missions() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`font-bold text-sm ${r.mission_points >= 0 ? "text-green-400" : "text-red-400"}`}>{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
-                  <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
-                    r.status === "aprovado" ? "bg-green-900/50 text-green-300" :
-                    r.status === "rejeitado" ? "bg-red-900/50 text-red-300" :
-                    "bg-amber-900/50 text-amber-300"
-                  }`}>
-                    {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "rejeitado" ? <><XCircle className="w-3 h-3" /> Rejeitado</> : <><Clock className="w-3 h-3" /> Pendente</>}
-                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
+                      r.status === "aprovado" ? "bg-green-900/50 text-green-300" :
+                      r.status === "rejeitado" ? "bg-red-900/50 text-red-300" :
+                      "bg-amber-900/50 text-amber-300"
+                    }`}>
+                      {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "rejeitado" ? <><XCircle className="w-3 h-3" /> Rejeitado</> : <><Clock className="w-3 h-3" /> Pendente</>}
+                    </span>
+                    {r.status === "aprovado" && r.approved_by_name && (
+                      <p className="text-xs text-gray-500">por {r.approved_by_name}</p>
+                    )}
+                  </div>
                 </div>
               </div>
               {r.status === "rejeitado" && r.notes && (
@@ -588,9 +593,12 @@ export default function Missions() {
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
-                          {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
-                        </span>
-                        {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
+                           {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
+                          </span>
+                          {r.status === "aprovado" && r.approved_by_name && (
+                            <p className="text-xs text-gray-500">por {r.approved_by_name}</p>
+                          )}
+                         {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
                       </div>
                     </div>
                   ))}
@@ -684,9 +692,12 @@ export default function Missions() {
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
-                          {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
-                        </span>
-                        {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
+                           {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
+                          </span>
+                          {r.status === "aprovado" && r.approved_by_name && (
+                            <p className="text-xs text-gray-500">por {r.approved_by_name}</p>
+                          )}
+                         {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
                       </div>
                     </div>
                   ))}
