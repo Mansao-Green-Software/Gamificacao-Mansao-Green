@@ -148,6 +148,8 @@ export default function Missions() {
   };
 
   const handleApprove = async (request) => {
+    const myId = profile?.user_id || profile?.id || user?.id;
+    if (request.employee_id === myId) return;
     setApproving(request.id);
     const empProfile = allProfiles.find(p => p.user_id === request.employee_id || p.id === request.employee_id);
     const empName = empProfile?.full_name || request.employee_name;
@@ -627,21 +629,27 @@ export default function Missions() {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="text-green-400 font-bold text-sm">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
-                      <button
-                        onClick={() => handleApprove(r)}
-                        disabled={approving === r.id}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
-                      >
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        {approving === r.id ? "..." : "Aprovar"}
-                      </button>
-                      <button
-                        onClick={() => { setRejectModal(r); setRejectNote(""); }}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
-                      >
-                        <XCircle className="w-3.5 h-3.5" />
-                        Rejeitar
-                      </button>
+                      {r.employee_id !== (profile?.user_id || profile?.id || user?.id) ? (
+                        <>
+                          <button
+                            onClick={() => handleApprove(r)}
+                            disabled={approving === r.id}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                          >
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            {approving === r.id ? "..." : "Aprovar"}
+                          </button>
+                          <button
+                            onClick={() => { setRejectModal(r); setRejectNote(""); }}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                            Rejeitar
+                          </button>
+                        </>
+                      ) : (
+                        <span className="text-xs text-gray-500 italic">Própria solicitação</span>
+                      )}
                     </div>
                   </div>
                 ))}
