@@ -48,7 +48,7 @@ export default function ManagePoints() {
       setEmployees(filtered);
       const filteredTxs = (isAdmin && !mySector) ? txs : txs.filter(t => allMySectors.includes(t.sector));
       setTransactions(filteredTxs);
-      const filteredMissions = (isAdmin && !mySector) ? ms : ms.filter(m => allMySectors.includes(m.sector) || m.sector === "Todos");
+      const filteredMissions = (isAdmin && !mySector) ? ms : ms.filter(m => allMySectors.includes(m.sector) || m.sector === "Todos" || m.sector === "Supervisor");
       setMissions(filteredMissions);
       if (isAdmin) setAllTransactions(allTxs);
       setLoading(false);
