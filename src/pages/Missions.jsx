@@ -92,7 +92,11 @@ export default function Missions() {
 
   // Requests for current employee
   const myEmployeeId = profile?.user_id || profile?.id || user?.id;
-  const myRequests = requests.filter(r => r.employee_id === myEmployeeId || r.employee_id === user?.id);
+  const myRequests = requests.filter(r =>
+    r.employee_id === user?.id ||
+    (profile?.user_id && r.employee_id === profile.user_id) ||
+    (profile?.id && r.employee_id === profile.id)
+  );
   // Build map keeping only the NEWEST request per mission (list is sorted newest-first)
   const myRequestMap = {};
   myRequests.forEach(r => { if (!myRequestMap[r.mission_id]) myRequestMap[r.mission_id] = r; });
