@@ -499,20 +499,15 @@ export default function Missions() {
                 <div className="flex items-center gap-3">
                   <span className={`font-bold text-sm ${r.mission_points >= 0 ? "text-green-400" : "text-red-400"}`}>{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
                   <div className="flex flex-col items-end gap-1">
-                    <div className="flex flex-col items-end gap-1">
-                      <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
-                        r.status === "aprovado" ? "bg-green-900/50 text-green-300" :
-                        r.status === "rejeitado" ? "bg-red-900/50 text-red-300" :
-                        "bg-amber-900/50 text-amber-300"
-                      }`}>
-                        {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "rejeitado" ? <><XCircle className="w-3 h-3" /> Rejeitado</> : <><Clock className="w-3 h-3" /> Pendente</>}
-                      </span>
-                      {r.status === "aprovado" && r.approved_by_name && (
-                        <p className="text-xs text-gray-500">aprovado por {r.approved_by_name}</p>
-                      )}
-                    </div>
+                    <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
+                      r.status === "aprovado" ? "bg-green-900/50 text-green-300" :
+                      r.status === "rejeitado" ? "bg-red-900/50 text-red-300" :
+                      "bg-amber-900/50 text-amber-300"
+                    }`}>
+                      {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "rejeitado" ? <><XCircle className="w-3 h-3" /> Rejeitado</> : <><Clock className="w-3 h-3" /> Pendente</>}
+                    </span>
                     {r.status === "aprovado" && r.approved_by_name && (
-                      <p className="text-xs text-gray-500">por {r.approved_by_name}</p>
+                      <p className="text-xs text-gray-500">aprovado por {r.approved_by_name}</p>
                     )}
                   </div>
                 </div>
