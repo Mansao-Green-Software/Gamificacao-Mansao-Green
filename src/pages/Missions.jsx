@@ -102,7 +102,7 @@ export default function Missions() {
     ? requests.filter(r => {
         if (r.status !== "pendente") return false;
         if (isAdmin) return true;
-        if (mySector === "Gerência" && r.sector === "Supervisor") return true;
+        if ((effectiveRole === "manager" || effectiveRole === "admin") && r.sector === "Supervisor") return true;
         return allMySectors.includes(r.sector);
       })
     : [];
@@ -647,7 +647,7 @@ export default function Missions() {
 
           {/* Histórico */}
           {(() => {
-            const history = requests.filter(r => r.status !== "pendente" && (isAdmin || allMySectors.includes(r.sector)));
+            const history = requests.filter(r => r.status !== "pendente" && (isAdmin || allMySectors.includes(r.sector) || ((effectiveRole === "manager") && r.sector === "Supervisor")));
             if (history.length === 0) return null;
             return (
               <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
