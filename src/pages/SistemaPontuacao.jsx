@@ -44,7 +44,7 @@ export default function SistemaPontuacao() {
   const [loading, setLoading] = useState(true);
   const [selectedSector, setSelectedSector] = useState(null);
   const [search, setSearch] = useState("");
-  const [editing, setEditing] = useState(null);
+  const [editing, setEditing] = useState(null); // { id, title, points, description, frequency }
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", points: "", sector: "", category: "Performance & Resultados" });
   const [collapsedCategories, setCollapsedCategories] = useState({});
@@ -96,12 +96,11 @@ export default function SistemaPontuacao() {
   };
 
   const handleSaveEdit = async (id) => {
-    await base44.entities.Mission.update(id, {
-      title: editing.title,
-      points: parseInt(editing.points),
-      description: editing.description,
-    });
-    setMissions(prev => prev.map(m => m.id === id ? { ...m, ...editing, points: parseInt(editing.points) } : m));
+    const updateData = { title: editing.title, points: parseInt(editing.points), description: editing.description };
+    if (editing.frequency) updateData.frequency = editing.frequency;
+    else updateData.frequency = null;
+    await base44.entities.Mission.update(id, updateData);
+    setMissions(prev => prev.map(m => m.id === id ? { ...m, ...editing, points: parseInt(editing.points), frequency: editing.frequency || null } : m));
     setEditing(null);
   };
 
@@ -257,6 +256,12 @@ export default function SistemaPontuacao() {
                                     <div className="space-y-2">
                                       <input value={editing.title} onChange={e => setEditing(p => ({ ...p, title: e.target.value }))} className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-500" />
                                       <input value={editing.description} onChange={e => setEditing(p => ({ ...p, description: e.target.value }))} placeholder="Descrição" className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-500" />
+                                      <select value={editing.frequency} onChange={e => setEditing(p => ({ ...p, frequency: e.target.value }))} className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-500">
+                                        <option value="">Frequência (opcional)</option>
+                                        <option value="Diária">Diária</option>
+                                        <option value="Semanal">Semanal</option>
+                                        <option value="Mensal">Mensal</option>
+                                      </select>
                                     </div>
                                   ) : (
                                     <div>
@@ -289,7 +294,7 @@ export default function SistemaPontuacao() {
                                       </>
                                     ) : (
                                       <>
-                                        <button onClick={() => setEditing({ id: mission.id, title: mission.title, points: mission.points, description: mission.description || "" })} className="p-1.5 text-blue-400 hover:bg-blue-900/20 rounded-lg"><Pencil className="w-4 h-4" /></button>
+                                        <button onClick={() => setEditing({ id: mission.id, title: mission.title, points: mission.points, description: mission.description || "", frequency: mission.frequency || "" })} className="p-1.5 text-blue-400 hover:bg-blue-900/20 rounded-lg"><Pencil className="w-4 h-4" /></button>
                                         <button onClick={() => handleDelete(mission.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg"><Trash2 className="w-4 h-4" /></button>
                                       </>
                                     )}
