@@ -336,10 +336,17 @@ export default function Missions() {
                     {approved && <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />}
                     {pending && <Clock className="w-5 h-5 text-amber-400 shrink-0" />}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className={`font-bold text-lg ${mission.points >= 0 ? "text-green-400" : "text-red-400"}`}>{mission.points > 0 ? "+" : ""}{mission.points}</span>
                     <span className="text-gray-500 text-xs">pontos</span>
                     <span className="ml-auto text-xs px-2 py-0.5 bg-gray-700 text-gray-300 rounded-full">{mission.sector}</span>
+                    {mission.frequency && (
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        mission.frequency === "Diária" ? "bg-blue-900/60 text-blue-300" :
+                        mission.frequency === "Semanal" ? "bg-purple-900/60 text-purple-300" :
+                        "bg-amber-900/60 text-amber-300"
+                      }`}>{mission.frequency}</span>
+                    )}
                   </div>
                   <div className="flex gap-2 mt-auto">
                       <button

@@ -44,9 +44,9 @@ export default function SistemaPontuacao() {
   const [loading, setLoading] = useState(true);
   const [selectedSector, setSelectedSector] = useState(null);
   const [search, setSearch] = useState("");
-  const [editing, setEditing] = useState(null);
+  const [editing, setEditing] = useState(null); // { id, title, points, description, frequency }
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", points: "", sector: "", category: "Performance & Resultados" });
+  const [form, setForm] = useState({ title: "", description: "", points: "", sector: "", category: "Performance & Resultados", frequency: "" });
   const [collapsedCategories, setCollapsedCategories] = useState({});
 
   useEffect(() => {
@@ -88,6 +88,7 @@ export default function SistemaPontuacao() {
     const created = await base44.entities.Mission.create({
       ...form,
       points: parseInt(form.points),
+      frequency: form.frequency || undefined,
       is_active: true,
     });
     setMissions(prev => [...prev, created]);
@@ -100,6 +101,7 @@ export default function SistemaPontuacao() {
       title: editing.title,
       points: parseInt(editing.points),
       description: editing.description,
+      frequency: editing.frequency || undefined,
     });
     setMissions(prev => prev.map(m => m.id === id ? { ...m, ...editing, points: parseInt(editing.points) } : m));
     setEditing(null);
@@ -152,6 +154,12 @@ export default function SistemaPontuacao() {
             </select>
             <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} className="col-span-2 bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500">
               {CATEGORIES.map(c => <option key={c.key} value={c.key}>{c.key}</option>)}
+            </select>
+            <select value={form.frequency} onChange={e => setForm(p => ({ ...p, frequency: e.target.value }))} className="col-span-2 bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500">
+              <option value="">Frequência (opcional)</option>
+              <option value="Diária">Diária</option>
+              <option value="Semanal">Semanal</option>
+              <option value="Mensal">Mensal</option>
             </select>
           </div>
           <div className="flex gap-3 mt-4">
@@ -257,19 +265,32 @@ export default function SistemaPontuacao() {
                                     <div className="space-y-2">
                                       <input value={editing.title} onChange={e => setEditing(p => ({ ...p, title: e.target.value }))} className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-500" />
                                       <input value={editing.description} onChange={e => setEditing(p => ({ ...p, description: e.target.value }))} placeholder="Descrição" className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-500" />
+                                      <select value={editing.frequency} onChange={e => setEditing(p => ({ ...p, frequency: e.target.value }))} className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-500">
+                                        <option value="">Frequência (opcional)</option>
+                                        <option value="Diária">Diária</option>
+                                        <option value="Semanal">Semanal</option>
+                                        <option value="Mensal">Mensal</option>
+                                      </select>
                                     </div>
                                   ) : (
                                     <div>
-                                      <div className="flex items-center gap-2 flex-wrap">
-                                        <p className="text-white text-sm font-medium">{mission.title}</p>
-                                        {mission.sector === "Todos" && (
-                                          <span className="text-xs px-1.5 py-0.5 bg-gray-700 text-gray-400 rounded">Todos</span>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                          <p className="text-white text-sm font-medium">{mission.title}</p>
+                                          {mission.sector === "Todos" && (
+                                            <span className="text-xs px-1.5 py-0.5 bg-gray-700 text-gray-400 rounded">Todos</span>
+                                          )}
+                                          {mission.frequency && (
+                                            <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                                              mission.frequency === "Diária" ? "bg-blue-900/60 text-blue-300" :
+                                              mission.frequency === "Semanal" ? "bg-purple-900/60 text-purple-300" :
+                                              "bg-amber-900/60 text-amber-300"
+                                            }`}>{mission.frequency}</span>
+                                          )}
+                                        </div>
+                                        {mission.description && (
+                                          <p className="text-gray-500 text-xs mt-0.5 truncate">{mission.description}</p>
                                         )}
                                       </div>
-                                      {mission.description && (
-                                        <p className="text-gray-500 text-xs mt-0.5 truncate">{mission.description}</p>
-                                      )}
-                                    </div>
                                   )}
                                 </div>
                                 {isEditingThis ? (
@@ -289,7 +310,7 @@ export default function SistemaPontuacao() {
                                       </>
                                     ) : (
                                       <>
-                                        <button onClick={() => setEditing({ id: mission.id, title: mission.title, points: mission.points, description: mission.description || "" })} className="p-1.5 text-blue-400 hover:bg-blue-900/20 rounded-lg"><Pencil className="w-4 h-4" /></button>
+                                        <button onClick={() => setEditing({ id: mission.id, title: mission.title, points: mission.points, description: mission.description || "", frequency: mission.frequency || "" })} className="p-1.5 text-blue-400 hover:bg-blue-900/20 rounded-lg"><Pencil className="w-4 h-4" /></button>
                                         <button onClick={() => handleDelete(mission.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg"><Trash2 className="w-4 h-4" /></button>
                                       </>
                                     )}
