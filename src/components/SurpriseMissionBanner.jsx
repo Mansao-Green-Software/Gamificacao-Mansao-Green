@@ -17,6 +17,8 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
   const [newRule, setNewRule] = useState("");
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [expandedRules, setExpandedRules] = useState({});
+  const toggleRules = (id) => setExpandedRules(p => ({ ...p, [id]: !p[id] }));
 
   useEffect(() => {
     base44.entities.SurpriseMission.filter({ is_active: true }).then((list) => {
@@ -115,16 +117,25 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                 {m.description && <p className="text-amber-200/70 text-sm mt-0.5">{m.description}</p>}
                 <p className="text-yellow-400 font-bold text-lg mt-1">{m.points > 0 ? "+" : ""}{m.points} pts</p>
                 {m.rules?.length > 0 && (
-                  <div className="mt-3 space-y-1">
-                    <p className="text-amber-300/80 text-xs font-semibold uppercase tracking-wide flex items-center gap-1"><ListChecks className="w-3.5 h-3.5" /> Regras</p>
-                    <ul className="space-y-1">
-                      {m.rules.map((rule, i) => (
-                        <li key={i} className="text-amber-100/80 text-sm flex items-start gap-2">
-                          <span className="text-yellow-400 font-bold shrink-0">{i + 1}.</span>
-                          {rule}
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="mt-2">
+                    <button
+                      onClick={() => toggleRules(m.id)}
+                      className="flex items-center gap-1.5 text-amber-300/80 text-xs font-semibold uppercase tracking-wide hover:text-amber-300 transition-colors"
+                    >
+                      <ListChecks className="w-3.5 h-3.5" />
+                      Regras ({m.rules.length})
+                      <span className="ml-0.5">{expandedRules[m.id] ? "▲" : "▼"}</span>
+                    </button>
+                    {expandedRules[m.id] && (
+                      <ul className="mt-2 space-y-1">
+                        {m.rules.map((rule, i) => (
+                          <li key={i} className="text-amber-100/80 text-sm flex items-start gap-2">
+                            <span className="text-yellow-400 font-bold shrink-0">{i + 1}.</span>
+                            {rule}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 )}
               </div>
