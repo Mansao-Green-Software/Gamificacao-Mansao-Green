@@ -166,7 +166,7 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                   )}
                   {m.expires_at && (
                     <span className="text-xs text-amber-400/70">
-                      até {new Date(m.expires_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                      até {new Date(m.expires_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
                     </span>
                   )}
                 </div>
