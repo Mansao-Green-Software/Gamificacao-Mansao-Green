@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Zap, Plus, Edit2, Check, X, Trash2, ListChecks } from "lucide-react";
+import { Zap, Plus, Edit2, Check, X, Trash2, ListChecks, Clock, CheckCircle, RotateCcw } from "lucide-react";
 
 const SECTORS = [
   "Todos", "Social Media", "Audiovisual", "Tráfego", "Líder de Projeto",
@@ -19,13 +19,58 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
   const [editingId, setEditingId] = useState(null);
   const [expandedRules, setExpandedRules] = useState({});
   const toggleRules = (id) => setExpandedRules(p => ({ ...p, [id]: !p[id] }));
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [myRequests, setMyRequests] = useState([]);
+  const [requestModal, setRequestModal] = useState(null);
+  const [justification, setJustification] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    base44.entities.SurpriseMission.filter({ is_active: true }).then((list) => {
+    const init = async () => {
+      const u = await base44.auth.me().catch(() => null);
+      setUser(u);
+      const [list, profs, reqs] = await Promise.all([
+        base44.entities.SurpriseMission.filter({ is_active: true }),
+        base44.entities.EmployeeProfile.list(),
+        u ? base44.entities.MissionRequest.list("-created_date", 200) : Promise.resolve([]),
+      ]);
       setMissions(list);
+      if (u) {
+        const p = profs.find(p => p.user_id === u.id || p.email === u.email);
+        setProfile(p || null);
+        setMyRequests(reqs.filter(r => r.employee_id === u.id || (p && r.employee_id === p.user_id)));
+      }
       setLoading(false);
-    });
+    };
+    init();
   }, []);
+
+  const getReqStatus = (missionId) => {
+    const req = myRequests.find(r => r.mission_id === missionId);
+    return req?.status || null;
+  };
+
+  const handleSubmitRequest = async () => {
+    if (!requestModal || !user) return;
+    setSubmitting(true);
+    const effectiveRole = profile?.role || user.role;
+    const sector = effectiveRole === "manager" || effectiveRole === "admin" ? "Gerência" : effectiveRole === "supervisor" ? "Supervisor" : (profile?.sector || userSector || "Todos");
+    const req = await base44.entities.MissionRequest.create({
+      employee_id: profile?.user_id || profile?.id || user.id,
+      employee_name: profile?.full_name || user.full_name,
+      sector,
+      mission_id: requestModal.id,
+      mission_title: requestModal.title,
+      mission_points: requestModal.points,
+      status: "pendente",
+      justification: justification || "",
+    });
+    setMyRequests(prev => [req, ...prev]);
+    setSubmitting(false);
+    setRequestModal(null);
+    setJustification("");
+  };
 
   const visibleMissions = missions.filter(m => {
     if (!m.is_active) return false;
@@ -116,6 +161,24 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                 <h3 className="text-white font-bold text-base leading-tight">{m.title}</h3>
                 {m.description && <p className="text-amber-200/70 text-sm mt-0.5">{m.description}</p>}
                 <p className="text-yellow-400 font-bold text-lg mt-1">{m.points > 0 ? "+" : ""}{m.points} pts</p>
+                {user && (() => {
+                  const status = getReqStatus(m.id);
+                  return (
+                    <button
+                      onClick={() => { if (status !== "pendente") { setRequestModal(m); setJustification(""); } }}
+                      disabled={status === "pendente"}
+                      className={`mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
+                        status === "pendente" ? "bg-amber-900/40 text-amber-400 cursor-not-allowed" :
+                        status === "aprovado" ? "bg-gray-700 hover:bg-gray-600 text-white" :
+                        "bg-yellow-500 hover:bg-yellow-400 text-black"
+                      }`}
+                    >
+                      {status === "pendente" ? <><Clock className="w-3.5 h-3.5" /> Aguardando aprovação</> :
+                       status === "aprovado" ? <><RotateCcw className="w-3.5 h-3.5" /> Solicitar novamente</> :
+                       <><Zap className="w-3.5 h-3.5" /> Solicitar pontuação</>}
+                    </button>
+                  );
+                })()}
                 {m.rules?.length > 0 && (
                   <div className="mt-2">
                     <button
@@ -166,6 +229,34 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
       )}
 
       {/* Form */}
+      {/* Request Modal */}
+      {requestModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md">
+            <h3 className="text-white font-bold text-lg mb-1">Solicitar Pontuação</h3>
+            <p className="text-gray-400 text-sm mb-4">{requestModal.title} · <span className="text-yellow-400 font-bold">{requestModal.points > 0 ? "+" : ""}{requestModal.points} pts</span></p>
+            <div>
+              <label className="text-gray-400 text-xs mb-1.5 block">Justificativa (opcional)</label>
+              <textarea
+                value={justification}
+                onChange={e => setJustification(e.target.value)}
+                placeholder="Descreva o que foi feito..."
+                rows={3}
+                className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-yellow-500 resize-none"
+              />
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button onClick={handleSubmitRequest} disabled={submitting} className="flex-1 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-xl text-sm transition-colors disabled:opacity-50">
+                {submitting ? "Enviando..." : "Enviar Solicitação"}
+              </button>
+              <button onClick={() => setRequestModal(null)} className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {editing && isAdmin && (
         <div className="bg-gray-800 border border-yellow-700/40 rounded-2xl p-5 space-y-3">
           <h3 className="text-white font-bold text-sm">{editingId ? "Editar Missão Surpresa" : "Nova Missão Surpresa"}</h3>
