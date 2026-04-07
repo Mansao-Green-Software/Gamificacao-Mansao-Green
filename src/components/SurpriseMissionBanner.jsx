@@ -165,14 +165,24 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                     <span className="text-xs px-2 py-0.5 bg-yellow-900/60 text-yellow-300 rounded-full">{m.sector}</span>
                   )}
                 </div>
-                {m.expires_at && (
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Clock className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-amber-300 text-xs font-semibold">
-                      Prazo: {new Date(m.expires_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  </div>
-                )}
+                {m.expires_at && (() => {
+                  const now = new Date();
+                  const exp = new Date(m.expires_at);
+                  const diffMs = exp - now;
+                  const diffMins = Math.floor(diffMs / 60000);
+                  const diffHours = Math.floor(diffMs / 3600000);
+                  const diffDays = Math.floor(diffMs / 86400000);
+                  const countdown = diffMs <= 0 ? "Expirada" : diffMins < 60 ? `Expira em ${diffMins}min` : diffHours < 24 ? `Expira em ${diffHours}h` : `Expira em ${diffDays} dia${diffDays !== 1 ? "s" : ""}`;
+                  const isUrgent = diffMs > 0 && diffHours < 24;
+                  return (
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Clock className={`w-3.5 h-3.5 ${isUrgent ? "text-red-400" : "text-amber-400"}`} />
+                      <span className={`text-xs font-semibold ${isUrgent ? "text-red-300" : "text-amber-300"}`}>
+                        {countdown} · até {exp.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                  );
+                })()}
                 <h3 className="text-white font-bold text-base leading-tight">{m.title}</h3>
                 {m.description && <p className="text-amber-200/70 text-sm mt-0.5">{m.description}</p>}
                 <p className="text-yellow-400 font-bold text-lg mt-1">{m.points > 0 ? "+" : ""}{m.points} pts</p>
