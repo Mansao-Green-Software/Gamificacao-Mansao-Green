@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Zap, Plus, Edit2, Check, X, Trash2 } from "lucide-react";
+import { Zap, Plus, Edit2, Check, X, Trash2, ListChecks } from "lucide-react";
 
 const SECTORS = [
   "Todos", "Social Media", "Audiovisual", "Tráfego", "Líder de Projeto",
@@ -13,7 +13,8 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
   const [missions, setMissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", points: "", sector: "Todos", expires_at: "" });
+  const [form, setForm] = useState({ title: "", description: "", points: "", sector: "Todos", expires_at: "", rules: [] });
+  const [newRule, setNewRule] = useState("");
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
@@ -33,7 +34,8 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
 
   const openCreate = () => {
     setEditingId(null);
-    setForm({ title: "", description: "", points: "", sector: "Todos", expires_at: "" });
+    setForm({ title: "", description: "", points: "", sector: "Todos", expires_at: "", rules: [] });
+    setNewRule("");
     setEditing(true);
   };
 
@@ -45,7 +47,9 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
       points: String(m.points || ""),
       sector: m.sector || "Todos",
       expires_at: m.expires_at ? m.expires_at.slice(0, 16) : "",
+      rules: m.rules || [],
     });
+    setNewRule("");
     setEditing(true);
   };
 
@@ -57,6 +61,7 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
       description: form.description,
       points: parseInt(form.points),
       sector: form.sector || "Todos",
+      rules: form.rules || [],
       is_active: true,
       expires_at: form.expires_at ? new Date(form.expires_at).toISOString() : null,
     };
@@ -109,6 +114,19 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                 <h3 className="text-white font-bold text-base leading-tight">{m.title}</h3>
                 {m.description && <p className="text-amber-200/70 text-sm mt-0.5">{m.description}</p>}
                 <p className="text-yellow-400 font-bold text-lg mt-1">{m.points > 0 ? "+" : ""}{m.points} pts</p>
+                {m.rules?.length > 0 && (
+                  <div className="mt-3 space-y-1">
+                    <p className="text-amber-300/80 text-xs font-semibold uppercase tracking-wide flex items-center gap-1"><ListChecks className="w-3.5 h-3.5" /> Regras</p>
+                    <ul className="space-y-1">
+                      {m.rules.map((rule, i) => (
+                        <li key={i} className="text-amber-100/80 text-sm flex items-start gap-2">
+                          <span className="text-yellow-400 font-bold shrink-0">{i + 1}.</span>
+                          {rule}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
             {isAdmin && (
@@ -175,6 +193,39 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                 onChange={e => setForm(p => ({ ...p, expires_at: e.target.value }))}
                 className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-yellow-500"
               />
+            </div>
+            <div className="col-span-2">
+              <label className="text-gray-400 text-xs mb-1.5 block">Regras (opcional)</label>
+              <div className="space-y-2">
+                {form.rules.map((rule, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <span className="text-yellow-400 text-xs font-bold shrink-0">{i + 1}.</span>
+                    <input
+                      value={rule}
+                      onChange={e => setForm(p => ({ ...p, rules: p.rules.map((r, idx) => idx === i ? e.target.value : r) }))}
+                      className="flex-1 bg-gray-900 border border-gray-600 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-yellow-500"
+                    />
+                    <button onClick={() => setForm(p => ({ ...p, rules: p.rules.filter((_, idx) => idx !== i) }))} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+                <div className="flex items-center gap-2">
+                  <input
+                    value={newRule}
+                    onChange={e => setNewRule(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter" && newRule.trim()) { setForm(p => ({ ...p, rules: [...p.rules, newRule.trim()] })); setNewRule(""); } }}
+                    placeholder="Digite uma regra e pressione Enter..."
+                    className="flex-1 bg-gray-900 border border-gray-600 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-yellow-500"
+                  />
+                  <button
+                    onClick={() => { if (newRule.trim()) { setForm(p => ({ ...p, rules: [...p.rules, newRule.trim()] })); setNewRule(""); } }}
+                    className="p-2 bg-yellow-600/30 hover:bg-yellow-600/50 text-yellow-400 rounded-xl transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
           <div className="flex gap-2">
