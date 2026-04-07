@@ -74,7 +74,10 @@ export default function ManagePoints() {
   const getEffectiveSector = (emp) => {
     if (!emp) return null;
     if (emp.role === "manager" || emp.role === "admin") return "Gerência";
-    if (emp.role === "supervisor") return "Supervisor";
+    if (emp.role === "supervisor") {
+      // Se participa do ranking do setor, usa o setor; senão usa "Supervisor"
+      return emp.include_in_sector_ranking !== false ? emp.sector : "Supervisor";
+    }
     return emp.sector;
   };
 
