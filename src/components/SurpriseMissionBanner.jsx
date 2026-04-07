@@ -159,17 +159,20 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                 <Zap className="w-5 h-5 text-yellow-400" />
               </div>
               <div>
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className="text-yellow-400 text-xs font-bold uppercase tracking-wider">⚡ Missão Surpresa</span>
                   {m.sector !== "Todos" && (
                     <span className="text-xs px-2 py-0.5 bg-yellow-900/60 text-yellow-300 rounded-full">{m.sector}</span>
                   )}
-                  {m.expires_at && (
-                    <span className="text-xs text-amber-400/70">
-                      até {new Date(m.expires_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  )}
                 </div>
+                {m.expires_at && (
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Clock className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-amber-300 text-xs font-semibold">
+                      Prazo: {new Date(m.expires_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                )}
                 <h3 className="text-white font-bold text-base leading-tight">{m.title}</h3>
                 {m.description && <p className="text-amber-200/70 text-sm mt-0.5">{m.description}</p>}
                 <p className="text-yellow-400 font-bold text-lg mt-1">{m.points > 0 ? "+" : ""}{m.points} pts</p>
