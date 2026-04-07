@@ -1,0 +1,30 @@
+{
+  "name": "SurpriseMission",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "points": {
+      "type": "number"
+    },
+    "sector": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "expires_at": {
+      "type": "string",
+      "description": "Data/hora de expira\u00e7\u00e3o (ISO string)"
+    }
+  },
+  "required": [
+    "title",
+    "points"
+  ]
+}

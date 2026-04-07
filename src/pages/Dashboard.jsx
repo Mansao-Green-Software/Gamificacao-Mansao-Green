@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Trophy, Star, Target, TrendingUp, Medal, History, TrendingDown, RotateCcw } from "lucide-react";
 import { FaMedal, FaHandPaper } from 'react-icons/fa';
 import QuarterlyPrizeBanner from "../components/QuarterlyPrizeBanner";
+import SurpriseMissionBanner from "../components/SurpriseMissionBanner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -122,6 +123,9 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Quarterly Prize Banner */}
       <QuarterlyPrizeBanner isAdmin={isAdmin} />
+
+      {/* Surprise Mission Banner */}
+      <SurpriseMissionBanner isAdmin={isAdmin} userSector={mySector} />
 
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
