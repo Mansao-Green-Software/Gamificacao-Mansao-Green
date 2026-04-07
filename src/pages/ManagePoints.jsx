@@ -12,6 +12,9 @@ export default function ManagePoints() {
   const [tab, setTab] = useState("add");
   const [allTransactions, setAllTransactions] = useState([]);
   const [historyFilter, setHistoryFilter] = useState("Todos");
+  const [historyEmployeeFilter, setHistoryEmployeeFilter] = useState("");
+  const [historyAllSectorFilter, setHistoryAllSectorFilter] = useState("Todos");
+  const [historyAllEmployeeFilter, setHistoryAllEmployeeFilter] = useState("");
   const [form, setForm] = useState({ employee_id: "", points: "", description: "", mission_id: "" });
   const [missionSearch, setMissionSearch] = useState("");
   const [missionDropdownOpen, setMissionDropdownOpen] = useState(false);
@@ -353,23 +356,40 @@ export default function ManagePoints() {
               <History className="w-4 h-4 text-green-400" />
               Histórico Geral de Pontuações
             </h3>
-            <select
-              value={historyFilter}
-              onChange={e => setHistoryFilter(e.target.value)}
-              className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-green-500"
-            >
-              <option value="Todos">Todos os setores</option>
-              {["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "TV Green", "Feira FC", "TI"].map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+            <div className="flex gap-2 flex-wrap">
+              <select
+                value={historyFilter}
+                onChange={e => { setHistoryFilter(e.target.value); setHistoryAllEmployeeFilter(""); }}
+                className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-green-500"
+              >
+                <option value="Todos">Todos os setores</option>
+                {["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "TV Green", "Feira FC", "TI"].map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+              <select
+                value={historyAllEmployeeFilter}
+                onChange={e => setHistoryAllEmployeeFilter(e.target.value)}
+                className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-green-500"
+              >
+                <option value="">Todos os colaboradores</option>
+                {[...new Map(allTransactions
+                  .filter(t => historyFilter === "Todos" || t.sector === historyFilter)
+                  .map(t => [t.employee_id, t.employee_name])).entries()].map(([id, name]) => (
+                  <option key={id} value={id}>{name}</option>
+                ))}
+              </select>
+            </div>
           </div>
           {allTransactions.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">Nenhuma pontuação registrada ainda.</p>
           ) : (() => {
-            const filtered = historyFilter === "Todos" ? allTransactions : allTransactions.filter(t => t.sector === historyFilter);
+            const filtered = allTransactions.filter(t =>
+              (historyFilter === "Todos" || t.sector === historyFilter) &&
+              (!historyAllEmployeeFilter || t.employee_id === historyAllEmployeeFilter)
+            );
             return filtered.length === 0 ? (
-              <p className="text-gray-500 text-sm text-center py-8">Nenhuma pontuação neste setor.</p>
+              <p className="text-gray-500 text-sm text-center py-8">Nenhuma pontuação encontrada.</p>
             ) : (
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {filtered.map(tx => (
@@ -386,10 +406,7 @@ export default function ManagePoints() {
                       <span className={`font-bold text-sm ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>
                         {tx.points >= 0 ? "+" : ""}{tx.points}
                       </span>
-                      <button
-                        onClick={() => handleDeleteTx(tx.id)}
-                        className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
-                      >
+                      <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -404,37 +421,53 @@ export default function ManagePoints() {
       {/* History tab */}
       {tab === "history" && (
         <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
-          <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-            <History className="w-4 h-4 text-green-400" />
-            Histórico de Pontuações
-          </h3>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <h3 className="text-white font-bold flex items-center gap-2">
+              <History className="w-4 h-4 text-green-400" />
+              Histórico de Pontuações
+            </h3>
+            <select
+              value={historyEmployeeFilter}
+              onChange={e => setHistoryEmployeeFilter(e.target.value)}
+              className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-green-500"
+            >
+              <option value="">Todos os colaboradores</option>
+              {[...new Map(transactions.map(t => [t.employee_id, t.employee_name])).entries()].map(([id, name]) => (
+                <option key={id} value={id}>{name}</option>
+              ))}
+            </select>
+          </div>
           {transactions.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">Nenhuma pontuação registrada ainda.</p>
-          ) : (
-            <div className="space-y-2 max-h-[500px] overflow-y-auto">
-              {transactions.map(tx => (
-                <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium truncate">{tx.employee_name}</p>
-                    <p className="text-gray-500 text-xs truncate">{tx.description || tx.mission_title || "—"}</p>
-                    <p className="text-gray-600 text-xs">por {tx.awarded_by_name}</p>
-                  </div>
-                  <div className="flex items-center gap-3 ml-3">
-                    <div className="text-right">
-                      <span className="text-green-400 font-bold text-sm">+{tx.points}</span>
-                      <p className="text-gray-600 text-xs capitalize">{tx.type}</p>
+          ) : (() => {
+            const filtered = transactions.filter(t =>
+              (!historyEmployeeFilter || t.employee_id === historyEmployeeFilter)
+            );
+            return filtered.length === 0 ? (
+              <p className="text-gray-500 text-sm text-center py-8">Nenhuma pontuação encontrada.</p>
+            ) : (
+              <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                {filtered.map(tx => (
+                  <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-medium truncate">{tx.employee_name}</p>
+                      <p className="text-gray-500 text-xs truncate">{tx.description || tx.mission_title || "—"}</p>
+                      <p className="text-gray-600 text-xs">por {tx.awarded_by_name}</p>
                     </div>
-                    <button
-                      onClick={() => handleDeleteTx(tx.id)}
-                      className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex items-center gap-3 ml-3">
+                      <div className="text-right">
+                        <span className="text-green-400 font-bold text-sm">{tx.points >= 0 ? "+" : ""}{tx.points}</span>
+                        <p className="text-gray-600 text-xs capitalize">{tx.type}</p>
+                      </div>
+                      <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
