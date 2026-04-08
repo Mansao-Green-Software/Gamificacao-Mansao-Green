@@ -22,6 +22,8 @@ export default function ManagePoints() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [subSectors, setSubSectors] = useState([]);
+  const [selectedSubSector, setSelectedSubSector] = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -29,12 +31,14 @@ export default function ManagePoints() {
       setUser(u);
 
       const isAdmin = u.role === "admin";
-      const [emps, txs, ms, allTxs] = await Promise.all([
+      const [emps, txs, ms, allTxs, subs] = await Promise.all([
         base44.entities.EmployeeProfile.list(),
         base44.entities.PointTransaction.list("-created_date", 200),
         base44.entities.Mission.filter({ is_active: true }),
         isAdmin ? base44.entities.PointTransaction.list("-created_date", 1000) : Promise.resolve([]),
+        base44.entities.SubSector.list(),
       ]);
+      setSubSectors(subs);
       const myProfile = emps.find(p => p.user_id === u.id || p.email === u.email);
       const mySector = myProfile?.sector;
 
@@ -84,11 +88,14 @@ export default function ManagePoints() {
     return emp.sector;
   };
 
+  const employeeEffectiveSector = getEffectiveSector(selectedEmployee);
+  const employeeSubSectors = subSectors.filter(s => s.sector === employeeEffectiveSector);
+
   const filteredMissions = missions.filter(m => {
-    const effectiveSector = getEffectiveSector(selectedEmployee);
-    const sectorMatch = !selectedEmployee || m.sector === effectiveSector || m.sector === "Todos";
+    const sectorMatch = !selectedEmployee || m.sector === employeeEffectiveSector || m.sector === "Todos";
     const searchMatch = !missionSearch || m.title.toLowerCase().includes(missionSearch.toLowerCase());
-    return sectorMatch && searchMatch;
+    const subSectorMatch = !selectedSubSector || m.sub_sector === selectedSubSector;
+    return sectorMatch && searchMatch && subSectorMatch;
   });
 
   const selectedMission = missions.find(m => m.id === form.mission_id);
@@ -96,6 +103,7 @@ export default function ManagePoints() {
   const handleEmployeeChange = (employeeId) => {
     setForm(p => ({ ...p, employee_id: employeeId, mission_id: "", points: "", description: "" }));
     setMissionSearch("");
+    setSelectedSubSector("");
   };
 
   const handleAddPoints = async () => {
@@ -209,6 +217,22 @@ export default function ManagePoints() {
                   ))}
                 </select>
               </div>
+              {/* Sub-sector filter - shown only if employee's sector has sub-sectors */}
+              {selectedEmployee && employeeSubSectors.length > 0 && (
+                <div>
+                  <label className="text-gray-400 text-xs mb-1.5 block">Sub-setor</label>
+                  <select
+                    value={selectedSubSector}
+                    onChange={e => { setSelectedSubSector(e.target.value); setForm(p => ({ ...p, mission_id: "", points: "", description: "" })); setMissionSearch(""); }}
+                    className="w-full bg-gray-900 border border-blue-700/50 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="">Todos os sub-setores</option>
+                    {employeeSubSectors.map(s => (
+                      <option key={s.id} value={s.name}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="text-gray-400 text-xs mb-1.5 block">Selecionar Tarefa (opcional)</label>
                 <div className="relative" ref={missionDropdownRef}>
