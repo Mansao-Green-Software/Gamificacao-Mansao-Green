@@ -38,6 +38,7 @@ export default function Missions() {
   const [refreshing, setRefreshing] = useState(false);
   const [subSectors, setSubSectors] = useState([]);
   const [selectedSubSector, setSelectedSubSector] = useState("");
+  const [selectedSectorFilter, setSelectedSectorFilter] = useState("");
 
   const loadData = async (showSpinner = false) => {
     if (showSpinner) setRefreshing(true);
@@ -101,6 +102,11 @@ export default function Missions() {
     if (effectiveRole === "supervisor" && m.sector === "Supervisor") return true;
     return allMySectors.includes(m.sector) || m.sector === "Todos";
   });
+
+  // Sectors present in visible missions (for filter)
+  const availableSectorFilters = isAdmin || isManager
+    ? [...new Set(visibleMissions.map(m => m.sector))].sort()
+    : [];
 
   // Requests for current employee
   const myEmployeeId = profile?.user_id || profile?.id || user?.id;
@@ -323,6 +329,27 @@ export default function Missions() {
       {/* TAB: Missões */}
       {tab === "missoes" && (
         <div className="space-y-4">
+          {/* Sector filter (admin/manager only) */}
+          {availableSectorFilters.length > 1 && (
+            <div className="flex gap-2 flex-wrap items-center">
+              <span className="text-gray-500 text-xs font-medium">Setor:</span>
+              <button
+                onClick={() => { setSelectedSectorFilter(""); setSelectedSubSector(""); }}
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${!selectedSectorFilter ? "bg-green-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
+              >
+                Todos
+              </button>
+              {availableSectorFilters.map(s => (
+                <button
+                  key={s}
+                  onClick={() => { setSelectedSectorFilter(selectedSectorFilter === s ? "" : s); setSelectedSubSector(""); }}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${selectedSectorFilter === s ? "bg-green-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
           {/* Sub-sector filter */}
           {visibleSectorSubSectors.length > 0 && (
             <div className="flex gap-2 flex-wrap items-center">
@@ -345,7 +372,9 @@ export default function Missions() {
             </div>
           )}
           {(() => {
-            const filtered = selectedSubSector ? visibleMissions.filter(m => m.sub_sector === selectedSubSector) : visibleMissions;
+            let filtered = visibleMissions;
+            if (selectedSectorFilter) filtered = filtered.filter(m => m.sector === selectedSectorFilter);
+            if (selectedSubSector) filtered = filtered.filter(m => m.sub_sector === selectedSubSector);
             return filtered.length === 0 ? (
             <div className="text-center py-16 text-gray-500">
               <Target className="w-12 h-12 mx-auto mb-3 opacity-30" />
