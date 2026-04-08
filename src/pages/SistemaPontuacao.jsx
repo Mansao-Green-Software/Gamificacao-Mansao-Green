@@ -292,25 +292,20 @@ export default function SistemaPontuacao() {
             />
           </div>
 
-          {/* Sub-sector filter pills */}
+          {/* Sub-sector filter dropdown */}
           {currentSubSectors.length > 0 && (
-            <div className="flex gap-2 flex-wrap items-center">
-              <span className="text-gray-500 text-xs font-medium">Sub-setor:</span>
-              <button
-                onClick={() => setSelectedSubSector("")}
-                className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${!selectedSubSector ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 text-xs font-medium shrink-0">Sub-setor:</span>
+              <select
+                value={selectedSubSector}
+                onChange={e => setSelectedSubSector(e.target.value)}
+                className="bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
               >
-                Todos
-              </button>
-              {currentSubSectors.map(s => (
-                <button
-                  key={s.id}
-                  onClick={() => setSelectedSubSector(selectedSubSector === s.name ? "" : s.name)}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${selectedSubSector === s.name ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
-                >
-                  {s.name}
-                </button>
-              ))}
+                <option value="">Todos os sub-setores</option>
+                {currentSubSectors.map(s => (
+                  <option key={s.id} value={s.name}>{s.name}</option>
+                ))}
+              </select>
             </div>
           )}
 

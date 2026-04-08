@@ -345,22 +345,7 @@ export default function Missions() {
               </select>
             </div>
           )}
-          {/* Sub-sector filter */}
-          {visibleSectorSubSectors.length > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-gray-500 text-xs font-medium shrink-0">Sub-setor:</span>
-              <select
-                value={selectedSubSector}
-                onChange={e => setSelectedSubSector(e.target.value)}
-                className="bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
-              >
-                <option value="">Todos os sub-setores</option>
-                {visibleSectorSubSectors.map(s => (
-                  <option key={s.id} value={s.name}>{s.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
+
           {(() => {
             let filtered = visibleMissions;
             if (selectedSectorFilter) filtered = filtered.filter(m => m.sector === selectedSectorFilter);
