@@ -331,23 +331,18 @@ export default function Missions() {
         <div className="space-y-4">
           {/* Sector filter (admin/manager only) */}
           {availableSectorFilters.length > 1 && (
-            <div className="flex gap-2 flex-wrap items-center">
-              <span className="text-gray-500 text-xs font-medium">Setor:</span>
-              <button
-                onClick={() => { setSelectedSectorFilter(""); setSelectedSubSector(""); }}
-                className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${!selectedSectorFilter ? "bg-green-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 text-xs font-medium shrink-0">Setor:</span>
+              <select
+                value={selectedSectorFilter}
+                onChange={e => { setSelectedSectorFilter(e.target.value); setSelectedSubSector(""); }}
+                className="bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-green-500"
               >
-                Todos
-              </button>
-              {availableSectorFilters.map(s => (
-                <button
-                  key={s}
-                  onClick={() => { setSelectedSectorFilter(selectedSectorFilter === s ? "" : s); setSelectedSubSector(""); }}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${selectedSectorFilter === s ? "bg-green-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
-                >
-                  {s}
-                </button>
-              ))}
+                <option value="">Todos os setores</option>
+                {availableSectorFilters.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
             </div>
           )}
           {/* Sub-sector filter */}
