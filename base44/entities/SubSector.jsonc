@@ -1,0 +1,16 @@
+{
+  "name": "SubSector",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "sector": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "sector"
+  ]
+}

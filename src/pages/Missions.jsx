@@ -36,19 +36,23 @@ export default function Missions() {
   const [rejectModal, setRejectModal] = useState(null);
   const [rejectNote, setRejectNote] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [subSectors, setSubSectors] = useState([]);
+  const [selectedSubSector, setSelectedSubSector] = useState("");
 
   const loadData = async (showSpinner = false) => {
     if (showSpinner) setRefreshing(true);
     const u = user || await base44.auth.me();
     if (!user) setUser(u);
-    const [ms, profs, reqs] = await Promise.all([
+    const [ms, profs, reqs, subs] = await Promise.all([
       base44.entities.Mission.filter({ is_active: true }),
       base44.entities.EmployeeProfile.list(),
       base44.entities.MissionRequest.list("-created_date", 500),
+      base44.entities.SubSector.list(),
     ]);
     setMissions(ms);
     setRequests(reqs);
     setAllProfiles(profs);
+    setSubSectors(subs);
     const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
     setProfile(myProfile || null);
     if (showSpinner) setRefreshing(false);
@@ -59,14 +63,16 @@ export default function Missions() {
     const init = async () => {
       const u = await base44.auth.me();
       setUser(u);
-      const [ms, profs, reqs] = await Promise.all([
+      const [ms, profs, reqs, subs] = await Promise.all([
         base44.entities.Mission.filter({ is_active: true }),
         base44.entities.EmployeeProfile.list(),
         base44.entities.MissionRequest.list("-created_date", 500),
+        base44.entities.SubSector.list(),
       ]);
       setMissions(ms);
       setRequests(reqs);
       setAllProfiles(profs);
+      setSubSectors(subs);
       const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
       setProfile(myProfile || null);
       setLoading(false);
@@ -81,6 +87,12 @@ export default function Missions() {
   const mySector = profile?.sector || user?.sector;
   const myExtraSectors = profile?.extra_sectors || [];
   const allMySectors = mySector ? [mySector, ...myExtraSectors] : [];
+
+  const mySectorSubSectors = subSectors.filter(s => allMySectors.includes(s.sector) || (isAdmin && s.sector));
+  const visibleSectorSubSectors = subSectors.filter(s => {
+    if (isAdmin) return true;
+    return allMySectors.includes(s.sector);
+  });
 
   const visibleMissions = missions.filter(m => {
     if (!m.is_active) return false;
@@ -310,15 +322,39 @@ export default function Missions() {
 
       {/* TAB: Missões */}
       {tab === "missoes" && (
-        visibleMissions.length === 0 ? (
-          <div className="text-center py-16 text-gray-500">
-            <Target className="w-12 h-12 mx-auto mb-3 opacity-30" />
-            <p>Nenhuma missão disponível para o seu setor ainda.</p>
-          </div>
-        ) : (
+        <div className="space-y-4">
+          {/* Sub-sector filter */}
+          {visibleSectorSubSectors.length > 0 && (
+            <div className="flex gap-2 flex-wrap items-center">
+              <span className="text-gray-500 text-xs font-medium">Sub-setor:</span>
+              <button
+                onClick={() => setSelectedSubSector("")}
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${!selectedSubSector ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
+              >
+                Todos
+              </button>
+              {visibleSectorSubSectors.map(s => (
+                <button
+                  key={s.id}
+                  onClick={() => setSelectedSubSector(selectedSubSector === s.name ? "" : s.name)}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${selectedSubSector === s.name ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
+                >
+                  {s.name}
+                </button>
+              ))}
+            </div>
+          )}
+          {(() => {
+            const filtered = selectedSubSector ? visibleMissions.filter(m => m.sub_sector === selectedSubSector) : visibleMissions;
+            return filtered.length === 0 ? (
+            <div className="text-center py-16 text-gray-500">
+              <Target className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p>Nenhuma missão disponível para o seu setor ainda.</p>
+            </div>
+          ) : (
           <div className="space-y-4">
             {CATEGORIES.map(cat => {
-              const catMissions = visibleMissions.filter(m => (m.category || "Performance & Resultados") === cat.key);
+              const catMissions = filtered.filter(m => (m.category || "Performance & Resultados") === cat.key);
               if (catMissions.length === 0) return null;
               const collapsed = collapsedCategories[cat.key];
               return (
@@ -342,6 +378,7 @@ export default function Missions() {
               const approved = req?.status === "aprovado";
               const pending = req?.status === "pendente";
               const rejected = req?.status === "rejeitado";
+              const hasSub = !!mission.sub_sector;
 
               return (
                 <div key={mission.id} className={`bg-gray-900/60 border rounded-2xl p-5 flex flex-col gap-3 ${approved ? "border-green-700/50" : "border-gray-700"}`}>
@@ -354,9 +391,10 @@ export default function Missions() {
                     {pending && <Clock className="w-5 h-5 text-amber-400 shrink-0" />}
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`font-bold text-lg ${mission.points >= 0 ? "text-green-400" : "text-red-400"}`}>{mission.points > 0 ? "+" : ""}{mission.points}</span>
-                    <span className="text-gray-500 text-xs">pontos</span>
-                    <span className="ml-auto text-xs px-2 py-0.5 bg-gray-700 text-gray-300 rounded-full">{mission.sector}</span>
+                                    <span className={`font-bold text-lg ${mission.points >= 0 ? "text-green-400" : "text-red-400"}`}>{mission.points > 0 ? "+" : ""}{mission.points}</span>
+                                    <span className="text-gray-500 text-xs">pontos</span>
+                                    <span className="ml-auto text-xs px-2 py-0.5 bg-gray-700 text-gray-300 rounded-full">{mission.sector}</span>
+                                    {hasSub && <span className="text-xs px-2 py-0.5 bg-blue-900/60 text-blue-300 rounded-full font-medium">{mission.sub_sector}</span>}
                     {mission.frequency && (
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                         mission.frequency === "Diária" ? "bg-blue-900/60 text-blue-300" :
@@ -393,7 +431,9 @@ export default function Missions() {
               );
             })}
           </div>
-        )
+          );
+          })()}
+        </div>
       )}
 
       {/* Reject Modal */}
