@@ -57,8 +57,10 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
   }, []);
 
   const getReqStatus = (missionId) => {
-    const req = myRequests.find(r => r.mission_id === missionId);
-    return req?.status || null;
+    const missionRequests = myRequests.filter(r => r.mission_id === missionId);
+    if (missionRequests.some(r => r.status === "pendente")) return "pendente";
+    if (missionRequests.some(r => r.status === "aprovado")) return "aprovado";
+    return missionRequests[0]?.status || null;
   };
 
   const handleSubmitRequest = async () => {
@@ -87,6 +89,7 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
   const visibleMissions = missions.filter(m => {
     if (!m.is_active) return false;
     if (m.expires_at && new Date(m.expires_at) < new Date()) return false;
+    if (!isAdmin && getReqStatus(m.id) === "aprovado") return false;
     if (m.sector === "Todos") return true;
     return m.sector === userSector;
   });
