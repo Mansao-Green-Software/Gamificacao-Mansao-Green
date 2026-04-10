@@ -28,6 +28,18 @@
     "expires_at": {
       "type": "string",
       "description": "Data/hora de expira\u00e7\u00e3o (ISO string)"
+    },
+    "background_color": {
+      "type": "string",
+      "description": "Cor de fundo do card em formato hexadecimal (#RRGGBB)"
+    },
+    "text_color": {
+      "type": "string",
+      "description": "Cor principal de texto do card em formato hexadecimal (#RRGGBB)"
+    },
+    "icon": {
+      "type": "string",
+      "description": "\u00cdcone usado no card da miss\u00e3o"
     }
   },
   "required": [

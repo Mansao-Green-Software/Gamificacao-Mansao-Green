@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Zap, Plus, Edit2, Check, X, Trash2, ListChecks, Clock, CheckCircle, RotateCcw, Camera } from "lucide-react";
+import { Zap, Plus, Edit2, Check, X, Trash2, ListChecks, Clock, RotateCcw, Camera, Trophy, Star, Gift, Flame, Target } from "lucide-react";
 
 const SECTORS = [
   "Todos", "Social Media", "Audiovisual", "Tráfego", "Líder de Projeto",
@@ -9,11 +9,39 @@ const SECTORS = [
   "TV Green", "Feira FC", "TI", "IA/Automação", "Supervisor"
 ];
 
+const ICON_OPTIONS = [
+  { value: "zap", label: "Raio", Icon: Zap },
+  { value: "trophy", label: "Troféu", Icon: Trophy },
+  { value: "star", label: "Estrela", Icon: Star },
+  { value: "gift", label: "Presente", Icon: Gift },
+  { value: "flame", label: "Fogo", Icon: Flame },
+  { value: "target", label: "Alvo", Icon: Target },
+];
+
+const DEFAULT_BG_COLOR = "#422006";
+const DEFAULT_TEXT_COLOR = "#facc15";
+
+const sanitizeHexColor = (value, fallback) => {
+  if (typeof value !== "string") return fallback;
+  const cleaned = value.trim();
+  return /^#[0-9A-Fa-f]{6}$/.test(cleaned) ? cleaned : fallback;
+};
+
 export default function SurpriseMissionBanner({ isAdmin, userSector }) {
   const [missions, setMissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", points: "", sector: "Todos", expires_at: "", rules: [] });
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    points: "",
+    sector: "Todos",
+    expires_at: "",
+    rules: [],
+    background_color: DEFAULT_BG_COLOR,
+    text_color: DEFAULT_TEXT_COLOR,
+    icon: "zap",
+  });
   const [newRule, setNewRule] = useState("");
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -55,7 +83,6 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
     };
     init();
   }, []);
-
   const getReqStatus = (missionId) => {
     const missionRequests = myRequests.filter(r => r.mission_id === missionId);
     if (missionRequests.some(r => r.status === "pendente")) return "pendente";
@@ -96,7 +123,17 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
 
   const openCreate = () => {
     setEditingId(null);
-    setForm({ title: "", description: "", points: "", sector: "Todos", expires_at: "", rules: [] });
+    setForm({
+      title: "",
+      description: "",
+      points: "",
+      sector: "Todos",
+      expires_at: "",
+      rules: [],
+      background_color: DEFAULT_BG_COLOR,
+      text_color: DEFAULT_TEXT_COLOR,
+      icon: "zap",
+    });
     setNewRule("");
     setEditing(true);
   };
@@ -110,6 +147,9 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
       sector: m.sector || "Todos",
       expires_at: m.expires_at ? m.expires_at.slice(0, 16) : "",
       rules: m.rules || [],
+      background_color: sanitizeHexColor(m.background_color, DEFAULT_BG_COLOR),
+      text_color: sanitizeHexColor(m.text_color, DEFAULT_TEXT_COLOR),
+      icon: ICON_OPTIONS.some(opt => opt.value === m.icon) ? m.icon : "zap",
     });
     setNewRule("");
     setEditing(true);
@@ -126,6 +166,9 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
       rules: form.rules || [],
       is_active: true,
       expires_at: form.expires_at ? new Date(form.expires_at).toISOString() : null,
+      background_color: sanitizeHexColor(form.background_color, DEFAULT_BG_COLOR),
+      text_color: sanitizeHexColor(form.text_color, DEFAULT_TEXT_COLOR),
+      icon: ICON_OPTIONS.some(opt => opt.value === form.icon) ? form.icon : "zap",
     };
     if (editingId) {
       const updated = await base44.entities.SurpriseMission.update(editingId, data);
@@ -151,21 +194,28 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
     <div className="space-y-3">
       {/* Visible missions */}
       {visibleMissions.map(m => (
+        (() => {
+          const cardBgColor = sanitizeHexColor(m.background_color, DEFAULT_BG_COLOR);
+          const textColor = sanitizeHexColor(m.text_color, DEFAULT_TEXT_COLOR);
+          const selectedIcon = ICON_OPTIONS.find(opt => opt.value === m.icon)?.Icon || Zap;
+          const MissionIcon = selectedIcon;
+          return (
         <div
           key={m.id}
-          className="relative overflow-hidden rounded-2xl border border-yellow-600/40 bg-gradient-to-r from-yellow-950/60 via-amber-900/40 to-yellow-950/60"
+          className="relative overflow-hidden rounded-2xl border border-yellow-600/30"
+          style={{ backgroundColor: cardBgColor }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-black/30" />
           <div className="relative p-5 flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-yellow-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                <Zap className="w-5 h-5 text-yellow-400" />
+              <div className="w-10 h-10 rounded-xl bg-black/20 flex items-center justify-center shrink-0 mt-0.5">
+                <MissionIcon className="w-5 h-5" style={{ color: textColor }} />
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className="text-yellow-400 text-xs font-bold uppercase tracking-wider">⚡ Missão Surpresa</span>
+                  <span className="text-xs font-bold uppercase tracking-wider" style={{ color: textColor }}>⚡ Missão Surpresa</span>
                   {m.sector !== "Todos" && (
-                    <span className="text-xs px-2 py-0.5 bg-yellow-900/60 text-yellow-300 rounded-full">{m.sector}</span>
+                    <span className="text-xs px-2 py-0.5 bg-black/30 rounded-full" style={{ color: textColor }}>{m.sector}</span>
                   )}
                 </div>
                 {m.expires_at && (() => {
@@ -186,9 +236,9 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                     </div>
                   );
                 })()}
-                <h3 className="text-white font-bold text-base leading-tight">{m.title}</h3>
-                {m.description && <p className="text-amber-200/70 text-sm mt-0.5">{m.description}</p>}
-                <p className="text-yellow-400 font-bold text-lg mt-1">{m.points > 0 ? "+" : ""}{m.points} pts</p>
+                <h3 className="font-bold text-base leading-tight" style={{ color: textColor }}>{m.title}</h3>
+                {m.description && <p className="text-sm mt-0.5" style={{ color: textColor }}>{m.description}</p>}
+                <p className="font-bold text-lg mt-1" style={{ color: textColor }}>{m.points > 0 ? "+" : ""}{m.points} pts</p>
                 {user && (() => {
                   const status = getReqStatus(m.id);
                   return (
@@ -201,7 +251,7 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                         "bg-yellow-500 hover:bg-yellow-400 text-black"
                       }`}
                     >
-                      {status === "pendente" ? <><Clock className="w-3.5 h-3.5" /> Aguardando aprovação</> :
+                      {status === "pendente" ? <><Clock className="w-3.5 h-3.5" /> Pendente</> :
                        status === "aprovado" ? <><RotateCcw className="w-3.5 h-3.5" /> Solicitar novamente</> :
                        <><Zap className="w-3.5 h-3.5" /> Solicitar pontuação</>}
                     </button>
@@ -211,7 +261,8 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                   <div className="mt-2">
                     <button
                       onClick={() => toggleRules(m.id)}
-                      className="flex items-center gap-1.5 text-amber-300/80 text-xs font-semibold uppercase tracking-wide hover:text-amber-300 transition-colors"
+                      className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide transition-colors"
+                      style={{ color: textColor }}
                     >
                       <ListChecks className="w-3.5 h-3.5" />
                       Regras ({m.rules.length})
@@ -220,8 +271,8 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                     {expandedRules[m.id] && (
                       <ul className="mt-2 space-y-1">
                         {m.rules.map((rule, i) => (
-                          <li key={i} className="text-amber-100/80 text-sm flex items-start gap-2">
-                            <span className="text-yellow-400 font-bold shrink-0">{i + 1}.</span>
+                          <li key={i} className="text-sm flex items-start gap-2" style={{ color: textColor }}>
+                            <span className="font-bold shrink-0" style={{ color: textColor }}>{i + 1}.</span>
                             {rule}
                           </li>
                         ))}
@@ -243,6 +294,8 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
             )}
           </div>
         </div>
+          );
+        })()
       ))}
 
       {/* Admin: add button (only when no form open) */}
@@ -346,6 +399,36 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                 onChange={e => setForm(p => ({ ...p, expires_at: e.target.value }))}
                 className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-yellow-500"
               />
+            </div>
+            <div>
+              <label className="text-gray-400 text-xs mb-1.5 block">Cor de fundo</label>
+              <input
+                type="color"
+                value={form.background_color}
+                onChange={e => setForm(p => ({ ...p, background_color: e.target.value }))}
+                className="w-full h-11 bg-gray-900 border border-gray-600 rounded-xl px-2 py-1 cursor-pointer"
+              />
+            </div>
+            <div>
+              <label className="text-gray-400 text-xs mb-1.5 block">Cor da fonte</label>
+              <input
+                type="color"
+                value={form.text_color}
+                onChange={e => setForm(p => ({ ...p, text_color: e.target.value }))}
+                className="w-full h-11 bg-gray-900 border border-gray-600 rounded-xl px-2 py-1 cursor-pointer"
+              />
+            </div>
+            <div className="col-span-2">
+              <label className="text-gray-400 text-xs mb-1.5 block">Ícone do card</label>
+              <select
+                value={form.icon}
+                onChange={e => setForm(p => ({ ...p, icon: e.target.value }))}
+                className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-yellow-500"
+              >
+                {ICON_OPTIONS.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
             </div>
             <div className="col-span-2">
               <label className="text-gray-400 text-xs mb-1.5 block">Regras (opcional)</label>
