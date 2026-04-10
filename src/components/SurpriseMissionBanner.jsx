@@ -24,7 +24,64 @@ const DEFAULT_TEXT_COLOR = "#facc15";
 const sanitizeHexColor = (value, fallback) => {
   if (typeof value !== "string") return fallback;
   const cleaned = value.trim();
-  return /^#[0-9A-Fa-f]{6}$/.test(cleaned) ? cleaned : fallback;
+  return /^#[0-9A-Fa-f]{3,6}$/.test(cleaned) ? cleaned : fallback;
+};
+
+const hexToRgb = (hex) => {
+  let h = hex.replace(/^#/, "");
+  if (h.length === 3) {
+    h = h.split("").map(c => c + c).join("");
+  }
+  if (h.length !== 6) return null;
+  const r = Number.parseInt(h.slice(0, 2), 16);
+  const g = Number.parseInt(h.slice(2, 4), 16);
+  const b = Number.parseInt(h.slice(4, 6), 16);
+  if ([r, g, b].some(n => Number.isNaN(n))) return null;
+  return { r, g, b };
+};
+
+const mixHex = (hex, mixFn) => {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return hex;
+  const { r, g, b } = rgb;
+  const out = mixFn(r, g, b);
+  return `#${[out.r, out.g, out.b].map(x => Math.max(0, Math.min(255, Math.round(x))).toString(16).padStart(2, "0")).join("")}`;
+};
+
+/** Gradiente horizontal: extremidades escuras e centro na cor base */
+const cardBackgroundGradient = (baseHex) => {
+  const base = sanitizeHexColor(baseHex, DEFAULT_BG_COLOR);
+  const dark = mixHex(base, (r, g, b) => ({
+    r: r * 0.55,
+    g: g * 0.55,
+    b: b * 0.55,
+  }));
+  return `linear-gradient(to right, ${dark} -50%, ${base} 55%, ${dark} 100%)`;
+};
+
+const STYLE_TAG_REGEX = /\[STYLE:(.*?)\]/;
+
+const encodeStyleInDescription = (description, style) => {
+  const baseDesc = (description || "").replace(STYLE_TAG_REGEX, "").trim();
+  return `${baseDesc} [STYLE:${JSON.stringify(style)}]`.trim();
+};
+
+const decodeStyleFromMission = (mission) => {
+  const styleInDesc = mission.description?.match(STYLE_TAG_REGEX);
+  let decoded = {};
+  if (styleInDesc?.[1]) {
+    try {
+      decoded = JSON.parse(styleInDesc[1]);
+    } catch (e) {
+      console.warn("Falha ao decodificar estilo da missão", mission.id);
+    }
+  }
+  return {
+    background_color: mission.background_color || decoded.bg || DEFAULT_BG_COLOR,
+    text_color: mission.text_color || decoded.text || DEFAULT_TEXT_COLOR,
+    icon: mission.icon || decoded.icon || "zap",
+    description: (mission.description || "").replace(STYLE_TAG_REGEX, "").trim()
+  };
 };
 
 export default function SurpriseMissionBanner({ isAdmin, userSector }) {
@@ -55,6 +112,7 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
   const [submitting, setSubmitting] = useState(false);
   const [attachments, setAttachments] = useState([]);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
   const handleAttachmentUpload = async (file) => {
     if (!file) return;
@@ -73,7 +131,11 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
         base44.entities.EmployeeProfile.list(),
         u ? base44.entities.MissionRequest.list("-created_date", 200) : Promise.resolve([]),
       ]);
-      setMissions(list);
+      const enrichedMissions = list.map(m => {
+        const decoded = decodeStyleFromMission(m);
+        return { ...m, ...decoded };
+      });
+      setMissions(enrichedMissions);
       if (u) {
         const p = profs.find(p => p.user_id === u.id || p.email === u.email);
         setProfile(p || null);
@@ -117,11 +179,15 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
     if (!m.is_active) return false;
     if (m.expires_at && new Date(m.expires_at) < new Date()) return false;
     if (!isAdmin && getReqStatus(m.id) === "aprovado") return false;
-    if (m.sector === "Todos") return true;
-    return m.sector === userSector;
+    // Admin vê todas as missões (exceto regras acima). Colaborador só vê do próprio setor ou "Todos".
+    if (isAdmin) return true;
+    const missionSector = m.sector || "Todos";
+    if (missionSector === "Todos") return true;
+    return missionSector === userSector;
   });
 
   const openCreate = () => {
+    setSaveError(null);
     setEditingId(null);
     setForm({
       title: "",
@@ -139,6 +205,7 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
   };
 
   const openEdit = (m) => {
+    setSaveError(null);
     setEditingId(m.id);
     setForm({
       title: m.title || "",
@@ -155,31 +222,88 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
     setEditing(true);
   };
 
-  const handleSave = async () => {
-    if (!form.title || !form.points) return;
-    setSaving(true);
-    const data = {
-      title: form.title,
-      description: form.description,
-      points: parseInt(form.points),
+  const buildStyleFields = () => ({
+    background_color: sanitizeHexColor(form.background_color, DEFAULT_BG_COLOR),
+    text_color: sanitizeHexColor(form.text_color, DEFAULT_TEXT_COLOR),
+    icon: ICON_OPTIONS.some(opt => opt.value === form.icon) ? form.icon : "zap",
+  });
+
+  const buildCorePayload = () => {
+    const pts = Number.parseInt(String(form.points).trim(), 10);
+    const payload = {
+      title: form.title.trim(),
+      description: (form.description || "").trim(),
+      points: pts,
       sector: form.sector || "Todos",
       rules: form.rules || [],
       is_active: true,
-      expires_at: form.expires_at ? new Date(form.expires_at).toISOString() : null,
-      background_color: sanitizeHexColor(form.background_color, DEFAULT_BG_COLOR),
-      text_color: sanitizeHexColor(form.text_color, DEFAULT_TEXT_COLOR),
-      icon: ICON_OPTIONS.some(opt => opt.value === form.icon) ? form.icon : "zap",
     };
-    if (editingId) {
-      const updated = await base44.entities.SurpriseMission.update(editingId, data);
-      setMissions(prev => prev.map(m => m.id === editingId ? { ...m, ...data } : m));
-    } else {
-      const created = await base44.entities.SurpriseMission.create(data);
-      setMissions(prev => [...prev, created]);
+    if (form.expires_at) {
+      const exp = new Date(form.expires_at);
+      if (!Number.isNaN(exp.getTime())) payload.expires_at = exp.toISOString();
     }
-    setSaving(false);
-    setEditing(false);
-    setEditingId(null);
+    return payload;
+  };
+
+  const handleSave = async () => {
+    if (!form.title?.trim() || form.points === "" || form.points == null) return;
+    const core = buildCorePayload();
+    if (!Number.isFinite(core.points)) {
+      setSaveError("Informe um número válido de pontos.");
+      return;
+    }
+    setSaveError(null);
+    setSaving(true);
+    const style = buildStyleFields();
+    const styleMeta = { bg: style.background_color, text: style.text_color, icon: style.icon };
+    const coreWithStyle = {
+      ...core,
+      description: encodeStyleInDescription(core.description, styleMeta)
+    };
+    const fullPayload = { ...coreWithStyle, ...style };
+
+    const applyLocalMission = (m) => {
+      // Garantir que o estado local mostre a descrição "limpa" para o usuário
+      const cleanM = { ...m, description: core.description };
+      if (editingId) {
+        setMissions(prev => prev.map(x => x.id === editingId ? { ...x, ...cleanM } : x));
+      } else {
+        setMissions(prev => [...prev, cleanM]);
+      }
+    };
+
+    try {
+      if (editingId) {
+        // Tenta salvar com todos os campos. Se o banco aceitar background_color, ótimo.
+        // O estilo codificado na descrição garante que se o banco ignorar os campos extras,
+        // ainda teremos a informação no reload.
+        await base44.entities.SurpriseMission.update(editingId, fullPayload);
+        applyLocalMission({ id: editingId, ...fullPayload });
+      } else {
+        const created = await base44.entities.SurpriseMission.create(fullPayload);
+        applyLocalMission({ ...created, ...style });
+      }
+      setEditing(false);
+      setEditingId(null);
+    } catch (err) {
+      console.warn("SurpriseMission salvar (completo/style) falhou, tentando apenas com descrição codificada:", err);
+      try {
+        if (editingId) {
+          await base44.entities.SurpriseMission.update(editingId, coreWithStyle);
+          applyLocalMission({ id: editingId, ...coreWithStyle, ...style });
+        } else {
+          const created = await base44.entities.SurpriseMission.create(coreWithStyle);
+          applyLocalMission({ ...created, ...style });
+        }
+        setEditing(false);
+        setEditingId(null);
+      } catch (err2) {
+        console.error(err2);
+        setSaveError(err2?.message || "Não foi possível salvar a missão no banco de dados.");
+      }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDeactivate = async (id) => {
@@ -195,17 +319,17 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
       {/* Visible missions */}
       {visibleMissions.map(m => (
         (() => {
-          const cardBgColor = sanitizeHexColor(m.background_color, DEFAULT_BG_COLOR);
+          const cardBgGradient = cardBackgroundGradient(m.background_color);
           const textColor = sanitizeHexColor(m.text_color, DEFAULT_TEXT_COLOR);
           const selectedIcon = ICON_OPTIONS.find(opt => opt.value === m.icon)?.Icon || Zap;
           const MissionIcon = selectedIcon;
           return (
         <div
           key={m.id}
-          className="relative overflow-hidden rounded-2xl border border-yellow-600/30"
-          style={{ backgroundColor: cardBgColor }}
+          className="relative overflow-hidden rounded-2xl border border-white/10"
+          style={{ background: cardBgGradient }}
         >
-          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/15 to-transparent pointer-events-none" />
           <div className="relative p-5 flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-black/20 flex items-center justify-center shrink-0 mt-0.5">
@@ -221,7 +345,7 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                 {m.expires_at && (() => {
                   const now = new Date();
                   const exp = new Date(m.expires_at);
-                  const diffMs = exp - now;
+                  const diffMs = exp.getTime() - now.getTime();
                   const diffMins = Math.floor(diffMs / 60000);
                   const diffHours = Math.floor(diffMs / 3600000);
                   const diffDays = Math.floor(diffMs / 86400000);
@@ -464,8 +588,12 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
               </div>
             </div>
           </div>
+          {saveError && (
+            <p className="text-red-400 text-sm" role="alert">{saveError}</p>
+          )}
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={handleSave}
               disabled={saving}
               className="flex items-center gap-1.5 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black rounded-xl text-sm font-bold transition-colors disabled:opacity-50"
@@ -474,7 +602,8 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
               {saving ? "Salvando..." : "Salvar"}
             </button>
             <button
-              onClick={() => { setEditing(false); setEditingId(null); }}
+              type="button"
+              onClick={() => { setEditing(false); setEditingId(null); setSaveError(null); }}
               className="flex items-center gap-1.5 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors"
             >
               <X className="w-4 h-4" />
