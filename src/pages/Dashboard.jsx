@@ -49,7 +49,7 @@ export default function Dashboard() {
 
   const loadData = async (u) => {
     const [txs, emps] = await Promise.all([
-      base44.entities.PointTransaction.list("-created_date", 500),
+      base44.entities.PointTransaction.list("-created_date", 1000),
       base44.entities.EmployeeProfile.list(),
     ]);
     setTransactions(txs);
