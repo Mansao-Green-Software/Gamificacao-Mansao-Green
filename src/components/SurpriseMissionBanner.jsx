@@ -544,15 +544,28 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
             </div>
             <div className="col-span-2">
               <label className="text-gray-400 text-xs mb-1.5 block">Ícone do card</label>
-              <select
-                value={form.icon}
-                onChange={e => setForm(p => ({ ...p, icon: e.target.value }))}
-                className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-yellow-500"
-              >
-                {ICON_OPTIONS.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                {ICON_OPTIONS.map(option => {
+                  const Icon = option.Icon;
+                  const isSelected = form.icon === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setForm(p => ({ ...p, icon: option.value }))}
+                      className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${
+                        isSelected 
+                          ? "bg-yellow-500/20 border-yellow-500 text-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.1)]" 
+                          : "bg-gray-900 border-gray-600 text-gray-500 hover:border-gray-500 hover:bg-gray-800"
+                      }`}
+                      title={option.label}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="text-[10px] mt-1 font-medium">{option.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <div className="col-span-2">
               <label className="text-gray-400 text-xs mb-1.5 block">Regras (opcional)</label>
