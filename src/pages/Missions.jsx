@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Target, Plus, Trash2, CheckCircle, Clock, XCircle, Bell, Camera, X, Image, ChevronDown, ChevronRight, RotateCcw } from "lucide-react";
+import { Target, Plus, Trash2, CheckCircle, Clock, XCircle, Bell, Camera, X, Image, ChevronDown, ChevronRight, RotateCcw, Search } from "lucide-react";
 import { FaRocket, FaClipboardList, FaHeart, FaStar, FaExclamationCircle, FaBullseye, FaComment } from 'react-icons/fa';
 
 
@@ -39,6 +39,7 @@ export default function Missions() {
   const [subSectors, setSubSectors] = useState([]);
   const [selectedSubSector, setSelectedSubSector] = useState("");
   const [selectedSectorFilter, setSelectedSectorFilter] = useState("");
+  const [selectedEmployeeFilter, setSelectedEmployeeFilter] = useState("");
 
   const loadData = async (showSpinner = false) => {
     if (showSpinner) setRefreshing(true);
@@ -265,13 +266,13 @@ export default function Missions() {
       {/* Tabs */}
       <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1 w-fit">
         <button
-          onClick={() => setTab("missoes")}
+          onClick={() => { setTab("missoes"); setSelectedEmployeeFilter(""); }}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "missoes" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
         >
           Missões
         </button>
         <button
-          onClick={() => setTab("minhas")}
+          onClick={() => { setTab("minhas"); setSelectedEmployeeFilter(""); }}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "minhas" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
         >
           Minhas Solicitações
@@ -580,54 +581,80 @@ export default function Missions() {
             </h3>
             {(() => {
               const gerentePending = requests.filter(r => r.status === "pendente" && r.sector === "Gerência");
-              if (gerentePending.length === 0) return <p className="text-gray-500 text-sm text-center py-8">Nenhuma solicitação pendente da Gerência.</p>;
+              
+              const peopleInGerencia = allProfiles.filter(p => p.sector === "Gerência");
+
               return (
-                <div className="space-y-3">
-                  {gerentePending.map(r => (
-                    <div key={r.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl flex-wrap gap-3">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white font-medium text-sm">{r.mission_title}</p>
-                        <p className="text-gray-400 text-xs">{r.employee_name} · {r.sector}</p>
-                        <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
-                        {r.justification && (
-                          <p className="flex items-center gap-1.5 text-gray-300 text-xs mt-1.5 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">{r.justification}</p>
-                        )}
-                        {r.attachments?.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {r.attachments.map((url, idx) => (
-                              <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
-                                <img src={url} alt="anexo" className="w-full h-full object-cover" />
-                              </a>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-green-400 font-bold text-sm">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
-                        <button
-                          onClick={() => handleApprove(r)}
-                          disabled={approving === r.id}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
-                        >
-                          <CheckCircle className="w-3.5 h-3.5" />
-                          {approving === r.id ? "..." : "Aprovar"}
-                        </button>
-                        <button
-                          onClick={() => { setRejectModal(r); setRejectNote(""); }}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
-                        >
-                          <XCircle className="w-3.5 h-3.5" />
-                          Rejeitar
-                        </button>
-                      </div>
+                <div className="space-y-4">
+                  {peopleInGerencia.length > 0 && (
+                    <div className="flex items-center gap-2 mb-4">
+                      <Search className="w-4 h-4 text-gray-500" />
+                      <select
+                        value={selectedEmployeeFilter}
+                        onChange={e => setSelectedEmployeeFilter(e.target.value)}
+                        className="bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-green-500"
+                      >
+                        <option value="">Filtrar por pessoa (Todos)</option>
+                        {peopleInGerencia.map(p => (
+                          <option key={p.id} value={p.user_id || p.id}>{p.full_name}</option>
+                        ))}
+                      </select>
                     </div>
-                  ))}
+                  )}
+
+                  {(() => {
+                    const filtered = gerentePending.filter(r => !selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter);
+                    if (filtered.length === 0) return <p className="text-gray-500 text-sm py-4 italic">Nenhuma solicitação pendente para este filtro.</p>;
+                    return (
+                      <div className="space-y-3">
+                        {filtered.map(r => (
+                          <div key={r.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl flex-wrap gap-3">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white font-medium text-sm">{r.mission_title}</p>
+                              <p className="text-gray-400 text-xs">{r.employee_name} · {r.sector}</p>
+                              <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
+                              {r.justification && (
+                                <p className="flex items-center gap-1.5 text-gray-300 text-xs mt-1.5 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">{r.justification}</p>
+                              )}
+                              {r.attachments?.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  {r.attachments.map((url, idx) => (
+                                    <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
+                                      <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-green-400 font-bold text-sm">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
+                              <button
+                                onClick={() => handleApprove(r)}
+                                disabled={approving === r.id}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5" />
+                                {approving === r.id ? "..." : "Aprovar"}
+                              </button>
+                              <button
+                                onClick={() => { setRejectModal(r); setRejectNote(""); }}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
+                              >
+                                <XCircle className="w-3.5 h-3.5" />
+                                Rejeitar
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })()}
           </div>
           {(() => {
-            const gerenteHistory = requests.filter(r => r.status !== "pendente" && r.sector === "Gerência");
+            const gerenteHistory = requests.filter(r => r.status !== "pendente" && r.sector === "Gerência" && (!selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter));
             if (gerenteHistory.length === 0) return null;
             return (
               <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
@@ -666,51 +693,84 @@ export default function Missions() {
               Pendentes de Aprovação
               {pendingCount > 0 && <span className="px-2 py-0.5 bg-amber-900/50 text-amber-300 text-xs rounded-full">{pendingCount}</span>}
             </h3>
-            {pendingRequests.length === 0 ? (
-              <p className="text-gray-500 text-sm text-center py-8">Nenhuma solicitação pendente.</p>
-            ) : (
-              <div className="space-y-3">
-                {pendingRequests.map(r => (
-                  <div key={r.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl flex-wrap gap-3">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white font-medium text-sm">{r.mission_title}</p>
-                      <p className="text-gray-400 text-xs">{r.employee_name} · {r.sector}</p>
-                      <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
-                      {r.justification && (
-                        <p className="flex items-center gap-1.5 text-gray-300 text-xs mt-1.5 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700"><FaComment className="text-gray-500 shrink-0" /> {r.justification}</p>
-                      )}
-                      {r.attachments?.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {r.attachments.map((url, idx) => (
-                            <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
-                              <img src={url} alt="anexo" className="w-full h-full object-cover" />
-                            </a>
-                          ))}
+            
+            {(() => {
+              const peopleInAuthority = allProfiles.filter(p => {
+                if (p.user_id === user?.id || p.id === profile?.id) return false;
+                if (isAdmin) return true;
+                if (effectiveRole === "supervisor") return allMySectors.includes(p.sector) && p.role !== "supervisor" && p.role !== "manager" && p.role !== "admin";
+                if (effectiveRole === "manager") return allMySectors.includes(p.sector) && p.role !== "manager" && p.role !== "admin";
+                return allMySectors.includes(p.sector);
+              });
+
+              const filteredPending = pendingRequests.filter(r => !selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter);
+
+              return (
+                <div className="space-y-4">
+                  {peopleInAuthority.length > 0 && (
+                    <div className="flex items-center gap-2 mb-4">
+                      <Search className="w-4 h-4 text-gray-500" />
+                      <select
+                        value={selectedEmployeeFilter}
+                        onChange={e => setSelectedEmployeeFilter(e.target.value)}
+                        className="bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-green-500"
+                      >
+                       <option value="">Filtrar por pessoa (Todos)</option>
+                        {peopleInAuthority.map(p => (
+                          <option key={p.id} value={p.user_id || p.id}>{p.full_name} · {p.sector}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {filteredPending.length === 0 ? (
+                    <p className="text-gray-500 text-sm text-center py-8">Nenhuma solicitação pendente{selectedEmployeeFilter ? " para esta pessoa" : ""}.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {filteredPending.map(r => (
+                        <div key={r.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl flex-wrap gap-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white font-medium text-sm">{r.mission_title}</p>
+                            <p className="text-gray-400 text-xs">{r.employee_name} · {r.sector}</p>
+                            <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
+                            {r.justification && (
+                              <p className="flex items-center gap-1.5 text-gray-300 text-xs mt-1.5 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700"><FaComment className="text-gray-500 shrink-0" /> {r.justification}</p>
+                            )}
+                            {r.attachments?.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {r.attachments.map((url, idx) => (
+                                  <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
+                                    <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-green-400 font-bold text-sm">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
+                            <button
+                              onClick={() => handleApprove(r)}
+                              disabled={approving === r.id}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                            >
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              {approving === r.id ? "..." : "Aprovar"}
+                            </button>
+                            <button
+                              onClick={() => { setRejectModal(r); setRejectNote(""); }}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
+                            >
+                              <XCircle className="w-3.5 h-3.5" />
+                              Rejeitar
+                            </button>
+                          </div>
                         </div>
-                      )}
+                      ))}
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-green-400 font-bold text-sm">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
-                      <button
-                        onClick={() => handleApprove(r)}
-                        disabled={approving === r.id}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
-                      >
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        {approving === r.id ? "..." : "Aprovar"}
-                      </button>
-                      <button
-                        onClick={() => { setRejectModal(r); setRejectNote(""); }}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
-                      >
-                        <XCircle className="w-3.5 h-3.5" />
-                        Rejeitar
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Histórico */}
@@ -726,7 +786,7 @@ export default function Missions() {
                 return emp && allMySectors.includes(emp.sector);
               }
               return allMySectors.includes(r.sector);
-            });
+            }).filter(r => !selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter);
             if (history.length === 0) return null;
             return (
               <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
