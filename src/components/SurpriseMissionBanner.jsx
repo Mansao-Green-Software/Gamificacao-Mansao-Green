@@ -139,7 +139,7 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
       if (u) {
         const p = profs.find(p => p.user_id === u.id || p.email === u.email);
         setProfile(p || null);
-        setMyRequests(reqs.filter(r => r.employee_id === u.id || (p && r.employee_id === p.user_id)));
+        setMyRequests(reqs.filter(r => r.employee_id === u.id || (p && (r.employee_id === p.user_id || r.employee_id === p.id))));
       }
       setLoading(false);
     };
