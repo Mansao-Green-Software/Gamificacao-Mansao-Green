@@ -367,16 +367,18 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                   const status = getReqStatus(m.id);
                   return (
                     <button
-                      onClick={() => { if (status !== "pendente") { setRequestModal(m); setJustification(""); } }}
-                      disabled={status === "pendente"}
+                      onClick={() => { if (!status) { setRequestModal(m); setJustification(""); } }}
+                      disabled={!!status}
                       className={`mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
                         status === "pendente" ? "bg-amber-900/40 text-amber-400 cursor-not-allowed" :
-                        status === "aprovado" ? "bg-gray-700 hover:bg-gray-600 text-white" :
+                        status === "aprovado" ? "bg-green-900/40 text-green-400 cursor-not-allowed" :
+                        status === "rejeitado" ? "bg-red-900/40 text-red-400 cursor-not-allowed" :
                         "bg-yellow-500 hover:bg-yellow-400 text-black"
                       }`}
                     >
-                      {status === "pendente" ? <><Clock className="w-3.5 h-3.5" /> Pendente</> :
-                       status === "aprovado" ? <><RotateCcw className="w-3.5 h-3.5" /> Solicitar novamente</> :
+                      {status === "pendente" ? <><Clock className="w-3.5 h-3.5" /> Aguardando aprovação</> :
+                       status === "aprovado" ? <><Check className="w-3.5 h-3.5" /> Já solicitado</> :
+                       status === "rejeitado" ? <><X className="w-3.5 h-3.5" /> Solicitação rejeitada</> :
                        <><Zap className="w-3.5 h-3.5" /> Solicitar pontuação</>}
                     </button>
                   );
