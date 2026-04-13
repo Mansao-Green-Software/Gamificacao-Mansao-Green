@@ -79,7 +79,8 @@ const decodeStyleFromMission = (mission) => {
   return {
     background_color: mission.background_color || decoded.bg || DEFAULT_BG_COLOR,
     text_color: mission.text_color || decoded.text || DEFAULT_TEXT_COLOR,
-    icon: mission.icon || decoded.icon || "zap",
+    icon: decoded.icon || mission.icon || "zap",
+    sector: decoded.sector || mission.sector || "Todos",
     description: (mission.description || "").replace(STYLE_TAG_REGEX, "").trim()
   };
 };
@@ -255,16 +256,16 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
     setSaveError(null);
     setSaving(true);
     const style = buildStyleFields();
-    const styleMeta = { bg: style.background_color, text: style.text_color, icon: style.icon };
+    const styleMeta = { bg: style.background_color, text: style.text_color, icon: style.icon, sector: form.sector || "Todos" };
     const coreWithStyle = {
       ...core,
       description: encodeStyleInDescription(core.description, styleMeta)
     };
-    const fullPayload = { ...coreWithStyle, ...style };
+    const fullPayload = { ...coreWithStyle, ...style, sector: form.sector || "Todos" };
 
     const applyLocalMission = (m) => {
       // Garantir que o estado local mostre a descrição "limpa" para o usuário
-      const cleanM = { ...m, description: core.description };
+      const cleanM = { ...m, description: core.description, sector: form.sector || "Todos", is_active: true };
       if (editingId) {
         setMissions(prev => prev.map(x => x.id === editingId ? { ...x, ...cleanM } : x));
       } else {
