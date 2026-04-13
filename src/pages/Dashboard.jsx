@@ -339,7 +339,7 @@ export default function Dashboard() {
 
       {/* Recent transactions */}
       {myTxs.length > 0 && (
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+        <div className="bg-gray-800/40 border border-gray-700 rounded-xl p-6">
           <h2 className="text-white font-bold mb-4 flex items-center gap-2">
             <Target className="w-5 h-5 text-green-400" />
             Últimas Pontuações Recebidas
