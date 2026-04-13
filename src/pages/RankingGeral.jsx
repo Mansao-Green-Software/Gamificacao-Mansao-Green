@@ -243,7 +243,7 @@ export default function RankingGeral() {
       <div className="flex flex-col lg:flex-row gap-4 items-start">
 
         {/* Sidebar de setores - horizontal scroll no mobile */}
-        <aside className="w-full lg:w-48 lg:shrink-0 bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
+        <aside className="w-full lg:w-48 lg:shrink-0 bg-gray-800/40 border border-gray-800 rounded-xl overflow-hidden">
           <div className="flex lg:flex-col overflow-x-auto lg:overflow-x-visible">
           <button
             onClick={() => setSelectedSector("geral")}
@@ -263,10 +263,10 @@ export default function RankingGeral() {
               className={`shrink-0 lg:shrink-0 lg:w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all border-b lg:border-b border-r lg:border-r-0 border-gray-700 last:border-0 whitespace-nowrap ${
                 selectedSector === sector
                   ? "bg-green-500 text-black"
-                  : "text-gray-400 hover:text-white hover:bg-gray-700"
+                  : "text-gray-400 hover:text-white hover:bg-gray-800"
               }`}
             >
-              <span className={`w-2 h-2 rounded-full shrink-0 bg-gradient-to-br ${SECTOR_COLORS[sector]}`} />
+              <span className={`w-3 h-3 rounded-full shrink-0 bg-gradient-to-br ${SECTOR_COLORS[sector]}`} />
               <span className="truncate text-left">{sector}</span>
             </button>
           ))}
@@ -277,9 +277,9 @@ export default function RankingGeral() {
         <div className="flex-1 min-w-0">
           {/* View Geral - ranking de setores */}
           {selectedSector === "geral" && (
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
-              <h2 className="text-white font-bold mb-5 flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-amber-400" />
+            <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-6">
+              <h2 className="text-white font-bold mb-5 flex items-center gap-2 ">
+                <Trophy className="w-5 h-5 text-green-400" />
                 Ranking de Setores
               </h2>
               <div className="space-y-4">
