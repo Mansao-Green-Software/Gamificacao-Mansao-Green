@@ -48,7 +48,7 @@ export default function Missions() {
     const [ms, profs, reqs, subs] = await Promise.all([
       base44.entities.Mission.filter({ is_active: true }),
       base44.entities.EmployeeProfile.list(),
-      base44.entities.MissionRequest.list("-created_date", 500),
+      base44.entities.MissionRequest.list("-created_date", 1000),
       base44.entities.SubSector.list(),
     ]);
     setMissions(ms);
@@ -68,7 +68,7 @@ export default function Missions() {
       const [ms, profs, reqs, subs] = await Promise.all([
         base44.entities.Mission.filter({ is_active: true }),
         base44.entities.EmployeeProfile.list(),
-        base44.entities.MissionRequest.list("-created_date", 500),
+        base44.entities.MissionRequest.list("-created_date", 2000),
         base44.entities.SubSector.list(),
       ]);
       setMissions(ms);
@@ -128,17 +128,18 @@ export default function Missions() {
         if (r.status !== "pendente") return false;
         if (r.employee_id === myId) return false; // nunca mostra própria solicitação
         if (isAdmin) return true;
+        // Resolve sector from request or fallback to employee profile
+        const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
+        const effectiveSector = r.sector || empProfile?.sector;
         if (effectiveRole === "supervisor") {
-          // Supervisores aprovam apenas colaboradores (não outros supervisores)
-          if (r.sector === "Supervisor") return false;
-          return allMySectors.includes(r.sector);
+          if (effectiveSector === "Supervisor") return false;
+          return allMySectors.includes(effectiveSector);
         }
         // Gerente: aprova colaboradores e supervisores do seu setor
-        if (r.sector === "Supervisor") {
-          const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
+        if (effectiveSector === "Supervisor") {
           return empProfile && allMySectors.includes(empProfile.sector);
         }
-        return allMySectors.includes(r.sector);
+        return allMySectors.includes(effectiveSector);
       })
     : [];
 
@@ -778,14 +779,15 @@ export default function Missions() {
             const history = requests.filter(r => {
               if (r.status === "pendente") return false;
               if (isAdmin) return true;
+              const emp = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
+              const effectiveSector = r.sector || emp?.sector;
               if (effectiveRole === "supervisor") {
-                return r.sector !== "Supervisor" && allMySectors.includes(r.sector);
+                return effectiveSector !== "Supervisor" && allMySectors.includes(effectiveSector);
               }
-              if (r.sector === "Supervisor") {
-                const emp = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
+              if (effectiveSector === "Supervisor") {
                 return emp && allMySectors.includes(emp.sector);
               }
-              return allMySectors.includes(r.sector);
+              return allMySectors.includes(effectiveSector);
             }).filter(r => !selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter);
             if (history.length === 0) return null;
             return (

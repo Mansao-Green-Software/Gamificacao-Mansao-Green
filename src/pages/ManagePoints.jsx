@@ -33,7 +33,7 @@ export default function ManagePoints() {
       const isAdmin = u.role === "admin";
       const [emps, txs, ms, allTxs, subs] = await Promise.all([
         base44.entities.EmployeeProfile.list(),
-        base44.entities.PointTransaction.list("-created_date", 200),
+        base44.entities.PointTransaction.list("-created_date", 500),
         base44.entities.Mission.filter({ is_active: true }),
         isAdmin ? base44.entities.PointTransaction.list("-created_date", 1000) : Promise.resolve([]),
         base44.entities.SubSector.list(),
@@ -78,11 +78,35 @@ export default function ManagePoints() {
 
   const selectedEmployee = employees.find(e => e.user_id === form.employee_id || e.id === form.employee_id);
 
+  // Check if a mission was already submitted for an employee in the current period
+  const isMissionSubmittedInPeriod = (missionId, missionTitle, employeeId, frequency) => {
+    if (!frequency || !employeeId) return false;
+    const now = new Date();
+    return transactions.some(t => {
+      const missionMatch = t.mission_id === missionId || t.description === missionTitle || t.mission_title === missionTitle;
+      if (!missionMatch) return false;
+      if (t.employee_id !== employeeId) return false;
+      const txDate = new Date(t.created_date);
+      if (frequency === "Diária") {
+        return txDate.toDateString() === now.toDateString();
+      }
+      if (frequency === "Semanal") {
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+        return txDate >= startOfWeek;
+      }
+      if (frequency === "Mensal") {
+        return txDate.getMonth() === now.getMonth() && txDate.getFullYear() === now.getFullYear();
+      }
+      return false;
+    });
+  };
+
   const getEffectiveSector = (emp) => {
     if (!emp) return null;
     if (emp.role === "manager" || emp.role === "admin") return "Gerência";
     if (emp.role === "supervisor") {
-      // Se participa do ranking do setor, usa o setor; senão usa "Supervisor"
       return emp.include_in_sector_ranking !== false ? emp.sector : "Supervisor";
     }
     return emp.sector;
@@ -305,6 +329,9 @@ export default function ManagePoints() {
                                     m.frequency === "Semanal" ? "bg-purple-900/60 text-purple-300" :
                                     "bg-amber-900/60 text-amber-300"
                                   }`}>{m.frequency}</span>
+                                )}
+                                {m.frequency && isMissionSubmittedInPeriod(m.id, m.title, form.employee_id, m.frequency) && (
+                                  <span className="shrink-0 text-xs px-1.5 py-0.5 rounded-full font-medium bg-orange-900/60 text-orange-300">✓ já subido</span>
                                 )}
                               </div>
                               <span className={`shrink-0 text-xs font-bold ${m.points >= 0 ? "text-green-400" : "text-red-400"}`}>{m.points > 0 ? "+" : ""}{m.points} pts</span>
