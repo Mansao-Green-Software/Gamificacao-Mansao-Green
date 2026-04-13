@@ -78,6 +78,30 @@ export default function ManagePoints() {
 
   const selectedEmployee = employees.find(e => e.user_id === form.employee_id || e.id === form.employee_id);
 
+  // Check if a mission was already submitted for an employee in the current period
+  const isMissionSubmittedInPeriod = (missionId, employeeId, frequency) => {
+    if (!frequency || !employeeId) return false;
+    const now = new Date();
+    return transactions.some(t => {
+      if (t.mission_id !== missionId) return false;
+      if (t.employee_id !== employeeId) return false;
+      const txDate = new Date(t.created_date);
+      if (frequency === "Diária") {
+        return txDate.toDateString() === now.toDateString();
+      }
+      if (frequency === "Semanal") {
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+        return txDate >= startOfWeek;
+      }
+      if (frequency === "Mensal") {
+        return txDate.getMonth() === now.getMonth() && txDate.getFullYear() === now.getFullYear();
+      }
+      return false;
+    });
+  };
+
   const getEffectiveSector = (emp) => {
     if (!emp) return null;
     if (emp.role === "manager" || emp.role === "admin") return "Gerência";
@@ -305,6 +329,9 @@ export default function ManagePoints() {
                                     m.frequency === "Semanal" ? "bg-purple-900/60 text-purple-300" :
                                     "bg-amber-900/60 text-amber-300"
                                   }`}>{m.frequency}</span>
+                                )}
+                                {m.frequency && isMissionSubmittedInPeriod(m.id, form.employee_id, m.frequency) && (
+                                  <span className="shrink-0 text-xs px-1.5 py-0.5 rounded-full font-medium bg-orange-900/60 text-orange-300">✓ já subido</span>
                                 )}
                               </div>
                               <span className={`shrink-0 text-xs font-bold ${m.points >= 0 ? "text-green-400" : "text-red-400"}`}>{m.points > 0 ? "+" : ""}{m.points} pts</span>
