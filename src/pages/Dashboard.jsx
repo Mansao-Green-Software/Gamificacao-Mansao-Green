@@ -221,7 +221,7 @@ export default function Dashboard() {
 
       {/* My stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gray-800/40 border-l-4 border-green-600 rounded-2xl p-5">
+        <div className="bg-gray-800/40 border-l-4 border-green-600 rounded-xl p-5">
           <div className="flex items-center gap-3 mb-3">
            
             <span className="text-gray-400 text-xs uppercase">Meus Pontos</span>
@@ -229,7 +229,7 @@ export default function Dashboard() {
           <p className="text-3xl font-bold text-white">{myPoints.toLocaleString()}</p>
         </div>
 
-        <div className="bg-gray-800/40 border-l-4 border-amber-500 rounded-2xl p-5">
+        <div className="bg-gray-800/40 border-l-4 border-amber-500 rounded-xl p-5">
           <div className="flex items-center gap-3 mb-3">
            
             <span className="text-gray-400 text-xs uppercase">Meu Ranking</span>
@@ -238,7 +238,7 @@ export default function Dashboard() {
           {mySector && <p className="text-xs text-gray-500 mt-1">no {mySector}</p>}
         </div>
 
-        <div className="bg-gray-800/40 border-l-4 border-blue-500 rounded-2xl p-5">
+        <div className="bg-gray-800/40 border-l-4 border-blue-500 rounded-xl p-5">
           <div className="flex items-center gap-3 mb-3">
            
             <span className="text-gray-400 text-xs uppercase">Setor</span>
@@ -279,7 +279,7 @@ export default function Dashboard() {
         </div>
 
         {/* Top 5 MG (Colaboradores) */}
-        <div className="bg-gray-800/40 border border-gray-800 rounded-2xl p-6">
+        <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-white font-bold flex items-center gap-2 uppercase">
               <Trophy className="w-4 h-4 text-green-400" />
