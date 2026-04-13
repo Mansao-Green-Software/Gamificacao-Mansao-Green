@@ -324,102 +324,101 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
           const selectedIcon = ICON_OPTIONS.find(opt => opt.value === m.icon)?.Icon || Zap;
           const MissionIcon = selectedIcon;
           return (
-        <div
-          key={m.id}
-          className="relative overflow-hidden rounded-2xl border border-white/10"
-          style={{ background: cardBgGradient }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/15 to-transparent pointer-events-none" />
-          <div className="relative p-5 flex items-start justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-black/20 flex items-center justify-center shrink-0 mt-0.5">
-                <MissionIcon className="w-5 h-5" style={{ color: textColor }} />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className="text-xs font-bold uppercase tracking-wider" style={{ color: textColor }}>⚡ Missão Surpresa</span>
-                  {m.sector !== "Todos" && (
-                    <span className="text-xs px-2 py-0.5 bg-black/30 rounded-full" style={{ color: textColor }}>{m.sector}</span>
-                  )}
-                </div>
-                {m.expires_at && (() => {
-                  const now = new Date();
-                  const exp = new Date(m.expires_at);
-                  const diffMs = exp.getTime() - now.getTime();
-                  const diffMins = Math.floor(diffMs / 60000);
-                  const diffHours = Math.floor(diffMs / 3600000);
-                  const diffDays = Math.floor(diffMs / 86400000);
-                  const countdown = diffMs <= 0 ? "Expirada" : diffMins < 60 ? `Expira em ${diffMins}min` : diffHours < 24 ? `Expira em ${diffHours}h` : `Expira em ${diffDays} dia${diffDays !== 1 ? "s" : ""}`;
-                  const isUrgent = diffMs > 0 && diffHours < 24;
-                  return (
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Clock className={`w-3.5 h-3.5 ${isUrgent ? "text-red-400" : "text-amber-400"}`} />
-                      <span className={`text-xs font-semibold ${isUrgent ? "text-red-300" : "text-amber-300"}`}>
-                        {countdown} · até {exp.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
-                      </span>
+            <div
+              key={m.id}
+              className="relative overflow-hidden rounded-2xl border border-white/10"
+              style={{ background: cardBgGradient }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/15 to-transparent pointer-events-none" />
+              <div className="relative p-5 flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-black/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <MissionIcon className="w-5 h-5" style={{ color: textColor }} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1 flex-wrap py-2 ">
+                      <span className="text-xs font-bold uppercase tracking-wider" style={{ color: textColor }}>Missão Surpresa</span>
+                      {m.sector !== "Todos" && (
+                        <span className="text-xs px-2 py-0.5 bg-black/30 rounded-full" style={{ color: textColor }}>{m.sector}</span>
+                      )}
                     </div>
-                  );
-                })()}
-                <h3 className="font-bold text-base leading-tight" style={{ color: textColor }}>{m.title}</h3>
-                {m.description && <p className="text-sm mt-0.5" style={{ color: textColor }}>{m.description}</p>}
-                <p className="font-bold text-lg mt-1" style={{ color: textColor }}>{m.points > 0 ? "+" : ""}{m.points} pts</p>
-                {user && (() => {
-                  const status = getReqStatus(m.id);
-                  return (
-                    <button
-                      onClick={() => { if (!status) { setRequestModal(m); setJustification(""); } }}
-                      disabled={!!status}
-                      className={`mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
-                        status === "pendente" ? "bg-amber-900/40 text-amber-400 cursor-not-allowed" :
-                        status === "aprovado" ? "bg-green-900/40 text-green-400 cursor-not-allowed" :
-                        status === "rejeitado" ? "bg-red-900/40 text-red-400 cursor-not-allowed" :
-                        "bg-yellow-500 hover:bg-yellow-400 text-black"
-                      }`}
-                    >
-                      {status === "pendente" ? <><Clock className="w-3.5 h-3.5" /> Aguardando aprovação</> :
-                       status === "aprovado" ? <><Check className="w-3.5 h-3.5" /> Já solicitado</> :
-                       status === "rejeitado" ? <><X className="w-3.5 h-3.5" /> Solicitação rejeitada</> :
-                       <><Zap className="w-3.5 h-3.5" /> Solicitar pontuação</>}
-                    </button>
-                  );
-                })()}
-                {m.rules?.length > 0 && (
-                  <div className="mt-2">
-                    <button
-                      onClick={() => toggleRules(m.id)}
-                      className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide transition-colors"
-                      style={{ color: textColor }}
-                    >
-                      <ListChecks className="w-3.5 h-3.5" />
-                      Regras ({m.rules.length})
-                      <span className="ml-0.5">{expandedRules[m.id] ? "▲" : "▼"}</span>
-                    </button>
-                    {expandedRules[m.id] && (
-                      <ul className="mt-2 space-y-1">
-                        {m.rules.map((rule, i) => (
-                          <li key={i} className="text-sm flex items-start gap-2" style={{ color: textColor }}>
-                            <span className="font-bold shrink-0" style={{ color: textColor }}>{i + 1}.</span>
-                            {rule}
-                          </li>
-                        ))}
-                      </ul>
+                    {m.expires_at && (() => {
+                      const now = new Date();
+                      const exp = new Date(m.expires_at);
+                      const diffMs = exp.getTime() - now.getTime();
+                      const diffMins = Math.floor(diffMs / 60000);
+                      const diffHours = Math.floor(diffMs / 3600000);
+                      const diffDays = Math.floor(diffMs / 86400000);
+                      const countdown = diffMs <= 0 ? "Expirada" : diffMins < 60 ? `Expira em ${diffMins}min` : diffHours < 24 ? `Expira em ${diffHours}h` : `Expira em ${diffDays} dia${diffDays !== 1 ? "s" : ""}`;
+                      const isUrgent = diffMs > 0 && diffHours < 24;
+                      return (
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Clock className={`w-3.5 h-3.5 ${isUrgent ? "text-red-400" : "text-amber-400"}`} />
+                          <span className={`text-xs font-semibold ${isUrgent ? "text-red-300" : "text-amber-300"}`}>
+                            {countdown} · até {exp.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        </div>
+                      );
+                    })()}
+                    <h3 className="font-bold text-base leading-tight" style={{ color: textColor }}>{m.title}</h3>
+                    {m.description && <p className="text-sm mt-0.5" style={{ color: textColor }}>{m.description}</p>}
+                    <p className="font-bold text-lg mt-1  text-green-400">{m.points > 0 ? "+" : ""}{m.points} pts</p>
+                    {user && (() => {
+                      const status = getReqStatus(m.id);
+                      return (
+                        <button
+                          onClick={() => { if (!status) { setRequestModal(m); setJustification(""); } }}
+                          disabled={!!status}
+                          className={`mt-2 flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold transition-colors ${status === "pendente" ? "bg-amber-900/40 text-amber-400 cursor-not-allowed" :
+                            status === "aprovado" ? "bg-green-900/40 text-green-400 cursor-not-allowed" :
+                              status === "rejeitado" ? "bg-red-900/40 text-red-400 cursor-not-allowed" :
+                                "bg-yellow-500 hover:bg-yellow-400 text-black"
+                            }`}
+                        >
+                          {status === "pendente" ? <><Clock className="w-3.5 h-3.5" /> Aguardando aprovação</> :
+                            status === "aprovado" ? <><Check className="w-3.5 h-3.5" /> Já solicitado</> :
+                              status === "rejeitado" ? <><X className="w-3.5 h-3.5" /> Solicitação rejeitada</> :
+                                <><Zap className="w-3.5 h-3.5" /> Solicitar pontuação</>}
+                        </button>
+                      );
+                    })()}
+                    {m.rules?.length > 0 && (
+                      <div className="mt-2">
+                        <button
+                          onClick={() => toggleRules(m.id)}
+                          className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide transition-colors"
+                          style={{ color: textColor }}
+                        >
+                          <ListChecks className="w-3.5 h-3.5" />
+                          Regras ({m.rules.length})
+                          <span className="ml-0.5">{expandedRules[m.id] ? "▲" : "▼"}</span>
+                        </button>
+                        {expandedRules[m.id] && (
+                          <ul className="mt-2 space-y-1">
+                            {m.rules.map((rule, i) => (
+                              <li key={i} className="text-sm flex items-start gap-2" style={{ color: textColor }}>
+                                <span className="font-bold shrink-0" style={{ color: textColor }}>{i + 1}.</span>
+                                {rule}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                     )}
+                  </div>
+                </div>
+                {isAdmin && (
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button onClick={() => openEdit(m)} className="p-1.5 text-yellow-400 hover:bg-yellow-900/40 rounded-lg transition-colors">
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleDeactivate(m.id)} className="p-1.5 text-red-400 hover:bg-red-900/30 rounded-lg transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 )}
               </div>
             </div>
-            {isAdmin && (
-              <div className="flex items-center gap-1 shrink-0">
-                <button onClick={() => openEdit(m)} className="p-1.5 text-yellow-400 hover:bg-yellow-900/40 rounded-lg transition-colors">
-                  <Edit2 className="w-4 h-4" />
-                </button>
-                <button onClick={() => handleDeactivate(m.id)} className="p-1.5 text-red-400 hover:bg-red-900/30 rounded-lg transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
           );
         })()
       ))}
@@ -555,11 +554,10 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                       key={option.value}
                       type="button"
                       onClick={() => setForm(p => ({ ...p, icon: option.value }))}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${
-                        isSelected 
-                          ? "bg-yellow-500/20 border-yellow-500 text-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.1)]" 
-                          : "bg-gray-900 border-gray-600 text-gray-500 hover:border-gray-500 hover:bg-gray-800"
-                      }`}
+                      className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${isSelected
+                        ? "bg-yellow-500/20 border-yellow-500 text-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.1)]"
+                        : "bg-gray-900 border-gray-600 text-gray-500 hover:border-gray-500 hover:bg-gray-800"
+                        }`}
                       title={option.label}
                     >
                       <Icon className="w-5 h-5" />
