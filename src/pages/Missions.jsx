@@ -68,7 +68,7 @@ export default function Missions() {
       const [ms, profs, reqs, subs] = await Promise.all([
         base44.entities.Mission.filter({ is_active: true }),
         base44.entities.EmployeeProfile.list(),
-        base44.entities.MissionRequest.list("-created_date", 500),
+        base44.entities.MissionRequest.list("-created_date", 2000),
         base44.entities.SubSector.list(),
       ]);
       setMissions(ms);
