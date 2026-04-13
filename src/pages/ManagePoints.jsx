@@ -94,7 +94,7 @@ export default function ManagePoints() {
   const filteredMissions = missions.filter(m => {
     const sectorMatch = !selectedEmployee || m.sector === employeeEffectiveSector || m.sector === "Todos";
     const searchMatch = !missionSearch || m.title.toLowerCase().includes(missionSearch.toLowerCase());
-    const subSectorMatch = !selectedSubSector || m.sub_sector === selectedSubSector;
+    const subSectorMatch = !selectedSubSector || m.sub_sector === selectedSubSector || !m.sub_sector;
     return sectorMatch && searchMatch && subSectorMatch;
   });
 

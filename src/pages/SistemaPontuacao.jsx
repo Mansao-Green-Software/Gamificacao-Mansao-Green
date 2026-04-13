@@ -83,7 +83,7 @@ export default function SistemaPontuacao() {
   const filteredMissions = missions.filter(m => {
     const sectorMatch = m.sector === selectedSector || m.sector === "Todos";
     const searchMatch = !search || m.title.toLowerCase().includes(search.toLowerCase());
-    const subSectorMatch = !selectedSubSector || m.sub_sector === selectedSubSector;
+    const subSectorMatch = !selectedSubSector || m.sub_sector === selectedSubSector || !m.sub_sector;
     return sectorMatch && searchMatch && subSectorMatch;
   });
 
@@ -96,8 +96,8 @@ export default function SistemaPontuacao() {
     const created = await base44.entities.Mission.create({
       ...form,
       points: parseInt(form.points),
-      frequency: form.frequency || undefined,
-      sub_sector: form.sub_sector || undefined,
+      frequency: form.frequency || "",
+      sub_sector: form.sub_sector || "",
       is_active: true,
     });
     setMissions(prev => [...prev, created]);
@@ -110,10 +110,16 @@ export default function SistemaPontuacao() {
       title: editing.title,
       points: parseInt(editing.points),
       description: editing.description,
-      frequency: editing.frequency || undefined,
-      sub_sector: editing.sub_sector || undefined,
+      frequency: editing.frequency || "",
+      sub_sector: editing.sub_sector || "",
     });
-    setMissions(prev => prev.map(m => m.id === id ? { ...m, ...editing, points: parseInt(editing.points) } : m));
+    setMissions(prev => prev.map(m => m.id === id ? { 
+      ...m, 
+      ...editing,
+      points: parseInt(editing.points),
+      frequency: editing.frequency || "",
+      sub_sector: editing.sub_sector || ""
+    } : m));
     setEditing(null);
   };
 
@@ -132,8 +138,21 @@ export default function SistemaPontuacao() {
   };
 
   const handleDeleteSubSector = async (id) => {
+    const subToDelete = subSectors.find(s => s.id === id);
+    if (!subToDelete) return;
+
     await base44.entities.SubSector.delete(id);
     setSubSectors(prev => prev.filter(s => s.id !== id));
+    
+    if (selectedSubSector === subToDelete.name) {
+      setSelectedSubSector("");
+    }
+
+    const missionsToUpdate = missions.filter(m => m.sub_sector === subToDelete.name);
+    for (const m of missionsToUpdate) {
+      await base44.entities.Mission.update(m.id, { sub_sector: "" });
+    }
+    setMissions(prev => prev.map(m => m.sub_sector === subToDelete.name ? { ...m, sub_sector: "" } : m));
   };
 
   if (loading) return (
