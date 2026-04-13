@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Trophy, Star, Target, TrendingUp, Medal, History, TrendingDown, RotateCcw } from "lucide-react";
 import { FaMedal, FaHandPaper } from 'react-icons/fa';
+import { GoGraph } from "react-icons/go";
 import QuarterlyPrizeBanner from "../components/QuarterlyPrizeBanner";
 import SurpriseMissionBanner from "../components/SurpriseMissionBanner";
 import { Link } from "react-router-dom";
@@ -220,33 +221,27 @@ export default function Dashboard() {
 
       {/* My stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
+        <div className="bg-gray-800/40 border-l-4 border-green-600 rounded-2xl p-5">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
-              <Star className="w-5 h-5 text-green-400" />
-            </div>
-            <span className="text-gray-400 text-sm">Meus Pontos</span>
+           
+            <span className="text-gray-400 text-xs uppercase">Meus Pontos</span>
           </div>
           <p className="text-3xl font-bold text-white">{myPoints.toLocaleString()}</p>
         </div>
 
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
+        <div className="bg-gray-800/40 border-l-4 border-amber-500 rounded-2xl p-5">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center">
-              <Trophy className="w-5 h-5 text-amber-400" />
-            </div>
-            <span className="text-gray-400 text-sm">Meu Ranking</span>
+           
+            <span className="text-gray-400 text-xs uppercase">Meu Ranking</span>
           </div>
           <p className="text-3xl font-bold text-white">{myRank ? `#${myRank}` : "-"}</p>
           {mySector && <p className="text-xs text-gray-500 mt-1">no {mySector}</p>}
         </div>
 
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
+        <div className="bg-gray-800/40 border-l-4 border-blue-500 rounded-2xl p-5">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-blue-400" />
-            </div>
-            <span className="text-gray-400 text-sm">Setor</span>
+           
+            <span className="text-gray-400 text-xs uppercase">Setor</span>
           </div>
           <p className="text-lg font-bold text-white truncate">{mySector || "Não definido"}</p>
         </div>
@@ -255,10 +250,10 @@ export default function Dashboard() {
       {/* Rankings grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top 5 Setores */}
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+        <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-white font-bold flex items-center gap-2">
-              <Medal className="w-5 h-5 text-amber-400" />
+            <h2 className="text-white font-bold flex items-center gap-2 uppercase">
+              <GoGraph className="w-4 h-4 text-green-400" />
               Top 5 Setores
             </h2>
             <Link to={createPageUrl("RankingGeral")} className="text-green-400 text-sm hover:underline">Ver tudo</Link>
@@ -284,10 +279,10 @@ export default function Dashboard() {
         </div>
 
         {/* Top 5 MG (Colaboradores) */}
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+        <div className="bg-gray-800/40 border border-gray-800 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-white font-bold flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-amber-400" />
+            <h2 className="text-white font-bold flex items-center gap-2 uppercase">
+              <Trophy className="w-4 h-4 text-green-400" />
               Top 5 MG
             </h2>
             <Link to={createPageUrl("RankingGeral")} className="text-green-400 text-sm hover:underline">Ver tudo</Link>
