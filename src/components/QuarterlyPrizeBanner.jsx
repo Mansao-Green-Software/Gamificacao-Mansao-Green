@@ -54,44 +54,54 @@ export default function QuarterlyPrizeBanner({ isAdmin }) {
   if (!prize && !isAdmin) return null;
 
   return (
-    <div data-theme="dark" className="relative overflow-hidden rounded-2xl border border-amber-600/40">
+    <div data-theme="dark" className="relative overflow-hidden rounded-2xl border-1  group flex flex-col justify-center">
       {/* Background image or gradient */}
-      {prize?.image_url ?
-      <img src={prize.image_url} alt={prize.title} className="absolute inset-0 w-full h-full object-cover" /> :
+      {prize?.image_url ? (
+        <img src={prize.image_url} alt={prize.title} className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700" />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-950 via-gray-900 to-black" />
+      )}
+      
+      {/* Left to right gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
+      
+      {/* Bottom up gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
-      <div className="absolute inset-0 bg-gradient-to-r from-amber-950/60 via-yellow-900/40 to-amber-950/60" />
-      }
-      {/* Dark overlay for readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
-
-      <div className="relative p-6 min-h-[220px] flex flex-col justify-end">
-        <div className="flex items-center gap-2 mb-2">
-          <Trophy className="w-4 h-4 text-amber-400" />
-          <span className="text-amber-400 text-xs font-bold uppercase tracking-wider">
+      <div className="relative p-8 lg:p-12 min-h-[320px] flex flex-col justify-center w-full lg:w-3/4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2.5 bg-amber-500/20 rounded-xl border border-amber-500/30 backdrop-blur-md shadow-inner">
+            <Trophy className="w-6 h-6 text-amber-400" />
+          </div>
+          <span className="text-amber-400 text-sm font-bold uppercase tracking-[0.2em] drop-shadow-md">
             Prêmio do {prize?.quarter || "Trimestre"}
           </span>
         </div>
-        <h2 className="text-white text-2xl font-bold leading-tight">
+        
+        <h2 className="text-white text-3xl lg:text-5xl font-extrabold leading-tight mb-4 drop-shadow-lg">
           {prize?.title || "Configure o prêmio do trimestre"}
         </h2>
-        {prize?.description &&
-        <p className="text-amber-200/80 text-sm mt-1">{prize.description}</p>
-        }
-        <div className="flex items-center gap-1.5 mt-2">
-          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-          <span className="text-amber-300 text-xs font-medium">Para o 1º lugar no ranking  TOP 5 MG do trimestre</span>
+        
+        {prize?.description && (
+          <p className="text-gray-300 text-base md:text-lg max-w-2xl leading-relaxed mb-6 font-medium">
+            {prize.description}
+          </p>
+        )}
+        
+        <div className="flex items-center gap-2 mt-auto self-start bg-black/50 backdrop-blur-xl px-5 py-3 rounded-full border border-amber-500/20 shadow-lg shadow-black/50">
+          <Star className="w-5 h-5 text-amber-400 fill-amber-400 drop-shadow-sm" />
+          <span className="text-amber-50 text-sm font-semibold tracking-wide">Exclusivo para o 1º lugar do TOP 5 MG</span>
         </div>
       </div>
 
       {/* Admin button */}
-      {isAdmin && !editing &&
-      <button
-        onClick={openEdit}
-        className="absolute top-3 right-3 p-2 text-amber-400 hover:bg-amber-900/40 rounded-xl transition-colors border border-amber-700/40 bg-black/30">
-        
-          {prize ? <Edit2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+      {isAdmin && !editing && (
+        <button
+          onClick={openEdit}
+          className="absolute top-5 right-5 p-3 text-amber-400 hover:text-white bg-black/40 hover:bg-amber-500 backdrop-blur-md rounded-2xl transition-all duration-300 border border-amber-500/30 z-10 shadow-xl group-hover:scale-105">
+          {prize ? <Edit2 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
         </button>
-      }
+      )}
 
       {/* Edit form */}
       {editing && isAdmin &&
