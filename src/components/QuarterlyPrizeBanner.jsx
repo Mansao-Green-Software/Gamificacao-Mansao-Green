@@ -90,7 +90,7 @@ export default function QuarterlyPrizeBanner({ isAdmin }) {
         
         <div className="flex items-center gap-2 mt-auto self-start bg-black/50 backdrop-blur-xl px-5 py-3 rounded-full border border-amber-500/20 shadow-lg shadow-black/50">
           <Star className="w-5 h-5 text-amber-400 fill-amber-400 drop-shadow-sm" />
-          <span className="text-amber-50 text-sm font-semibold tracking-wide">Exclusivo para o 1º lugar do TOP 5 MG</span>
+          <span className="text-amber-50 text-sm font-semibold tracking-wide">Exclusivo para o 1º lugar do TOP 5 MG do trimestre</span>
         </div>
       </div>
 
