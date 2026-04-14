@@ -612,7 +612,10 @@ export default function Missions() {
               Solicitações da Gerência — Pendentes
             </h3>
             {(() => {
-              const gerentePending = requests.filter(r => r.status === "pendente" && r.sector === "Gerência");
+              const feiraFCManagerIds = new Set(
+                allProfiles.filter(p => p.sector === "Feira FC" && (p.role === "manager" || p.role === "director")).map(p => p.user_id || p.id)
+              );
+              const gerentePending = requests.filter(r => r.status === "pendente" && r.sector === "Gerência" && !feiraFCManagerIds.has(r.employee_id));
               
               const peopleInGerencia = allProfiles.filter(p => p.sector === "Gerência");
 
@@ -686,7 +689,10 @@ export default function Missions() {
             })()}
           </div>
           {(() => {
-            const gerenteHistory = requests.filter(r => r.status !== "pendente" && r.sector === "Gerência" && (!selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter));
+            const feiraFCManagerIds2 = new Set(
+              allProfiles.filter(p => p.sector === "Feira FC" && (p.role === "manager" || p.role === "director")).map(p => p.user_id || p.id)
+            );
+            const gerenteHistory = requests.filter(r => r.status !== "pendente" && r.sector === "Gerência" && !feiraFCManagerIds2.has(r.employee_id) && (!selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter));
             if (gerenteHistory.length === 0) return null;
             return (
               <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
