@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { ShoppingBag, Plus, Trash2, Star, CheckCircle, Clock, Package, Tag, Camera, Edit2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 const CATEGORIES = ["Experiência", "Produto", "Benefício", "Vale-presente", "Outros"];
 
@@ -205,18 +206,36 @@ export default function GreenShop() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-fit">
-        <button onClick={() => setTab("loja")} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "loja" ? "bg-green-500 text-gray-900" : "text-gray-400 hover:text-white"}`}>
-          Loja
-        </button>
-        <button onClick={() => setTab("resgates")} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "resgates" ? "bg-green-500 text-gray-900" : "text-gray-400 hover:text-white"}`}>
-          Meus Resgates {myRedemptions.length > 0 && <span className="ml-1.5 bg-green-700 text-white text-xs px-1.5 py-0.5 rounded-full">{myRedemptions.length}</span>}
-        </button>
-        {isManager && (
-          <button onClick={() => setTab("admin")} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "admin" ? "bg-green-500 text-gray-900" : "text-gray-400 hover:text-white"}`}>
-            Gerenciar
+      <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-fit relative z-0">
+        {[
+          { id: "loja", label: "Loja" },
+          { id: "resgates", label: "Meus Resgates", badge: myRedemptions.length },
+          ...(isManager ? [{ id: "admin", label: "Gerenciar" }] : [])
+        ].map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center gap-1.5 ${
+              tab === t.id ? "text-gray-900" : "text-gray-400 hover:text-white"
+            }`}
+          >
+            {tab === t.id && (
+              <motion.div
+                layoutId="activeShopTab"
+                className="absolute inset-0 bg-green-500 rounded-lg -z-10 shadow-sm"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10 block">{t.label}</span>
+            {t.badge > 0 && (
+              <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-colors ${
+                tab === t.id ? "bg-gray-900 text-green-400" : "bg-gray-700 text-gray-300"
+              }`}>
+                {t.badge}
+              </span>
+            )}
           </button>
-        )}
+        ))}
       </div>
 
       {/* Create form */}
