@@ -26,7 +26,7 @@ export default function Employees() {
     const load = async () => {
       const u = await base44.auth.me();
       setUser(u);
-      const emps = await base44.entities.EmployeeProfile.list();
+      const emps = await base44.entities.EmployeeProfile.list(null, 1000);
       setEmployees(emps);
       setLoading(false);
     };
