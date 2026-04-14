@@ -88,17 +88,21 @@ export default function Employees() {
 
   const saveEdit = async (id) => {
     await base44.entities.EmployeeProfile.update(id, editForm);
-    // Sincroniza o role do usuário real na plataforma usando os dados atualizados do form
+    // Tenta sincronizar o role do usuário real na plataforma
     const userId = editForm.user_id;
     const userEmail = editForm.email;
     if ((userId || userEmail) && editForm.role) {
-      const allUsers = await base44.entities.User.list();
-      const linkedUser = allUsers.find(u =>
-        (userId && u.id === userId) ||
-        (userEmail && u.email === userEmail)
-      );
-      if (linkedUser) {
-        await base44.entities.User.update(linkedUser.id, { role: editForm.role });
+      try {
+        const allUsers = await base44.entities.User.list();
+        const linkedUser = allUsers.find(u =>
+          (userId && u.id === userId) ||
+          (userEmail && u.email === userEmail)
+        );
+        if (linkedUser) {
+          await base44.entities.User.update(linkedUser.id, { role: editForm.role });
+        }
+      } catch (e) {
+        // Sem permissão para listar/atualizar usuários — ignora silenciosamente
       }
     }
     setEmployees(prev => prev.map(e => e.id === id ? { ...e, ...editForm } : e));
