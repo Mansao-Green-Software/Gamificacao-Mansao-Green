@@ -38,7 +38,7 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.me().then(async (u) => {
       setUser(u);
       const all = await base44.entities.EmployeeProfile.list();
-      const found = all.find(p => p.user_id === u.id || p.email === u.email);
+      const found = all.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
       if (found) setProfile(found);
     }).catch(() => {});
   }, []);

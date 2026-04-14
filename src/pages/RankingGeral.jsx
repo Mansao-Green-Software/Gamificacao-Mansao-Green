@@ -112,7 +112,7 @@ export default function RankingGeral() {
       setUser(u);
       await loadData(u);
       const profs = await base44.entities.EmployeeProfile.list();
-      const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
+      const myProfile = profs.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
       const effectiveRoleInner = myProfile?.role || u.role;
       setSelectedSector("geral");
       setLoading(false);
