@@ -103,8 +103,8 @@ export default function Missions() {
     if (!m.is_active) return false;
     if (isAdmin) return true;
     if (isDirector) return false;
-    if (effectiveRole === "manager" && m.sector === "Gerência") return true;
-    if (effectiveRole === "supervisor" && m.sector === "Supervisor") return true;
+    if (effectiveRole === "manager") return m.sector === "Gerência";
+    if (effectiveRole === "supervisor") return m.sector === "Supervisor" || allMySectors.includes(m.sector) || m.sector === "Todos";
     return allMySectors.includes(m.sector) || m.sector === "Todos";
   });
 
