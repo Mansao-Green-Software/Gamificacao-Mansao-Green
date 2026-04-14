@@ -57,7 +57,7 @@ export default function Missions() {
     setRequests(reqs);
     setAllProfiles(profs);
     setSubSectors(subs);
-    const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
+    const myProfile = profs.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
     setProfile(myProfile || null);
     if (showSpinner) setRefreshing(false);
     return u;
@@ -77,7 +77,7 @@ export default function Missions() {
       setRequests(reqs);
       setAllProfiles(profs);
       setSubSectors(subs);
-      const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
+      const myProfile = profs.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
       setProfile(myProfile || null);
       setLoading(false);
     };

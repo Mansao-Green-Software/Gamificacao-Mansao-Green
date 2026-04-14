@@ -57,7 +57,7 @@ export default function Dashboard() {
     ]);
     setTransactions(txs);
     setEmployees(emps);
-    const myProfile = emps.find(p => p.user_id === u.id || p.email === u.email);
+    const myProfile = emps.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
     setProfile(myProfile || null);
     const sector = myProfile?.sector;
     const myProfile2 = myProfile;

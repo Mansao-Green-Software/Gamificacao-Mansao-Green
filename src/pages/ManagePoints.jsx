@@ -41,7 +41,7 @@ export default function ManagePoints() {
         base44.entities.SubSector.list(),
       ]);
       setSubSectors(subs);
-      const myProfile = emps.find(p => p.user_id === u.id || p.email === u.email);
+      const myProfile = emps.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
       const mySector = myProfile?.sector;
 
       const isGerencia = mySector === "Gerência";
