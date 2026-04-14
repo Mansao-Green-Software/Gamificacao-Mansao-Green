@@ -387,42 +387,65 @@ export default function Missions() {
               const hasSub = !!mission.sub_sector;
 
               return (
-                <div key={mission.id} className={`bg-gray-900/60 border rounded-2xl p-5 flex flex-col gap-3 ${approved ? "border-green-700/50" : "border-gray-700"}`}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h3 className="text-white font-bold text-sm">{mission.title}</h3>
-                      {mission.description && <p className="text-gray-400 text-xs mt-1">{mission.description}</p>}
+                <div key={mission.id} className={`group relative bg-gray-900/40 backdrop-blur-sm border rounded-2xl p-6 flex flex-col gap-4 overflow-hidden transition-all duration-300  hover:-translate-y-1 ${approved ? "border-green-700" : "border-gray-800"}`}>
+                  
+                  <div className="flex items-start justify-between gap-4 z-10">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start flex-wrap gap-2 mb-1.5">
+                        <h3 className="text-gray-100 font-bold text-base tracking-tight leading-tight transition-colors">{mission.title}</h3>
+                        {approved && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full shrink-0">
+                            <CheckCircle className="w-3 h-3" /> Aprovado
+                          </span>
+                        )}
+                        {pending && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full shrink-0">
+                            <Clock className="w-3 h-3" /> Em Análise
+                          </span>
+                        )}
+                        {rejected && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full shrink-0">
+                            <XCircle className="w-3 h-3" /> Rejeitado
+                          </span>
+                        )}
+                      </div>
+                      {mission.description && <p className="text-gray-400 text-xs leading-relaxed line-clamp-2 transition-colors">{mission.description}</p>}
                     </div>
-                    {approved && <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />}
-                    {pending && <Clock className="w-5 h-5 text-amber-400 shrink-0" />}
+                    <div className="flex flex-col items-end shrink-0 pl-3">
+                      <div className="relative">
+                        <span className={`font-bold text-md  ${mission.points >= 0 ? "bg-gradient-to-br from-green-400 to-green-600 text-transparent bg-clip-text drop-shadow-sm" : "text-red-400"}`}>
+                          {mission.points > 0 ? "+" : ""}{mission.points}
+                        </span>
+                      </div>
+                      <span className="text-gray-500 font-semibold text-[8px] uppercase tracking-[0.1em]  drop-shadow-sm">pontos</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                                    <span className={`font-bold text-lg ${mission.points >= 0 ? "text-green-400" : "text-red-400"}`}>{mission.points > 0 ? "+" : ""}{mission.points}</span>
-                                    <span className="text-gray-500 text-xs">pontos</span>
-                                    <span className="ml-auto text-xs px-2 py-0.5 bg-gray-700 text-gray-300 rounded-full">{mission.sector}</span>
-                                    {hasSub && <span className="text-xs px-2 py-0.5 bg-blue-900/60 text-blue-300 rounded-full font-medium">{mission.sub_sector}</span>}
+                  
+                  <div className="flex items-center gap-2 flex-wrap mt-auto z-10">
+                    <span className="text-[10px] px-2.5 py-1 bg-gray-800 border border-gray-700/50 shadow-sm text-gray-300 rounded-md font-semibold tracking-wide uppercase">{mission.sector}</span>
+                    {hasSub && <span className="text-[10px] px-2.5 py-1 bg-blue-900/30 border border-blue-800/50 shadow-sm text-blue-300 rounded-md font-semibold tracking-wide uppercase">{mission.sub_sector}</span>}
                     {mission.frequency && (
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        mission.frequency === "Diária" ? "bg-blue-900/60 text-blue-300" :
-                        mission.frequency === "Semanal" ? "bg-purple-900/60 text-purple-300" :
-                        "bg-amber-900/60 text-amber-300"
+                      <span className={`text-[10px] px-2.5 py-1 border shadow-sm rounded-md font-semibold tracking-wide uppercase ${
+                        mission.frequency === "Diária" ? "bg-blue-900/30 border-blue-800/50 text-blue-300" :
+                        mission.frequency === "Semanal" ? "bg-purple-900/30 border-purple-800/50 text-purple-300" :
+                        "bg-amber-900/30 border-amber-800/50 text-amber-300"
                       }`}>{mission.frequency}</span>
                     )}
                   </div>
-                  <div className="flex gap-2 mt-auto">
+                  <div className="flex gap-2 z-10">
                       <button
                         onClick={() => !pending && openRequestModal(mission)}
                         disabled={pending}
-                        className={`flex items-center justify-center gap-1.5 flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
-                          pending ? "bg-amber-900/40 text-amber-400 cursor-not-allowed" :
-                          (approved || rejected) ? "bg-gray-600 hover:bg-gray-500 text-white" :
-                          "bg-green-500 hover:bg-green-400 text-black font-semibold"
+                        className={`flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm ${
+                          pending ? "bg-amber-900/20 text-amber-500/80 border border-amber-900/30 cursor-not-allowed" :
+                          (approved || rejected) ? "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 hover:border-gray-600 shadow-none" :
+                          "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-black active:scale-[0.98]"
                         }`}
                       >
-                        {pending ? <><Clock className="w-3.5 h-3.5" /> Aguardando aprovação</> : (approved || rejected) ? <><RotateCcw className="w-3.5 h-3.5" /> Solicitar novamente</> : submitting === mission.id ? "..." : "Solicitar pontuação"}
+                        {pending ? <><Clock className="w-3.5 h-3.5" /> Aguardando</> : (approved || rejected) ? <><RotateCcw className="w-3.5 h-3.5" /> Solicitar de novo</> : submitting === mission.id ? "... " : "Solicitar"}
                       </button>
                     {isManager && (
-                      <button onClick={() => handleDelete(mission.id)} className="p-2 text-red-400 hover:bg-red-900/20 rounded-xl transition-colors shrink-0">
+                      <button onClick={() => handleDelete(mission.id)} className="p-2.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 rounded-xl transition-all shadow-sm">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}

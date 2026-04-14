@@ -50,8 +50,8 @@ export default function Dashboard() {
 
   const loadData = async (u) => {
     const [txs, emps] = await Promise.all([
-      base44.entities.PointTransaction.list("-created_date", 1000),
-      base44.entities.EmployeeProfile.list(),
+      base44.entities.PointTransaction.list("-created_date", 5000),
+      base44.entities.EmployeeProfile.list(null, 1000),
     ]);
     setTransactions(txs);
     setEmployees(emps);
@@ -318,16 +318,22 @@ export default function Dashboard() {
             </div>
             <div className="space-y-3">
               {(() => {
+                const normalizeId = (employeeId) => {
+                  const p = employees.find(p => p.user_id === employeeId || p.id === employeeId);
+                  return p?.user_id || employeeId;
+                };
+                
                 const empPoints = {};
                 const empNames = {};
                 const empPhotos = {};
                 const empSectors = {};
                 transactions.forEach(t => {
-                  empPoints[t.employee_id] = (empPoints[t.employee_id] || 0) + t.points;
-                  empNames[t.employee_id] = t.employee_name;
-                  empSectors[t.employee_id] = t.sector;
-                  const emp = employees.find(e => e.user_id === t.employee_id || e.id === t.employee_id);
-                  if (emp?.photo_url) empPhotos[t.employee_id] = emp.photo_url;
+                  const nid = normalizeId(t.employee_id);
+                  empPoints[nid] = (empPoints[nid] || 0) + t.points;
+                  empNames[nid] = t.employee_name;
+                  empSectors[nid] = t.sector;
+                  const emp = employees.find(e => e.user_id === nid || e.id === nid);
+                  if (emp?.photo_url) empPhotos[nid] = emp.photo_url;
                 });
                 const topEmployees = Object.entries(empPoints)
                   .map(([id, points]) => ({ id, name: empNames[id], points, photo: empPhotos[id], sector: empSectors[id] }))
