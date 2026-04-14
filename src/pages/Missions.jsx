@@ -196,8 +196,10 @@ export default function Missions() {
       description: `Missão aprovada: ${request.mission_title}`,
       awarded_by_name: profile?.full_name || user.full_name,
     });
-    setRequests(prev => prev.map(r => r.id === request.id ? { ...r, status: "aprovado", approved_by_name: profile?.full_name || user.full_name } : r));
     setApproving(null);
+    // Recarrega do banco para garantir estado atualizado
+    const freshReqs = await base44.entities.MissionRequest.list("-created_date", 2000);
+    setRequests(freshReqs);
   };
 
   const handleReject = async () => {
