@@ -114,11 +114,7 @@ export default function RankingGeral() {
       const profs = await base44.entities.EmployeeProfile.list();
       const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
       const effectiveRoleInner = myProfile?.role || u.role;
-      if (effectiveRoleInner === "admin" || effectiveRoleInner === "manager") {
-        setSelectedSector("geral");
-      } else {
-        setSelectedSector(myProfile?.sector || u.sector || "geral");
-      }
+      setSelectedSector("geral");
       setLoading(false);
     };
     load();
@@ -290,7 +286,6 @@ export default function RankingGeral() {
         {/* Sidebar de setores - horizontal scroll no mobile */}
         <aside className="w-full lg:w-48 lg:shrink-0 bg-gray-800/40 border border-gray-800 rounded-xl overflow-hidden">
           <div className="flex lg:flex-col overflow-x-auto lg:overflow-x-visible">
-          {(effectiveRole === "admin" || effectiveRole === "manager") && (
           <button
             onClick={() => setSelectedSector("geral")}
             className={`shrink-0 lg:shrink flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all border-b lg:border-b border-r lg:border-r-0 border-gray-700 whitespace-nowrap ${
@@ -302,7 +297,6 @@ export default function RankingGeral() {
             <BarChart2 className="w-4 h-4 shrink-0" />
             <span>Geral</span>
           </button>
-          )}
           {availableSectors.map(sector => (
             <button
               key={sector}
