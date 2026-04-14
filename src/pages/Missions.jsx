@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Target, Plus, Trash2, CheckCircle, Clock, XCircle, Bell, Camera, X, Image, ChevronDown, ChevronRight, RotateCcw, Search } from "lucide-react";
+import { formatBRT } from "@/utils/dateUtils";
 import { FaRocket, FaClipboardList, FaHeart, FaStar, FaExclamationCircle, FaBullseye, FaComment } from 'react-icons/fa';
 
 
@@ -569,7 +570,7 @@ export default function Missions() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white font-medium text-sm">{r.mission_title}</p>
-                  <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
+                  <p className="text-gray-500 text-xs">{formatBRT(r.created_date, "date")}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`font-bold text-sm ${r.mission_points >= 0 ? "text-green-400" : "text-red-400"}`}>{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
@@ -638,7 +639,7 @@ export default function Missions() {
                             <div className="flex-1 min-w-0">
                               <p className="text-white font-medium text-sm">{r.mission_title}</p>
                               <p className="text-gray-400 text-xs">{r.employee_name} · {r.sector}</p>
-                              <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
+                              <p className="text-gray-500 text-xs">{formatBRT(r.created_date, "date")}</p>
                               {r.justification && (
                                 <p className="flex items-center gap-1.5 text-gray-300 text-xs mt-1.5 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">{r.justification}</p>
                               )}
@@ -690,7 +691,7 @@ export default function Missions() {
                     <div key={r.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
                       <div>
                         <p className="text-white text-sm">{r.mission_title}</p>
-                        <p className="text-gray-500 text-xs">{r.employee_name} · {new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
+                        <p className="text-gray-500 text-xs">{r.employee_name} · {formatBRT(r.created_date, "date")}</p>
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
@@ -758,7 +759,7 @@ export default function Missions() {
                           <div className="flex-1 min-w-0">
                             <p className="text-white font-medium text-sm">{r.mission_title}</p>
                             <p className="text-gray-400 text-xs">{r.employee_name} · {r.sector}</p>
-                            <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
+                            <p className="text-gray-500 text-xs">{formatBRT(r.created_date, "date")}</p>
                             {r.justification && (
                               <p className="flex items-center gap-1.5 text-gray-300 text-xs mt-1.5 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700"><FaComment className="text-gray-500 shrink-0" /> {r.justification}</p>
                             )}
@@ -823,7 +824,7 @@ export default function Missions() {
                     <div key={r.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
                       <div>
                         <p className="text-white text-sm">{r.mission_title}</p>
-                        <p className="text-gray-500 text-xs">{r.employee_name} · {new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
+                        <p className="text-gray-500 text-xs">{r.employee_name} · {formatBRT(r.created_date, "date")}</p>
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>

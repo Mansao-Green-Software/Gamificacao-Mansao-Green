@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Star, Plus, History, Trash2, Search, X, ChevronDown } from "lucide-react";
+import { formatBRT, nowBRT, todayBRT } from "@/utils/dateUtils";
 
 const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "Feira FC", "TI", "IA/Automação"];
 
@@ -79,25 +80,27 @@ export default function ManagePoints() {
   const selectedEmployee = employees.find(e => e.user_id === form.employee_id || e.id === form.employee_id);
 
   // Check if a mission was already submitted for an employee in the current period
+  const toBRT = (date) => new Date(new Date(date).toLocaleString("sv-SE", { timeZone: "America/Sao_Paulo" }));
+
   const isMissionSubmittedInPeriod = (missionId, missionTitle, employeeId, frequency) => {
     if (!frequency || !employeeId) return false;
-    const now = new Date();
+    const now = toBRT(new Date());
     return transactions.some(t => {
       const missionMatch = t.mission_id === missionId || t.description === missionTitle || t.mission_title === missionTitle;
       if (!missionMatch) return false;
       if (t.employee_id !== employeeId) return false;
-      const txDate = new Date(t.created_date);
+      const txBRT = toBRT(t.created_date);
       if (frequency === "Diária") {
-        return txDate.toDateString() === now.toDateString();
+        return txBRT.toDateString() === now.toDateString();
       }
       if (frequency === "Semanal") {
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - now.getDay());
         startOfWeek.setHours(0, 0, 0, 0);
-        return txDate >= startOfWeek;
+        return txBRT >= startOfWeek;
       }
       if (frequency === "Mensal") {
-        return txDate.getMonth() === now.getMonth() && txDate.getFullYear() === now.getFullYear();
+        return txBRT.getMonth() === now.getMonth() && txBRT.getFullYear() === now.getFullYear();
       }
       return false;
     });
@@ -451,7 +454,7 @@ export default function ManagePoints() {
                         <span className="text-xs px-2 py-0.5 bg-gray-700 text-gray-400 rounded-full shrink-0">{tx.sector}</span>
                       </div>
                       <p className="text-gray-500 text-xs truncate">{tx.description || tx.mission_title || "—"}</p>
-                      <p className="text-gray-600 text-xs">por {tx.awarded_by_name} · {new Date(tx.created_date).toLocaleString("pt-BR", { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                      <p className="text-gray-600 text-xs">por {tx.awarded_by_name} · {formatBRT(tx.created_date)}</p>
                     </div>
                     <div className="flex items-center gap-3 ml-3">
                       <span className={`font-bold text-sm ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>
@@ -503,7 +506,7 @@ export default function ManagePoints() {
                     <div className="flex-1 min-w-0">
                       <p className="text-white text-sm font-medium truncate">{tx.employee_name}</p>
                       <p className="text-gray-500 text-xs truncate">{tx.description || tx.mission_title || "—"}</p>
-                      <p className="text-gray-600 text-xs">por {tx.awarded_by_name} · {new Date(tx.created_date).toLocaleString("pt-BR", { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                      <p className="text-gray-600 text-xs">por {tx.awarded_by_name} · {formatBRT(tx.created_date)}</p>
                     </div>
                     <div className="flex items-center gap-3 ml-3">
                       <div className="text-right">
