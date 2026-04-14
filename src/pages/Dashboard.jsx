@@ -75,7 +75,7 @@ export default function Dashboard() {
     );
     const pts = {};
     const employeesData = {};
-    
+
     // Variáveis para a média global (C) do Score Bayesiano
     let globalTotalPoints = 0;
     const globalEmployees = new Set();
@@ -93,7 +93,7 @@ export default function Dashboard() {
 
     // C: Média global de pontos por pessoa
     const C = globalTotalPoints / Math.max(1, globalEmployees.size);
-    
+
     // m: Tamanho médio dos setores (peso da média global na fórmula)
     let totalSectors = 0;
     let totalEmps = 0;
@@ -108,12 +108,12 @@ export default function Dashboard() {
       if (v === 0) {
         return { sector: s, points: 0 };
       }
-      
+
       const R = pts[s] / v; // Média real do setor
-      
+
       // Regra de Score Bayesiano: pondera a média do setor com a média global
       const bayesianScore = (v * R + m * C) / (v + m);
-      
+
       return { sector: s, points: Math.round(bayesianScore) };
     }).sort((a, b) => b.points - a.points);
     setSectorRanking(ranked);
@@ -248,144 +248,144 @@ export default function Dashboard() {
       {/* TAB: Visão Geral */}
       {activeTab === "overview" && <>
 
-      {/* My stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gray-800/40 border-l-4 border-green-600 rounded-xl p-5">
-          <div className="flex items-center gap-3 mb-3">
-           
-            <span className="text-gray-400 text-xs uppercase">Meus Pontos</span>
-          </div>
-          <p className="text-3xl font-bold text-white">{myPoints.toLocaleString()}</p>
-        </div>
+        {/* My stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-gray-800/40 border-l-4 border-green-600 rounded-xl p-5">
+            <div className="flex items-center gap-3 mb-3">
 
-        <div className="bg-gray-800/40 border-l-4 border-amber-500 rounded-xl p-5">
-          <div className="flex items-center gap-3 mb-3">
-           
-            <span className="text-gray-400 text-xs uppercase">Meu Ranking</span>
+              <span className="text-gray-400 text-xs uppercase">Meus Pontos</span>
+            </div>
+            <p className="text-3xl font-bold text-white">{myPoints.toLocaleString()}</p>
           </div>
-          <p className="text-3xl font-bold text-white">{myRank ? `#${myRank}` : "-"}</p>
-          {mySector && <p className="text-xs text-gray-500 mt-1">no {mySector}</p>}
-        </div>
 
-        <div className="bg-gray-800/40 border-l-4 border-blue-500 rounded-xl p-5">
-          <div className="flex items-center gap-3 mb-3">
-           
-            <span className="text-gray-400 text-xs uppercase">Setor</span>
-          </div>
-          <p className="text-lg font-bold text-white truncate">{mySector || "Não definido"}</p>
-        </div>
-      </div>
+          <div className="bg-gray-800/40 border-l-4 border-amber-500 rounded-xl p-5">
+            <div className="flex items-center gap-3 mb-3">
 
-      {/* Rankings grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top 5 Setores */}
-        <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-white font-bold flex items-center gap-2 uppercase">
-              <GoGraph className="w-4 h-4 text-green-400" />
-              Top 5 Setores
-            </h2>
-            <Link to={createPageUrl("RankingGeral")} className="text-green-400 text-sm hover:underline">Ver tudo</Link>
+              <span className="text-gray-400 text-xs uppercase">Meu Ranking</span>
+            </div>
+            <p className="text-3xl font-bold text-white">{myRank ? `#${myRank}` : "-"}</p>
+            {mySector && <p className="text-xs text-gray-500 mt-1">no {mySector}</p>}
           </div>
-          <div className="space-y-3">
-            {sectorRanking.slice(0, 5).map((item, idx) => {
-              const isMe = item.sector === mySector;
-              return (
-                <div key={item.sector} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
-                  <span className="w-8 flex items-center justify-center">{getMedal(idx)}</span>
-                  <div className={`flex-1 h-2 rounded-full bg-gray-700 overflow-hidden`}>
-                    <div
-                      className={`h-full rounded-full bg-gradient-to-r ${SECTOR_COLORS[item.sector] || "from-green-500 to-teal-500"}`}
-                      style={{ width: sectorRanking[0].points > 0 ? `${(item.points / sectorRanking[0].points) * 100}%` : "0%" }}
-                    />
-                  </div>
-                  <span className="text-white text-sm font-medium w-24 truncate">{item.sector}</span>
-                  <span className="text-green-400 font-bold text-sm">{item.points.toLocaleString()} pts</span>
-                </div>
-              );
-            })}
+
+          <div className="bg-gray-800/40 border-l-4 border-blue-500 rounded-xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+
+              <span className="text-gray-400 text-xs uppercase">Setor</span>
+            </div>
+            <p className="text-lg font-bold text-white truncate">{mySector || "Não definido"}</p>
           </div>
         </div>
 
-        {/* Top 5 MG (Colaboradores) */}
-        <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-white font-bold flex items-center gap-2 uppercase">
-              <Trophy className="w-4 h-4 text-green-400" />
-              Top 5 MG
-            </h2>
-            <Link to={createPageUrl("RankingGeral")} className="text-green-400 text-sm hover:underline">Ver tudo</Link>
-          </div>
-          <div className="space-y-3">
-            {(() => {
-              const empPoints = {};
-              const empNames = {};
-              const empPhotos = {};
-              const empSectors = {};
-              transactions.forEach(t => {
-                empPoints[t.employee_id] = (empPoints[t.employee_id] || 0) + t.points;
-                empNames[t.employee_id] = t.employee_name;
-                empSectors[t.employee_id] = t.sector;
-                const emp = employees.find(e => e.user_id === t.employee_id || e.id === t.employee_id);
-                if (emp?.photo_url) empPhotos[t.employee_id] = emp.photo_url;
-              });
-              const topEmployees = Object.entries(empPoints)
-                .map(([id, points]) => ({ id, name: empNames[id], points, photo: empPhotos[id], sector: empSectors[id] }))
-                .sort((a, b) => b.points - a.points)
-                .slice(0, 5);
-              const maxPoints = topEmployees[0]?.points || 1;
-              
-              return topEmployees.map((emp, idx) => {
-                const isMe = emp.id === user?.id;
+        {/* Rankings grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Top 5 Setores */}
+          <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-white font-bold flex items-center gap-2 uppercase">
+                <GoGraph className="w-4 h-4 text-green-400" />
+                Top 5 Setores
+              </h2>
+              <Link to={createPageUrl("RankingGeral")} className="text-green-400 text-sm hover:underline">Ver tudo</Link>
+            </div>
+            <div className="space-y-3">
+              {sectorRanking.slice(0, 5).map((item, idx) => {
+                const isMe = item.sector === mySector;
                 return (
-                  <div key={emp.id} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
+                  <div key={item.sector} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
                     <span className="w-8 flex items-center justify-center">{getMedal(idx)}</span>
-                    <div className="w-8 h-8 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0">
-                      {emp.photo ? (
-                        <img src={emp.photo} alt={emp.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-gray-400 text-xs font-bold">{emp.name?.[0]?.toUpperCase()}</span>
-                      )}
+                    <div className={`flex-1 h-2 rounded-full bg-gray-700 overflow-hidden`}>
+                      <div
+                        className={`h-full rounded-full bg-gradient-to-r ${SECTOR_COLORS[item.sector] || "from-green-500 to-teal-500"}`}
+                        style={{ width: sectorRanking[0].points > 0 ? `${(item.points / sectorRanking[0].points) * 100}%` : "0%" }}
+                      />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium truncate">{emp.name}</p>
-                      {emp.sector && <p className="text-gray-500 text-xs truncate">{emp.sector}</p>}
-                      <div className="h-1.5 bg-gray-700 rounded-full mt-1 overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-green-500 to-teal-500"
-                          style={{ width: `${(emp.points / maxPoints) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                    <span className="text-green-400 font-bold text-sm shrink-0">{emp.points.toLocaleString()} pts</span>
+                    <span className="text-white text-sm font-medium w-24 truncate">{item.sector}</span>
+                    <span className="text-green-400 font-bold text-sm">{item.points.toLocaleString()} pts</span>
                   </div>
                 );
-              });
-            })()}
+              })}
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Recent transactions */}
-      {myTxs.length > 0 && (
-        <div className="bg-gray-800/40 border border-gray-700 rounded-xl p-6">
-          <h2 className="text-white font-bold mb-4 flex items-center gap-2">
-            <Target className="w-5 h-5 text-green-400" />
-            Últimas Pontuações Recebidas
-          </h2>
-          <div className="space-y-2">
-            {myTxs.slice(0, 5).map(tx => (
-              <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
-                <div>
-                  <p className="text-white text-sm font-medium">{tx.mission_title || tx.description || "Pontuação manual"}</p>
-                  <p className="text-gray-500 text-xs">por {tx.awarded_by_name || "Admin"}</p>
-                </div>
-                <span className={`font-bold ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>{tx.points >= 0 ? "+" : ""}{tx.points}</span>
-              </div>
-            ))}
+          {/* Top 5 MG (Colaboradores) */}
+          <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-white font-bold flex items-center gap-2 uppercase">
+                <Trophy className="w-4 h-4 text-green-400" />
+                Top 5 MG
+              </h2>
+              <Link to={createPageUrl("RankingGeral")} className="text-green-400 text-sm hover:underline">Ver tudo</Link>
+            </div>
+            <div className="space-y-3">
+              {(() => {
+                const empPoints = {};
+                const empNames = {};
+                const empPhotos = {};
+                const empSectors = {};
+                transactions.forEach(t => {
+                  empPoints[t.employee_id] = (empPoints[t.employee_id] || 0) + t.points;
+                  empNames[t.employee_id] = t.employee_name;
+                  empSectors[t.employee_id] = t.sector;
+                  const emp = employees.find(e => e.user_id === t.employee_id || e.id === t.employee_id);
+                  if (emp?.photo_url) empPhotos[t.employee_id] = emp.photo_url;
+                });
+                const topEmployees = Object.entries(empPoints)
+                  .map(([id, points]) => ({ id, name: empNames[id], points, photo: empPhotos[id], sector: empSectors[id] }))
+                  .sort((a, b) => b.points - a.points)
+                  .slice(0, 5);
+                const maxPoints = topEmployees[0]?.points || 1;
+
+                return topEmployees.map((emp, idx) => {
+                  const isMe = emp.id === user?.id;
+                  return (
+                    <div key={emp.id} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
+                      <span className="w-8 flex items-center justify-center">{getMedal(idx)}</span>
+                      <div className="w-8 h-8 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0">
+                        {emp.photo ? (
+                          <img src={emp.photo} alt={emp.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-gray-400 text-xs font-bold">{emp.name?.[0]?.toUpperCase()}</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm font-medium truncate">{emp.name}</p>
+                        {emp.sector && <p className="text-gray-500 text-xs truncate">{emp.sector}</p>}
+                        <div className="h-1.5 bg-gray-700 rounded-full mt-1 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-green-500 to-teal-500"
+                            style={{ width: `${(emp.points / maxPoints) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="text-green-400 font-bold text-sm shrink-0">{emp.points.toLocaleString()} pts</span>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
           </div>
         </div>
-      )}
+
+        {/* Recent transactions */}
+        {myTxs.length > 0 && (
+          <div className="bg-gray-800/40 border border-gray-700 rounded-xl p-6">
+            <h2 className="text-white font-bold mb-4 flex items-center gap-2">
+              <Target className="w-5 h-5 text-green-400" />
+              Últimas Pontuações Recebidas
+            </h2>
+            <div className="space-y-2">
+              {myTxs.slice(0, 5).map(tx => (
+                <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
+                  <div>
+                    <p className="text-white text-sm font-medium">{tx.mission_title || tx.description || "Pontuação manual"}</p>
+                    <p className="text-gray-500 text-xs">por {tx.awarded_by_name || "Admin"}</p>
+                  </div>
+                  <span className={`font-bold ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>{tx.points >= 0 ? "+" : ""}{tx.points}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
       </>}
     </div>

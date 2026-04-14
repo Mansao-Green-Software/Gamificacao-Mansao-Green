@@ -229,7 +229,15 @@ export default function RankingGeral() {
   const employeeRanking = getEmployeeRanking(selectedSector);
   const maxEmpPts = employeeRanking[0]?.points || 1;
 
-  const availableSectors = isAdminOrManager ? [...SECTORS, ...VIRTUAL_SECTORS] : [myProfile?.sector || user?.sector].filter(Boolean);
+  let availableSectors = [];
+  if (isAdminOrManager) {
+    availableSectors = [...SECTORS, ...VIRTUAL_SECTORS];
+  } else if (effectiveRole === "supervisor") {
+    const userSector = myProfile?.sector || user?.sector;
+    availableSectors = [...new Set([userSector, "Supervisor"].filter(Boolean))];
+  } else {
+    availableSectors = [myProfile?.sector || user?.sector].filter(Boolean);
+  }
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
