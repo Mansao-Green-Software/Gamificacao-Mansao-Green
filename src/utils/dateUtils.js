@@ -5,10 +5,21 @@ const TZ = "America/Sao_Paulo";
  * @param {string|Date} date
  * @param {"datetime"|"date"|"time"} mode
  */
+function parseUTC(date) {
+  if (!date) return null;
+  if (date instanceof Date) return date;
+  // Se a string não tem indicador de fuso, assume UTC
+  const s = String(date);
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s) && !/[Z+\-]\d{2}:?\d{2}$/.test(s) && !s.endsWith("Z")) {
+    return new Date(s + "Z");
+  }
+  return new Date(s);
+}
+
 export function formatBRT(date, mode = "datetime") {
   if (!date) return "—";
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return "—";
+  const d = parseUTC(date);
+  if (!d || isNaN(d.getTime())) return "—";
 
   const opts =
     mode === "date"
@@ -32,7 +43,7 @@ export function nowBRT() {
  * Converte qualquer Date para um Date "ingênuo" com os componentes de Brasília.
  */
 export function dateToBRT(date) {
-  const d = new Date(date);
+  const d = parseUTC(date);
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: TZ,
     year: "numeric", month: "2-digit", day: "2-digit",
