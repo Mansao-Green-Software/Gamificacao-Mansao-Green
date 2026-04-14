@@ -184,7 +184,7 @@ export default function GreenShop() {
         {canEditRewards && (
           <button
             onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium text-sm transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-gray-900 rounded-xl font-medium text-sm transition-colors"
           >
             <Plus className="w-4 h-4" />
             Novo Prêmio
@@ -193,27 +193,27 @@ export default function GreenShop() {
       </div>
 
       {/* Points banner */}
-      <div className="bg-gradient-to-r from-green-900/60 to-teal-900/60 border border-green-700/50 rounded-2xl p-5 flex items-center justify-between">
+      <div className="bg-gradient-to-br from-teal-900/60 via-gray-800/60 to-teal-900/60 border-2 border-green-700/50 rounded-xl p-5 flex items-center justify-between">
         <div>
-          <p className="text-green-300 text-sm font-medium">Seus pontos disponíveis</p>
+          <p className="text-white text-sm font-medium">Seus pontos disponíveis</p>
           <p className="text-4xl font-bold text-white mt-1">{availablePoints.toLocaleString()} <span className="text-green-400 text-lg">pts</span></p>
           <p className="text-gray-400 text-xs mt-1">{myPoints.toLocaleString()} ganhos · {spentPoints.toLocaleString()} gastos</p>
         </div>
-        <div className="w-16 h-16 bg-green-500/20 rounded-2xl flex items-center justify-center">
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center">
           <Star className="w-8 h-8 text-green-400" />
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1 w-fit">
-        <button onClick={() => setTab("loja")} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "loja" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}>
+      <div className="flex gap-2 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-fit">
+        <button onClick={() => setTab("loja")} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "loja" ? "bg-green-500 text-gray-900" : "text-gray-400 hover:text-white"}`}>
           Loja
         </button>
-        <button onClick={() => setTab("resgates")} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "resgates" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}>
+        <button onClick={() => setTab("resgates")} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "resgates" ? "bg-green-500 text-gray-900" : "text-gray-400 hover:text-white"}`}>
           Meus Resgates {myRedemptions.length > 0 && <span className="ml-1.5 bg-green-700 text-white text-xs px-1.5 py-0.5 rounded-full">{myRedemptions.length}</span>}
         </button>
         {isManager && (
-          <button onClick={() => setTab("admin")} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "admin" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}>
+          <button onClick={() => setTab("admin")} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "admin" ? "bg-green-500 text-gray-900" : "text-gray-400 hover:text-white"}`}>
             Gerenciar
           </button>
         )}
@@ -273,7 +273,7 @@ export default function GreenShop() {
           {/* Category filter */}
           <div className="flex flex-wrap gap-2">
             {["Todos", ...CATEGORIES].map(c => (
-              <button key={c} onClick={() => setFilterCategory(c)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filterCategory === c ? "bg-green-500 text-white" : "bg-gray-800 text-gray-400 hover:text-white border border-gray-700"}`}>{c}</button>
+              <button key={c} onClick={() => setFilterCategory(c)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filterCategory === c ? "bg-green-500 text-gray-900" : "bg-gray-900/40 text-gray-400 hover:text-white border border-gray-700"}`}>{c}</button>
             ))}
           </div>
 
@@ -287,53 +287,75 @@ export default function GreenShop() {
               {filteredRewards.map(reward => {
                 const canAfford = availablePoints >= reward.points_cost;
                 const outOfStock = reward.stock !== null && reward.stock !== undefined && reward.stock <= 0;
+               
                 return (
-                  <div key={reward.id} className={`bg-gray-800 border rounded-2xl overflow-hidden flex flex-col ${outOfStock ? "opacity-50 border-gray-700" : canAfford ? "border-gray-700 hover:border-green-600 transition-colors" : "border-gray-700 opacity-75"}`}>
-                    {reward.image_url ? (
-                      <div className="w-full aspect-[4/5] overflow-hidden">
-                        <img src={reward.image_url} alt={reward.title} className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="w-full aspect-[4/5] bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
-                        <ShoppingBag className="w-12 h-12 text-gray-600" />
-                      </div>
-                    )}
-                    <div className="p-4 flex flex-col flex-1 gap-3">
-                      <div>
-                        <div className="flex items-start justify-between gap-2">
-                          <h3 className="text-white font-bold text-sm">{reward.title}</h3>
-                          <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${CATEGORY_COLORS[reward.category]}`}>{reward.category}</span>
+                  <div key={reward.id} className={`group relative bg-gray-900/40 backdrop-blur-md border rounded-2xl overflow-hidden flex flex-col transition-all duration-300 ${outOfStock ? "opacity-60 border-gray-800 grayscale-[0.3]" : canAfford ? "border-gray-700/50 hover:border-green-500/50 hover:-translate-y-1 hover:shadow-2xl hover:shadow-green-900/20" : "border-gray-800 opacity-80"}`}>
+                    
+                    {/* Imagem do Produto */}
+                    <div className="w-full aspect-[4/3] overflow-hidden relative border-b border-gray-800">
+                      {reward.image_url ? (
+                        <img src={reward.image_url} alt={reward.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
+                          <ShoppingBag className="w-16 h-16 text-gray-700" />
                         </div>
-                        {reward.description && <p className="text-gray-400 text-xs mt-1">{reward.description}</p>}
+                      )}
+                      
+                      {/* Fade para mesclar a imagem com o card */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-80"></div>
+                      
+                      {/* Categoria */}
+                      <div className="absolute top-3 right-3 flex flex-col items-end gap-2 text-right">
+                        <span className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-full shadow-lg backdrop-blur-md border border-white/10 ${CATEGORY_COLORS[reward.category]}`}>
+                          {reward.category}
+                        </span>
                       </div>
-                      <div className="flex items-center justify-between mt-auto">
-                        <div className="flex items-center gap-1.5">
-                          <Star className="w-4 h-4 text-green-400" />
-                          <span className="text-green-400 font-bold">{reward.points_cost.toLocaleString()}</span>
-                          <span className="text-gray-500 text-xs">pts</span>
+                    </div>
+                    
+                    {/* Conteúdo do Card */}
+                    <div className="p-5 flex flex-col flex-1 gap-4 relative z-10 bg-gradient-to-b from-gray-900/50 to-gray-900/10">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-white leading-tight group-hover:text-green-400 transition-colors drop-shadow-sm">{reward.title}</h3>
+                        {reward.description && <p className="text-gray-400 text-sm mt-2 line-clamp-2 leading-relaxed">{reward.description}</p>}
+                      </div>
+                      
+                      <div className="flex items-center justify-between py-3 border-y border-gray-800">
+                        <div className="flex items-center gap-2 ">
+                          <div className="w-8 h-8 rounded-full  flex items-center justify-center border border-gray-800 ">
+                            <Star className="w-4 h-4 text-green-400" />
+                          </div>
+                          <div className="flex items-baseline">
+                            <span className="text-green-400 font-bold text-xl leading-none">{reward.points_cost}</span>
+                            <span className="text-green-500/60 text-xs uppercase font-bold tracking-wider ml-1">pts</span>
+                          </div>
                         </div>
                         {reward.stock !== null && reward.stock !== undefined && (
-                          <span className="text-xs text-gray-500">{reward.stock} em estoque</span>
+                          <div className="text-right">
+                            <span className="block text-[10px] uppercase font-bold tracking-wider text-gray-500">Estoque</span>
+                            <span className="text-gray-300 font-medium text-sm">{reward.stock} un.</span>
+                          </div>
                         )}
                       </div>
+
                       <button
                         onClick={() => setConfirmReward(reward)}
                         disabled={!canAfford || outOfStock || redeeming === reward.id}
-                        className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                          outOfStock ? "bg-gray-700 text-gray-500 cursor-not-allowed" :
-                          canAfford ? "bg-green-500 hover:bg-green-600 text-white" :
-                          "bg-gray-700 text-gray-500 cursor-not-allowed"
+                        className={`w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98] ${
+                          outOfStock ? "bg-gray-800 text-gray-500 cursor-not-allowed border-2 border-gray-700" :
+                          canAfford ? "bg-green-500 hover:bg-green-400 text-gray-900 shadow-xl shadow-green-500/20" :
+                          "bg-gray-800 text-gray-500 cursor-not-allowed border-2 border-gray-700"
                         }`}
                       >
-                        {outOfStock ? "Esgotado" : !canAfford ? "Pontos insuficientes" : "Resgatar"}
+                        {outOfStock ? "Esgotado" : !canAfford ? "Pontos insuficientes" : "Resgatar Prêmio"}
                       </button>
+
                       {canEditRewards && (
-                        <div className="flex gap-2">
-                          <button onClick={() => handleEditReward(reward)} className="flex-1 py-2 rounded-xl text-sm font-medium text-blue-400 hover:bg-blue-900/20 transition-colors border border-blue-900/30 flex items-center justify-center gap-1">
+                        <div className="flex gap-2 pt-1">
+                          <button onClick={() => handleEditReward(reward)} className="flex-1 py-2.5 rounded-lg text-xs font-semibold text-blue-400 hover:bg-blue-500 hover:text-white transition-colors border border-blue-900/30 flex items-center justify-center gap-1.5">
                             <Edit2 className="w-3.5 h-3.5" /> Editar
                           </button>
-                          <button onClick={() => handleDelete(reward.id)} className="flex-1 py-2 rounded-xl text-sm font-medium text-red-400 hover:bg-red-900/20 transition-colors border border-red-900/30">
-                            Remover
+                          <button onClick={() => handleDelete(reward.id)} className="flex-1 py-2.5 rounded-lg text-xs font-semibold text-red-400 hover:bg-red-500 hover:text-white transition-colors border border-red-900/30 flex items-center justify-center gap-1.5">
+                            <Trash2 className="w-3.5 h-3.5" /> Remover
                           </button>
                         </div>
                       )}
