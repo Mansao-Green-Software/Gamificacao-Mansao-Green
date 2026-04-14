@@ -45,7 +45,8 @@ export default function Layout({ children, currentPageName }) {
 
   const isAdmin = user?.role === "admin";
   const isSupervisor = user?.role === "supervisor";
-  const isManager = user?.role === "manager" || isAdmin || isSupervisor;
+  const isDirector = user?.role === "director";
+  const isManager = user?.role === "manager" || isAdmin || isSupervisor || isDirector;
 
   const navItems = [
     { label: "Dashboard", page: "Dashboard", icon: LayoutDashboard },
@@ -116,6 +117,7 @@ export default function Layout({ children, currentPageName }) {
                   {(() => {
                     const role = profile?.role || user.role;
                     if (role === "admin") return "Admin";
+                    if (role === "director") return "Diretor";
                     if (role === "manager") return "Gerente";
                     if (role === "supervisor") return "Supervisor";
                     return "Colaborador";
@@ -210,6 +212,7 @@ export default function Layout({ children, currentPageName }) {
                   {(() => {
                     const role = profile?.role || user.role;
                     if (role === "admin") return "Admin";
+                    if (role === "director") return "Diretor";
                     if (role === "manager") return "Gerente";
                     if (role === "supervisor") return "Supervisor";
                     return "Colaborador";

@@ -49,7 +49,7 @@ export default function Missions() {
     if (!user) setUser(u);
     const [ms, profs, reqs, subs] = await Promise.all([
       base44.entities.Mission.filter({ is_active: true }),
-      base44.entities.EmployeeProfile.list(),
+      base44.entities.EmployeeProfile.list(null, 1000),
       base44.entities.MissionRequest.list("-created_date", 1000),
       base44.entities.SubSector.list(),
     ]);
@@ -69,7 +69,7 @@ export default function Missions() {
       setUser(u);
       const [ms, profs, reqs, subs] = await Promise.all([
         base44.entities.Mission.filter({ is_active: true }),
-        base44.entities.EmployeeProfile.list(),
+        base44.entities.EmployeeProfile.list(null, 1000),
         base44.entities.MissionRequest.list("-created_date", 2000),
         base44.entities.SubSector.list(),
       ]);
@@ -87,7 +87,8 @@ export default function Missions() {
   const effectiveRole = profile?.role || user?.role;
   const isGerenteViewer = user?.email === "igaming@gruporoyalty.com";
   const isAdmin = effectiveRole === "admin";
-  const isManager = effectiveRole === "manager" || effectiveRole === "supervisor" || isAdmin;
+  const isDirector = effectiveRole === "director";
+  const isManager = effectiveRole === "manager" || effectiveRole === "supervisor" || isAdmin || isDirector;
   const mySector = profile?.sector || user?.sector;
   const myExtraSectors = profile?.extra_sectors || [];
   const allMySectors = mySector ? [mySector, ...myExtraSectors] : [];
@@ -101,8 +102,9 @@ export default function Missions() {
   const visibleMissions = missions.filter(m => {
     if (!m.is_active) return false;
     if (isAdmin) return true;
-    if ((effectiveRole === "manager" || isAdmin) && m.sector === "Gerência") return true;
-    if (effectiveRole === "supervisor" && m.sector === "Supervisor") return true;
+    if (isDirector) return false;
+    if (effectiveRole === "manager") return m.sector === "Gerência";
+    if (effectiveRole === "supervisor") return m.sector === "Supervisor" || allMySectors.includes(m.sector) || m.sector === "Todos";
     return allMySectors.includes(m.sector) || m.sector === "Todos";
   });
 
@@ -124,12 +126,22 @@ export default function Missions() {
 
   const myId = profile?.user_id || profile?.id || user?.id;
 
-  // Pending requests visible to manager/supervisor - respecting hierarchy
+  // Pending requests visible to manager/supervisor/director - respecting hierarchy
   const pendingRequests = isManager
     ? requests.filter(r => {
         if (r.status !== "pendente") return false;
         if (r.employee_id === myId) return false; // nunca mostra própria solicitação
         if (isAdmin) return true;
+        // Diretor: vê solicitações de todos do seu setor (incluindo gerentes)
+        if (isDirector) {
+          const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
+          const effectiveSector = r.sector || empProfile?.sector;
+          // Para gerentes, o sector da solicitação é "Gerência", mas o perfil tem o setor real
+          if (empProfile?.role === "manager" || empProfile?.role === "director") {
+            return allMySectors.includes(empProfile.sector);
+          }
+          return allMySectors.includes(effectiveSector);
+        }
         // Resolve sector from request or fallback to employee profile
         const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
         const effectiveSector = r.sector || empProfile?.sector;
@@ -164,7 +176,7 @@ export default function Missions() {
   const handleSubmitRequest = async () => {
     if (!requestModal) return;
     setSubmitting(requestModal.id);
-    const requestSector = (effectiveRole === "manager" || effectiveRole === "admin") ? "Gerência" : effectiveRole === "supervisor" ? "Supervisor" : mySector;
+    const requestSector = (effectiveRole === "manager" || effectiveRole === "admin" || effectiveRole === "director") ? "Gerência" : effectiveRole === "supervisor" ? "Supervisor" : mySector;
     const req = await base44.entities.MissionRequest.create({
       employee_id: profile?.user_id || profile?.id || user.id,
       employee_name: profile?.full_name || user.full_name,
@@ -800,6 +812,13 @@ export default function Missions() {
               if (isAdmin) return true;
               const emp = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
               const effectiveSector = r.sector || emp?.sector;
+              if (isDirector) {
+                // Para gerentes, o sector da solicitação é "Gerência", mas o perfil tem o setor real
+                if (emp?.role === "manager" || emp?.role === "director") {
+                  return allMySectors.includes(emp.sector);
+                }
+                return allMySectors.includes(effectiveSector);
+              }
               if (effectiveRole === "supervisor") {
                 return effectiveSector !== "Supervisor" && allMySectors.includes(effectiveSector);
               }

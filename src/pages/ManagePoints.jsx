@@ -33,11 +33,12 @@ export default function ManagePoints() {
       setUser(u);
 
       const isAdmin = u.role === "admin";
+      const isDirector = u.role === "director";
       const [emps, txs, ms, allTxs, subs] = await Promise.all([
-        base44.entities.EmployeeProfile.list(),
+        base44.entities.EmployeeProfile.list(null, 1000),
         base44.entities.PointTransaction.list("-created_date", 500),
         base44.entities.Mission.filter({ is_active: true }),
-        isAdmin ? base44.entities.PointTransaction.list("-created_date", 1000) : Promise.resolve([]),
+        (isAdmin || isDirector) ? base44.entities.PointTransaction.list("-created_date", 1000) : Promise.resolve([]),
         base44.entities.SubSector.list(),
       ]);
       setSubSectors(subs);
@@ -48,24 +49,31 @@ export default function ManagePoints() {
       const myExtraSectors = myProfile?.extra_sectors || [];
       const allMySectors = mySector ? [mySector, ...myExtraSectors] : [];
 
-      const filtered = (isAdmin && !mySector)
-        ? emps
-        : emps.filter(e => {
-            if (isGerencia) return e.role === "manager" || e.role === "supervisor";
-            return allMySectors.includes(e.sector) && e.role !== "admin";
-          });
+      let filtered;
+      if (isAdmin && !mySector) {
+        filtered = emps;
+      } else if (isDirector) {
+        // Diretor vê apenas gerentes
+        filtered = emps.filter(e => e.role === "manager");
+      } else {
+        filtered = emps.filter(e => {
+          if (isGerencia) return e.role === "manager" || e.role === "supervisor";
+          return allMySectors.includes(e.sector) && e.role !== "admin" && e.role !== "director";
+        });
+      }
       setEmployees(filtered);
-      const filteredTxs = (isAdmin && !mySector) ? txs : txs.filter(t => allMySectors.includes(t.sector));
+      const filteredTxs = (isAdmin && !mySector) ? txs : isDirector ? txs.filter(t => t.sector === "Gerência") : txs.filter(t => allMySectors.includes(t.sector));
       setTransactions(filteredTxs);
-      const filteredMissions = (isAdmin && !mySector) ? ms : ms.filter(m => allMySectors.includes(m.sector) || m.sector === "Todos" || m.sector === "Supervisor");
+      const filteredMissions = (isAdmin && !mySector) ? ms : isDirector ? ms.filter(m => m.sector === "Gerência" || m.sector === "Todos") : ms.filter(m => allMySectors.includes(m.sector) || m.sector === "Todos" || m.sector === "Supervisor");
       setMissions(filteredMissions);
-      if (isAdmin) setAllTransactions(allTxs);
+      if (isAdmin || isDirector) setAllTransactions(allTxs);
       setLoading(false);
     };
     load();
   }, []);
 
   const isAdmin = user?.role === "admin";
+  const isDirector = user?.role === "director";
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -178,7 +186,7 @@ export default function ManagePoints() {
     </div>
   );
 
-  if (user?.role !== "admin" && user?.role !== "manager" && user?.role !== "supervisor") {
+  if (user?.role !== "admin" && user?.role !== "manager" && user?.role !== "supervisor" && user?.role !== "director") {
     return (
       <div className="text-center py-16 text-gray-500">
         <p>Acesso restrito a gerentes.</p>
@@ -203,7 +211,7 @@ export default function ManagePoints() {
         {[
           { id: "add", label: "Adicionar Pontos" },
           { id: "history", label: "Histórico" },
-          ...(isAdmin ? [{ id: "historyAll", label: "Histórico Geral" }] : [])
+          ...((isAdmin || isDirector) ? [{ id: "historyAll", label: "Histórico Geral" }] : [])
         ].map(t => (
           <button
             key={t.id}
@@ -405,8 +413,8 @@ export default function ManagePoints() {
         </div>
       )}
 
-      {/* History All tab - Admin only */}
-      {tab === "historyAll" && isAdmin && (
+      {/* History All tab - Admin/Director */}
+      {tab === "historyAll" && (isAdmin || isDirector) && (
         <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
             <h3 className="text-white font-bold flex items-center gap-2">

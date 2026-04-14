@@ -7,6 +7,7 @@ const ROLES = [
   { value: "user", label: "Colaborador" },
   { value: "supervisor", label: "Supervisor" },
   { value: "manager", label: "Gerente" },
+  { value: "director", label: "Diretor" },
   { value: "admin", label: "Admin" },
 ];
 
@@ -25,7 +26,7 @@ export default function Employees() {
     const load = async () => {
       const u = await base44.auth.me();
       setUser(u);
-      const emps = await base44.entities.EmployeeProfile.list();
+      const emps = await base44.entities.EmployeeProfile.list(null, 1000);
       setEmployees(emps);
       setLoading(false);
     };
@@ -87,17 +88,21 @@ export default function Employees() {
 
   const saveEdit = async (id) => {
     await base44.entities.EmployeeProfile.update(id, editForm);
-    // Sincroniza o role do usuário real na plataforma usando os dados atualizados do form
+    // Tenta sincronizar o role do usuário real na plataforma
     const userId = editForm.user_id;
     const userEmail = editForm.email;
     if ((userId || userEmail) && editForm.role) {
-      const allUsers = await base44.entities.User.list();
-      const linkedUser = allUsers.find(u =>
-        (userId && u.id === userId) ||
-        (userEmail && u.email === userEmail)
-      );
-      if (linkedUser) {
-        await base44.entities.User.update(linkedUser.id, { role: editForm.role });
+      try {
+        const allUsers = await base44.entities.User.list();
+        const linkedUser = allUsers.find(u =>
+          (userId && u.id === userId) ||
+          (userEmail && u.email === userEmail)
+        );
+        if (linkedUser) {
+          await base44.entities.User.update(linkedUser.id, { role: editForm.role });
+        }
+      } catch (e) {
+        // Sem permissão para listar/atualizar usuários — ignora silenciosamente
       }
     }
     setEmployees(prev => prev.map(e => e.id === id ? { ...e, ...editForm } : e));
@@ -391,6 +396,7 @@ export default function Employees() {
                         <div className="flex flex-col gap-1">
                           <span className={`text-xs px-2 py-0.5 rounded-full w-fit ${
                             emp.role === "admin" ? "bg-red-900/50 text-red-300" :
+                            emp.role === "director" ? "bg-yellow-900/50 text-yellow-300" :
                             emp.role === "manager" ? "bg-blue-900/50 text-blue-300" :
                             emp.role === "supervisor" ? "bg-purple-900/50 text-purple-300" :
                             "bg-gray-700 text-gray-300"
