@@ -47,7 +47,7 @@ export default function GreenShop() {
       const [rws, reds, allTxs, profiles] = await Promise.all([
         base44.entities.Reward.list(),
         base44.entities.RewardRedemption.list("-created_date", 200),
-        base44.entities.PointTransaction.list("-created_date", 1000),
+        base44.entities.PointTransaction.list("-created_date", 5000),
         base44.entities.EmployeeProfile.list(),
       ]);
       const found = profiles.find(p => p.user_id === u.id || p.email === u.email);
