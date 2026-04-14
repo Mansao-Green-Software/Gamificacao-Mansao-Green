@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Trophy, Users, BarChart2, RotateCcw, Info } from "lucide-react";
 import { FaMedal } from 'react-icons/fa';
+import EmployeeHistoryModal from "@/components/EmployeeHistoryModal";
 
 const SECTORS = ["Administrativo", "Affiliates", "Audiovisual", "Comercial", "Contingência", "Feira FC", "Financeiro", "Gerência", "IA/Automação", "Líder de Projeto", "Saúde e Bem Estar", "Serviços Gerais", "Social Media", "Suporte", "TI", "Tipster", "Tráfego"];
 const VIRTUAL_SECTORS = ["Supervisor"]; // setores virtuais baseados em função
@@ -82,6 +83,7 @@ export default function RankingGeral() {
   const [allProfiles, setAllProfiles] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [showInfo, setShowInfo] = useState(true);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   const loadData = async (u) => {
     const [txs, profs] = await Promise.all([
@@ -119,7 +121,7 @@ export default function RankingGeral() {
 
   const myProfile = Object.values(profiles).find(p => p.user_id === user?.id || p.email === user?.email);
   const effectiveRole = myProfile?.role || user?.role;
-  const isAdminOrManager = effectiveRole === "admin" || effectiveRole === "manager";
+  const isAdminOrManager = effectiveRole === "admin" || effectiveRole === "manager" || effectiveRole === "supervisor";
 
   const periodTxs = filterByPeriod(transactions, selectedPeriod);
 
@@ -383,11 +385,12 @@ export default function RankingGeral() {
                   {employeeRanking.map((emp, idx) => (
                     <div
                       key={emp.id}
-                      className={`flex items-center gap-4 p-3 rounded-xl ${
+                      onClick={() => isAdminOrManager && setSelectedEmployee(emp)}
+                      className={`flex items-center gap-4 p-3 rounded-xl transition-colors ${
                         idx === 0 ? "bg-amber-900/20 border border-amber-700/40" :
                         idx === 1 ? "bg-gray-700/30 border border-gray-600/30" :
                         "bg-gray-900/50"
-                      }`}
+                      } ${isAdminOrManager ? "cursor-pointer hover:bg-gray-700/50" : ""}`}
                     >
                       <span className="w-8 flex items-center justify-center shrink-0">{getMedal(idx)}</span>
                       <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-gray-700 overflow-hidden shrink-0 flex items-center justify-center">
@@ -415,6 +418,13 @@ export default function RankingGeral() {
           )}
         </div>
       </div>
+      {selectedEmployee && (
+        <EmployeeHistoryModal
+          employee={selectedEmployee}
+          transactions={transactions.filter(t => t.employee_id === selectedEmployee.id)}
+          onClose={() => setSelectedEmployee(null)}
+        />
+      )}
     </div>
   );
 }
