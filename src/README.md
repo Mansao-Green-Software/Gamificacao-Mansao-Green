@@ -32,8 +32,14 @@ Página inicial da plataforma.
 ### 🏆 Ranking Geral
 Visualização de rankings de performance.
 
-- **Ranking de Setores**: média de pontos por colaborador em cada setor.
-- **Ranking por Setor**: lista individual de colaboradores dentro de um setor selecionado.
+- **Ranking de Setores**: utiliza a regra do **Score Bayesiano** para garantir equilíbrio matemático e justiça entre times grandes e pequenos.
+  - O cálculo pondera a média local do setor contra a média global de toda a empresa.
+  - **Fórmula:** `Score = (v * R + m * C) / (v + m)`
+    - `v`: Número de membros pontuando no setor.
+    - `R`: Média real bruta de pontos do setor (`Total do Setor` ÷ `v`).
+    - `m`: Peso de confiança (calculado como tamanho médio dos setores).
+    - `C`: Média global de pontos por colaborador na empresa inteira.
+- **Ranking por Setor**: lista individual de pontuação dos colaboradores dentro de um setor selecionado.
 - Filtros de período: **Mensal**, **Trimestral (Abr–Jun)** e **Anual**.
 - Supervisores com `include_in_sector_ranking = false` aparecem no setor virtual **"Supervisor"**.
 
