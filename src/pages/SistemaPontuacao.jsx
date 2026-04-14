@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Zap, Star, Search, Pencil, Trash2, Check, X, Plus, ChevronDown, ChevronRight, Tag } from "lucide-react";
 import { FaRocket, FaClipboardList, FaHeart, FaStar, FaExclamationCircle, FaBullseye } from 'react-icons/fa';
 
-const SECTORS = ["Administrativo", "Affiliates", "Audiovisual", "Comercial", "Contingência", "Feira FC", "Financeiro", "Gerência", "IA/Automação", "Líder de Projeto", "Saúde e Bem Estar", "Serviços Gerais", "Social Media", "Suporte", "Supervisor", "TI", "Tipster", "Tráfego", "TV Green"];
+const SECTORS = ["Administrativo", "Affiliates", "Audiovisual", "Comercial", "Contingência", "Feira FC", "Financeiro", "Gerência", "IA/Automação", "Líder de Projeto", "Saúde e Bem Estar", "Serviços Gerais", "Social Media", "Suporte", "Supervisor", "TI", "Tipster", "Tráfego"];
 
 const CATEGORIES = [
   { key: "Performance & Resultados", Icon: FaRocket, color: "text-purple-400 border-purple-700 bg-purple-700" },
@@ -29,7 +29,7 @@ const SECTOR_COLORS = {
   "Gerência": "from-indigo-500 to-blue-600",
   "Saúde e Bem Estar": "from-teal-500 to-cyan-600",
   "Serviços Gerais": "from-orange-500 to-amber-600",
-  "TV Green": "from-green-600 to-emerald-700",
+
   "Feira FC": "from-lime-500 to-green-600",
   "TI": "from-sky-400 to-blue-500",
   "Todos": "from-gray-500 to-gray-600",

@@ -8,7 +8,7 @@ import SurpriseMissionBanner from "../components/SurpriseMissionBanner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
-const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "TV Green", "Feira FC", "IA/Automação"];
+const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "Feira FC", "IA/Automação"];
 
 const SECTOR_COLORS = {
   "Social Media": "from-pink-500 to-rose-600",
@@ -25,7 +25,7 @@ const SECTOR_COLORS = {
   "Gerência": "from-indigo-500 to-blue-600",
   "Saúde e Bem Estar": "from-teal-500 to-cyan-600",
   "Serviços Gerais": "from-orange-500 to-amber-600",
-  "TV Green": "from-green-600 to-emerald-700",
+
   "Feira FC": "from-lime-500 to-green-600",
 };
 

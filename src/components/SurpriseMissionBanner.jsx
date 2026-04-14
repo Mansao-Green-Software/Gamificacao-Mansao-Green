@@ -6,7 +6,7 @@ const SECTORS = [
   "Todos", "Social Media", "Audiovisual", "Tráfego", "Líder de Projeto",
   "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates",
   "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais",
-  "TV Green", "Feira FC", "TI", "IA/Automação", "Supervisor"
+  "Feira FC", "TI", "IA/Automação", "Supervisor"
 ];
 
 const ICON_OPTIONS = [
