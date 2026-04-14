@@ -335,7 +335,7 @@ export default function SistemaPontuacao() {
               <p className="text-gray-400 text-xs mt-1">Tarefas</p>
             </div>
             <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-green-400">{sorted.reduce((s, m) => s + m.points, 0).toLocaleString()}</p>
+              <p className="text-2xl font-bold text-green-400">{sorted.reduce((s, m) => s + (m.points > 0 ? m.points : 0), 0).toLocaleString()}</p>
               <p className="text-gray-400 text-xs mt-1">Total de pontos</p>
             </div>
             <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 text-center">
