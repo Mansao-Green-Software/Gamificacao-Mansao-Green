@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
+import { motion } from "framer-motion";
 import { Star, Plus, History, Trash2, Search, X, ChevronDown } from "lucide-react";
 import { formatBRT, nowBRT, dateToBRT } from "@/utils/dateUtils";
 
@@ -198,27 +199,29 @@ export default function ManagePoints() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1 w-fit">
-        <button
-          onClick={() => setTab("add")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "add" ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
-        >
-          Adicionar Pontos
-        </button>
-        <button
-          onClick={() => setTab("history")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "history" ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
-        >
-          Histórico
-        </button>
-        {isAdmin && (
+      <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-fit relative z-0 flex-wrap">
+        {[
+          { id: "add", label: "Adicionar Pontos" },
+          { id: "history", label: "Histórico" },
+          ...(isAdmin ? [{ id: "historyAll", label: "Histórico Geral" }] : [])
+        ].map(t => (
           <button
-            onClick={() => setTab("historyAll")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "historyAll" ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center gap-1.5 ${
+              tab === t.id ? "text-gray-900" : "text-gray-400 hover:text-white"
+            }`}
           >
-            Histórico Geral
+            {tab === t.id && (
+              <motion.div
+                layoutId="activeManagePointsTab"
+                className="absolute inset-0 bg-green-500 rounded-lg -z-10 shadow-sm"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10 block">{t.label}</span>
           </button>
-        )}
+        ))}
       </div>
 
       {/* Add points tab */}

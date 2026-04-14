@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { motion } from "framer-motion";
 import { Trophy, Star, Target, TrendingUp, Medal, History, TrendingDown, RotateCcw } from "lucide-react";
 import { formatBRT } from "@/utils/dateUtils";
 import { FaMedal, FaHandPaper } from 'react-icons/fa';
@@ -173,19 +174,28 @@ export default function Dashboard() {
             <RotateCcw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             {refreshing ? "Atualizando..." : "Atualizar"}
           </button>
-          <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "overview" ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
-            >
-              Visão Geral
-            </button>
-            <button
-              onClick={() => setActiveTab("mypoints")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "mypoints" ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
-            >
-              Meus Pontos
-            </button>
+          <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-fit relative z-0">
+            {[
+              { id: "overview", label: "Visão Geral" },
+              { id: "mypoints", label: "Meus Pontos" }
+            ].map(t => (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id)}
+                className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center gap-1.5 ${
+                  activeTab === t.id ? "text-gray-900" : "text-gray-400 hover:text-white"
+                }`}
+              >
+                {activeTab === t.id && (
+                  <motion.div
+                    layoutId="activeDashboardTab"
+                    className="absolute inset-0 bg-green-500 rounded-lg -z-10 shadow-sm"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 block">{t.label}</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { motion } from "framer-motion";
 import { Target, Plus, Trash2, CheckCircle, Clock, XCircle, Bell, Camera, X, Image, ChevronDown, ChevronRight, RotateCcw, Search } from "lucide-react";
 import { formatBRT } from "@/utils/dateUtils";
 import { FaRocket, FaClipboardList, FaHeart, FaStar, FaExclamationCircle, FaBullseye, FaComment } from 'react-icons/fa';
@@ -268,45 +269,37 @@ export default function Missions() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1 w-fit">
-        <button
-          onClick={() => { setTab("missoes"); setSelectedEmployeeFilter(""); }}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "missoes" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
-        >
-          Missões
-        </button>
-        <button
-          onClick={() => { setTab("minhas"); setSelectedEmployeeFilter(""); }}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "minhas" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
-        >
-          Minhas Solicitações
-        </button>
-        {isGerenteViewer && (
+      <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-fit relative z-0 flex-wrap">
+        {[
+          { id: "missoes", label: "Missões", onClick: () => { setTab("missoes"); setSelectedEmployeeFilter(""); } },
+          { id: "minhas", label: "Minhas Solicitações", onClick: () => { setTab("minhas"); setSelectedEmployeeFilter(""); } },
+          ...(isGerenteViewer ? [{ id: "gerencia", label: "Gerência", badge: requests.filter(r => r.status === "pendente" && r.sector === "Gerência").length, onClick: () => setTab("gerencia") }] : []),
+          ...(isManager ? [{ id: "solicitacoes", label: "Solicitações", badge: pendingCount, onClick: () => setTab("solicitacoes") }] : [])
+        ].map(t => (
           <button
-            onClick={() => setTab("gerencia")}
-            className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "gerencia" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
+            key={t.id}
+            onClick={t.onClick}
+            className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center gap-1.5 ${
+              tab === t.id ? "text-gray-900" : "text-gray-400 hover:text-white"
+            }`}
           >
-            Gerência
-            {requests.filter(r => r.status === "pendente" && r.sector === "Gerência").length > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                {requests.filter(r => r.status === "pendente" && r.sector === "Gerência").length}
+            {tab === t.id && (
+              <motion.div
+                layoutId="activeMissionsTab"
+                className="absolute inset-0 bg-green-500 rounded-lg -z-10 shadow-sm"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10 block">{t.label}</span>
+            {t.badge > 0 && (
+              <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-colors ${
+                tab === t.id ? "bg-red-400 text-gray-900" : "bg-red-500 text-white"
+              }`}>
+                {t.badge}
               </span>
             )}
           </button>
-        )}
-        {isManager && (
-          <button
-            onClick={() => setTab("solicitacoes")}
-            className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "solicitacoes" ? "bg-green-500 text-white" : "text-gray-400 hover:text-white"}`}
-          >
-            Solicitações
-            {pendingCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                {pendingCount}
-              </span>
-            )}
-          </button>
-        )}
+        ))}
       </div>
 
       {/* Create form */}
