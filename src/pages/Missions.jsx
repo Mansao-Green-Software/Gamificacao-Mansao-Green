@@ -237,11 +237,11 @@ export default function Missions() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-md font-bold text-white flex items-center gap-2 uppercase">
             <Target className="w-6 h-6 text-green-400" />
             Missões
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Solicite pontuação ao concluir uma tarefa</p>
+          <p className="text-gray-400 text-xs mt-1">Solicite pontuação ao concluir uma tarefa</p>
         </div>
         <div className="flex items-center gap-2">
           <button

@@ -249,11 +249,11 @@ export default function RankingGeral() {
     <div className="space-y-4">
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Trophy className="w-6 h-6 text-amber-400" />
+          <h1 className="text-md font-bold text-white flex items-center gap-2 uppercase">
+            <Trophy className="w-6 h-6 text-green-400" />
             Ranking
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Performance por setor</p>
+          <p className="text-gray-400 text-xs mt-1">Performance por setor</p>
         </div>
         <div className="flex items-center gap-2">
           <button

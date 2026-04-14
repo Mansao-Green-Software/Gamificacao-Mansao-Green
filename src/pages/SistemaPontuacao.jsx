@@ -165,11 +165,11 @@ export default function SistemaPontuacao() {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Zap className="w-6 h-6 text-yellow-400" />
+          <h1 className="text-md font-bold text-white flex items-center gap-2 uppercase">
+            <Zap className="w-6 h-6 text-green-400" />
             Sistema de Pontuação
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Todas as tarefas e quantos pontos cada uma vale</p>
+          <p className="text-gray-400 text-xs mt-1">Todas as tarefas e quantos pontos cada uma vale</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {isAdminOrManager && (

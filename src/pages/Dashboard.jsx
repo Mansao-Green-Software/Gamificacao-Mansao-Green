@@ -231,7 +231,7 @@ export default function Dashboard() {
                         {tx.mission_title || tx.description || "Pontuação manual"}
                       </p>
                       <p className="text-gray-500 text-xs mt-0.5">
-                        por {tx.awarded_by_name || "Sistema"} · {new Date(tx.created_date).toLocaleDateString("pt-BR")}
+                        por {tx.awarded_by_name || "Sistema"} · {new Date(tx.created_date).toLocaleString("pt-BR", { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                     <span className={`font-bold text-sm shrink-0 ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>
@@ -384,7 +384,7 @@ export default function Dashboard() {
                 <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
                   <div>
                     <p className="text-white text-sm font-medium">{tx.mission_title || tx.description || "Pontuação manual"}</p>
-                    <p className="text-gray-500 text-xs">por {tx.awarded_by_name || "Admin"}</p>
+                    <p className="text-gray-500 text-xs">por {tx.awarded_by_name || "Admin"} · {new Date(tx.created_date).toLocaleString("pt-BR", { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                   <span className={`font-bold ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>{tx.points >= 0 ? "+" : ""}{tx.points}</span>
                 </div>

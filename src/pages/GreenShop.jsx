@@ -175,11 +175,11 @@ export default function GreenShop() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-md font-bold text-white flex items-center gap-2 uppercase">
             <ShoppingBag className="w-6 h-6 text-green-400" />
             Green Shop
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Troque seus pontos por prêmios incríveis</p>
+          <p className="text-gray-400 text-xs mt-1">Troque seus pontos por prêmios incríveis</p>
         </div>
         {canEditRewards && (
           <button

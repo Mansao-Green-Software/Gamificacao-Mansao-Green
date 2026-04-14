@@ -124,11 +124,11 @@ export default function Employees() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-md font-bold text-white flex items-center gap-2 uppercase">
             <Users className="w-6 h-6 text-green-400" />
             Colaboradores
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Gerencie todos os colaboradores</p>
+          <p className="text-gray-400 text-xs mt-1">Gerencie todos os colaboradores</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}

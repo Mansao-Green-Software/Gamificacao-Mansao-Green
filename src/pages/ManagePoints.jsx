@@ -185,11 +185,11 @@ export default function ManagePoints() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-md font-bold text-white flex items-center gap-2 uppercase">
           <Star className="w-6 h-6 text-green-400" />
           Gerenciar Pontos
         </h1>
-        <p className="text-gray-400 text-sm mt-1">
+        <p className="text-gray-400 text-xs mt-1">
           {isAdmin ? "Gerencie pontos de todos os setores" : `Setor: ${user?.sector}`}
         </p>
       </div>
@@ -451,7 +451,7 @@ export default function ManagePoints() {
                         <span className="text-xs px-2 py-0.5 bg-gray-700 text-gray-400 rounded-full shrink-0">{tx.sector}</span>
                       </div>
                       <p className="text-gray-500 text-xs truncate">{tx.description || tx.mission_title || "—"}</p>
-                      <p className="text-gray-600 text-xs">por {tx.awarded_by_name} · {new Date(tx.created_date).toLocaleDateString("pt-BR")}</p>
+                      <p className="text-gray-600 text-xs">por {tx.awarded_by_name} · {new Date(tx.created_date).toLocaleString("pt-BR", { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                     </div>
                     <div className="flex items-center gap-3 ml-3">
                       <span className={`font-bold text-sm ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>
@@ -503,7 +503,7 @@ export default function ManagePoints() {
                     <div className="flex-1 min-w-0">
                       <p className="text-white text-sm font-medium truncate">{tx.employee_name}</p>
                       <p className="text-gray-500 text-xs truncate">{tx.description || tx.mission_title || "—"}</p>
-                      <p className="text-gray-600 text-xs">por {tx.awarded_by_name}</p>
+                      <p className="text-gray-600 text-xs">por {tx.awarded_by_name} · {new Date(tx.created_date).toLocaleString("pt-BR", { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                     </div>
                     <div className="flex items-center gap-3 ml-3">
                       <div className="text-right">
