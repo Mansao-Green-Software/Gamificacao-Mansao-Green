@@ -7,6 +7,7 @@ const ROLES = [
   { value: "user", label: "Colaborador" },
   { value: "supervisor", label: "Supervisor" },
   { value: "manager", label: "Gerente" },
+  { value: "director", label: "Diretor" },
   { value: "admin", label: "Admin" },
 ];
 
@@ -391,6 +392,7 @@ export default function Employees() {
                         <div className="flex flex-col gap-1">
                           <span className={`text-xs px-2 py-0.5 rounded-full w-fit ${
                             emp.role === "admin" ? "bg-red-900/50 text-red-300" :
+                            emp.role === "director" ? "bg-yellow-900/50 text-yellow-300" :
                             emp.role === "manager" ? "bg-blue-900/50 text-blue-300" :
                             emp.role === "supervisor" ? "bg-purple-900/50 text-purple-300" :
                             "bg-gray-700 text-gray-300"

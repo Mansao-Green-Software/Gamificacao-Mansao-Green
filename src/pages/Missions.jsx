@@ -87,7 +87,8 @@ export default function Missions() {
   const effectiveRole = profile?.role || user?.role;
   const isGerenteViewer = user?.email === "igaming@gruporoyalty.com";
   const isAdmin = effectiveRole === "admin";
-  const isManager = effectiveRole === "manager" || effectiveRole === "supervisor" || isAdmin;
+  const isDirector = effectiveRole === "director";
+  const isManager = effectiveRole === "manager" || effectiveRole === "supervisor" || isAdmin || isDirector;
   const mySector = profile?.sector || user?.sector;
   const myExtraSectors = profile?.extra_sectors || [];
   const allMySectors = mySector ? [mySector, ...myExtraSectors] : [];
@@ -100,8 +101,8 @@ export default function Missions() {
 
   const visibleMissions = missions.filter(m => {
     if (!m.is_active) return false;
-    if (isAdmin) return true;
-    if ((effectiveRole === "manager" || isAdmin) && m.sector === "Gerência") return true;
+    if (isAdmin || isDirector) return true;
+    if (effectiveRole === "manager" && m.sector === "Gerência") return true;
     if (effectiveRole === "supervisor" && m.sector === "Supervisor") return true;
     return allMySectors.includes(m.sector) || m.sector === "Todos";
   });
@@ -124,12 +125,17 @@ export default function Missions() {
 
   const myId = profile?.user_id || profile?.id || user?.id;
 
-  // Pending requests visible to manager/supervisor - respecting hierarchy
+  // Pending requests visible to manager/supervisor/director - respecting hierarchy
   const pendingRequests = isManager
     ? requests.filter(r => {
         if (r.status !== "pendente") return false;
         if (r.employee_id === myId) return false; // nunca mostra própria solicitação
         if (isAdmin) return true;
+        // Diretor: aprova apenas gerentes (sector = "Gerência")
+        if (isDirector) {
+          const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
+          return r.sector === "Gerência" || empProfile?.role === "manager";
+        }
         // Resolve sector from request or fallback to employee profile
         const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
         const effectiveSector = r.sector || empProfile?.sector;
@@ -164,7 +170,7 @@ export default function Missions() {
   const handleSubmitRequest = async () => {
     if (!requestModal) return;
     setSubmitting(requestModal.id);
-    const requestSector = (effectiveRole === "manager" || effectiveRole === "admin") ? "Gerência" : effectiveRole === "supervisor" ? "Supervisor" : mySector;
+    const requestSector = (effectiveRole === "manager" || effectiveRole === "admin" || effectiveRole === "director") ? "Gerência" : effectiveRole === "supervisor" ? "Supervisor" : mySector;
     const req = await base44.entities.MissionRequest.create({
       employee_id: profile?.user_id || profile?.id || user.id,
       employee_name: profile?.full_name || user.full_name,
