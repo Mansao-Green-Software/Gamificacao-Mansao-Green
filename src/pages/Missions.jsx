@@ -131,10 +131,11 @@ export default function Missions() {
         if (r.status !== "pendente") return false;
         if (r.employee_id === myId) return false; // nunca mostra própria solicitação
         if (isAdmin) return true;
-        // Diretor: aprova apenas gerentes (sector = "Gerência")
+        // Diretor: vê apenas solicitações do seu próprio setor
         if (isDirector) {
           const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
-          return r.sector === "Gerência" || empProfile?.role === "manager";
+          const effectiveSector = r.sector || empProfile?.sector;
+          return allMySectors.includes(effectiveSector);
         }
         // Resolve sector from request or fallback to employee profile
         const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
@@ -806,6 +807,9 @@ export default function Missions() {
               if (isAdmin) return true;
               const emp = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
               const effectiveSector = r.sector || emp?.sector;
+              if (isDirector) {
+                return allMySectors.includes(effectiveSector);
+              }
               if (effectiveRole === "supervisor") {
                 return effectiveSector !== "Supervisor" && allMySectors.includes(effectiveSector);
               }
