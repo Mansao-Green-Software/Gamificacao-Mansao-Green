@@ -71,7 +71,7 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       {/* Sidebar Desktop */}
-      <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-gray-900 border-r border-gray-800 z-40">
+      <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-gray-900/50 border-r border-gray-800 z-40">
         <div className="p-6 border-b border-gray-800">
           <div className="flex items-center gap-3">
             <div className="relative group w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center overflow-hidden shrink-0">
@@ -92,8 +92,9 @@ export default function Layout({ children, currentPageName }) {
               )}
             </div>
             <div>
-              <h1 className="text-white font-bold text-sm leading-tight">Gamificação</h1>
-              <p className="text-green-400 text-xs font-semibold">Mansão Green</p>
+              
+              <p className="bg-gradient-to-r from-green-600 via-green-400 to-green-600 bg-clip-text text-transparent text-sm font-black uppercase tracking-wider">Mansão Green</p>
+              <h1 className="text-white font-semibold text-sm ">Gamificação</h1>
             </div>
           </div>
         </div>
@@ -125,20 +126,20 @@ export default function Layout({ children, currentPageName }) {
           </div>
         )}
 
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1  space-y-1">
           {navItems.map(({ label, page, icon: Icon }) => {
             const isActive = currentPageName === page;
             return (
               <Link
                 key={page}
                 to={createPageUrl(page)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                className={`flex items-center  gap-3 px-3 mr-4 py-3 rounded-r-full text-sm font-medium transition-all ${
                   isActive
-                    ? "bg-green-500 text-black shadow-lg shadow-green-500/20"
+                    ? "bg-green-500 text-black shadow-lg "
                     : "text-gray-400 hover:text-white hover:bg-gray-800"
                 }`}
               >
-                <Icon className="w-4 h-4 shrink-0" />
+                <Icon className="w-4 h-4 shrink-0 " />
                 {label}
               </Link>
             );
