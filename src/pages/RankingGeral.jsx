@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Users, BarChart2, RotateCcw } from "lucide-react";
+import { Trophy, Users, BarChart2, RotateCcw, Info } from "lucide-react";
 import { FaMedal } from 'react-icons/fa';
 
 const SECTORS = ["Administrativo", "Affiliates", "Audiovisual", "Comercial", "Contingência", "Feira FC", "Financeiro", "Gerência", "IA/Automação", "Líder de Projeto", "Saúde e Bem Estar", "Serviços Gerais", "Social Media", "Suporte", "TI", "Tipster", "Tráfego", "TV Green"];
@@ -81,6 +81,7 @@ export default function RankingGeral() {
   const [profiles, setProfiles] = useState({});
   const [allProfiles, setAllProfiles] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   const loadData = async (u) => {
     const [txs, profs] = await Promise.all([
@@ -132,17 +133,46 @@ export default function RankingGeral() {
     );
     const pts = {};
     const employees = {};
+    
+    // Variáveis para a média global (C) do Score Bayesiano
+    let globalTotalPoints = 0;
+    const globalEmployees = new Set();
+
     rankingTxs.forEach(t => {
       if (!t.sector) return;
       const sectorKey = excludedFromSector.has(t.employee_id) ? "Supervisor" : t.sector;
       pts[sectorKey] = (pts[sectorKey] || 0) + (t.points || 0);
       if (!employees[sectorKey]) employees[sectorKey] = new Set();
       employees[sectorKey].add(t.employee_id);
+
+      globalTotalPoints += (t.points || 0);
+      globalEmployees.add(t.employee_id);
     });
+
+    // C: Média global de pontos por pessoa
+    const C = globalTotalPoints / Math.max(1, globalEmployees.size);
+    
+    // m: Tamanho médio dos setores (peso da média global na fórmula)
+    let totalSectors = 0;
+    let totalEmps = 0;
+    for (const s of Object.keys(employees)) {
+      totalSectors++;
+      totalEmps += employees[s].size;
+    }
+    const m = totalSectors > 0 ? (totalEmps / totalSectors) : 1;
+
     return [...SECTORS, "Supervisor"].map(s => {
-      const total = pts[s] || 0;
-      const count = employees[s]?.size || 1;
-      return { sector: s, points: Math.round(total / count) };
+      const v = employees[s]?.size || 0;
+      if (v === 0) {
+        return { sector: s, points: 0 };
+      }
+      
+      const R = pts[s] / v; // Média real do setor
+      
+      // Regra de Score Bayesiano: pondera a média do setor com a média global
+      const bayesianScore = (v * R + m * C) / (v + m);
+      
+      return { sector: s, points: Math.round(bayesianScore) };
     }).sort((a, b) => b.points - a.points);
   };
 
@@ -278,10 +308,32 @@ export default function RankingGeral() {
           {/* View Geral - ranking de setores */}
           {selectedSector === "geral" && (
             <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-6">
-              <h2 className="text-white font-bold mb-5 flex items-center gap-2 ">
-                <Trophy className="w-5 h-5 text-green-400" />
-                Ranking de Setores
-              </h2>
+              <div className="mb-5 space-y-3">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-white font-bold flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-green-400" />
+                    Ranking de Setores
+                  </h2>
+                  <button 
+                    onClick={() => setShowInfo(!showInfo)}
+                    className="text-gray-400 hover:text-green-400 transition-colors p-1"
+                    title="Entenda como funciona"
+                  >
+                    <Info className="w-4 h-4" />
+                  </button>
+                </div>
+                {showInfo && (
+                  <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 text-sm text-gray-300">
+                    <p className="font-bold text-white mb-2">Como funciona o cálculo?</p>
+                    <p>O ranking utiliza o <strong>Score Bayesiano</strong>, que equilibra a pontuação do setor para ser o mais justo possível:</p>
+                    <ul className="list-disc ml-5 mt-2 space-y-1 text-xs text-gray-400">
+                      <li>A pontuação de cada setor é mesclada com a <strong>média global da empresa</strong>.</li>
+                      <li>Isso evita que setores muito pequenos ganhem vantagem extrema caso um único funcionário pontue bastante.</li>
+                      <li>Garante que áreas de diferentes tamanhos possam competir diretamente com as mesmas oportunidades e equilíbrio.</li>
+                    </ul>
+                  </div>
+                )}
+              </div>
               <div className="space-y-4">
                 {sectorRanking.map((item, idx) => (
                   <div key={item.sector}>
