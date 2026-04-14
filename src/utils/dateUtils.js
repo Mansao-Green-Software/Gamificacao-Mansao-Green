@@ -17,23 +17,30 @@ export function formatBRT(date, mode = "datetime") {
       ? { hour: "2-digit", minute: "2-digit", timeZone: TZ }
       : { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: TZ };
 
-  return d.toLocaleString("pt-BR", opts);
+  return new Intl.DateTimeFormat("pt-BR", opts).format(d);
 }
 
 /**
- * Retorna um objeto Date representando "agora" em Brasília como se fosse local.
+ * Retorna um objeto Date com os componentes de tempo no fuso de Brasília.
  * Útil para comparações de dia/semana/mês no fuso correto.
  */
 export function nowBRT() {
-  const now = new Date();
-  // Converte para string no TZ e cria novo Date "ingênuo"
-  const str = now.toLocaleString("sv-SE", { timeZone: TZ }); // "YYYY-MM-DD HH:MM:SS"
-  return new Date(str);
+  return dateToBRT(new Date());
 }
 
 /**
- * Retorna a string "YYYY-MM-DD" do dia atual em Brasília.
+ * Converte qualquer Date para um Date "ingênuo" com os componentes de Brasília.
  */
-export function todayBRT() {
-  return new Date().toLocaleDateString("sv-SE", { timeZone: TZ });
+export function dateToBRT(date) {
+  const d = new Date(date);
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: TZ,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+  }).formatToParts(d);
+
+  const get = (type) => parts.find(p => p.type === type)?.value;
+  return new Date(
+    `${get("year")}-${get("month")}-${get("day")}T${get("hour").replace("24","00")}:${get("minute")}:${get("second")}`
+  );
 }

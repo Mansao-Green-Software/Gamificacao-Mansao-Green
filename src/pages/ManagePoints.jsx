@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Star, Plus, History, Trash2, Search, X, ChevronDown } from "lucide-react";
-import { formatBRT, nowBRT, todayBRT } from "@/utils/dateUtils";
+import { formatBRT, nowBRT, dateToBRT } from "@/utils/dateUtils";
 
 const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "Feira FC", "TI", "IA/Automação"];
 
@@ -80,7 +80,7 @@ export default function ManagePoints() {
   const selectedEmployee = employees.find(e => e.user_id === form.employee_id || e.id === form.employee_id);
 
   // Check if a mission was already submitted for an employee in the current period
-  const toBRT = (date) => new Date(new Date(date).toLocaleString("sv-SE", { timeZone: "America/Sao_Paulo" }));
+  const toBRT = (date) => dateToBRT(date);
 
   const isMissionSubmittedInPeriod = (missionId, missionTitle, employeeId, frequency) => {
     if (!frequency || !employeeId) return false;
