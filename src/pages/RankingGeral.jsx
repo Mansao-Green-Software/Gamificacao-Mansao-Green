@@ -81,7 +81,7 @@ export default function RankingGeral() {
   const [profiles, setProfiles] = useState({});
   const [allProfiles, setAllProfiles] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
+  const [showInfo, setShowInfo] = useState(true);
 
   const loadData = async (u) => {
     const [txs, profs] = await Promise.all([

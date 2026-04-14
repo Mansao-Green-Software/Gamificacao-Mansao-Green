@@ -73,19 +73,48 @@ export default function Dashboard() {
     const excludedFromSector = new Set(
       emps.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
     );
-    const sectorPoints = {};
-    const sectorEmployees = {};
+    const pts = {};
+    const employeesData = {};
+    
+    // Variáveis para a média global (C) do Score Bayesiano
+    let globalTotalPoints = 0;
+    const globalEmployees = new Set();
+
     txs.filter(t => !t.description?.startsWith("Resgate:")).forEach(t => {
       if (!t.sector) return;
       const sectorKey = excludedFromSector.has(t.employee_id) ? "Supervisor" : t.sector;
-      sectorPoints[sectorKey] = (sectorPoints[sectorKey] || 0) + t.points;
-      if (!sectorEmployees[sectorKey]) sectorEmployees[sectorKey] = new Set();
-      sectorEmployees[sectorKey].add(t.employee_id);
+      pts[sectorKey] = (pts[sectorKey] || 0) + (t.points || 0);
+      if (!employeesData[sectorKey]) employeesData[sectorKey] = new Set();
+      employeesData[sectorKey].add(t.employee_id);
+
+      globalTotalPoints += (t.points || 0);
+      globalEmployees.add(t.employee_id);
     });
+
+    // C: Média global de pontos por pessoa
+    const C = globalTotalPoints / Math.max(1, globalEmployees.size);
+    
+    // m: Tamanho médio dos setores (peso da média global na fórmula)
+    let totalSectors = 0;
+    let totalEmps = 0;
+    for (const s of Object.keys(employeesData)) {
+      totalSectors++;
+      totalEmps += employeesData[s].size;
+    }
+    const m = totalSectors > 0 ? (totalEmps / totalSectors) : 1;
+
     const ranked = [...SECTORS, "Supervisor"].map(s => {
-      const total = sectorPoints[s] || 0;
-      const count = sectorEmployees[s]?.size || 1;
-      return { sector: s, points: Math.round(total / count) };
+      const v = employeesData[s]?.size || 0;
+      if (v === 0) {
+        return { sector: s, points: 0 };
+      }
+      
+      const R = pts[s] / v; // Média real do setor
+      
+      // Regra de Score Bayesiano: pondera a média do setor com a média global
+      const bayesianScore = (v * R + m * C) / (v + m);
+      
+      return { sector: s, points: Math.round(bayesianScore) };
     }).sort((a, b) => b.points - a.points);
     setSectorRanking(ranked);
   };
