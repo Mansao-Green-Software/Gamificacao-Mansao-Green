@@ -51,5 +51,40 @@
     "mission_id",
     "mission_title",
     "mission_points"
-  ]
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "data.employee_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": [
+              "admin",
+              "manager",
+              "supervisor",
+              "director"
+            ]
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": [
+          "admin",
+          "manager",
+          "supervisor",
+          "director"
+        ]
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }
