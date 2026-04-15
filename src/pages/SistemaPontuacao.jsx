@@ -331,7 +331,7 @@ export default function SistemaPontuacao() {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-white">{sorted.length}</p>
+              <p className="text-2xl font-bold text-white">{sorted.filter(m => m.category !== "Punições (Perda de Pontos)").length}</p>
               <p className="text-gray-400 text-xs mt-1">Tarefas</p>
             </div>
             <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 text-center">
