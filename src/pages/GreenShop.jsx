@@ -51,12 +51,12 @@ export default function GreenShop() {
         base44.entities.PointTransaction.list("-created_date", 5000),
         base44.entities.EmployeeProfile.list(),
       ]);
-      const found = profiles.find(p => p.user_id === u.id || p.email === u.email);
+      const found = profiles.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
       setProfile(found);
       const txs = allTxs.filter(t =>
         t.employee_id === u.id ||
-        t.employee_name === u.full_name ||
-        (found && t.employee_id === found.id)
+        (found && (t.employee_id === found.id || t.employee_id === found.user_id)) ||
+        t.employee_name === (found?.full_name || u.full_name)
       );
       setRewards(rws);
       setRedemptions(reds);
@@ -78,7 +78,10 @@ export default function GreenShop() {
   const canEditRewards = isAdmin;
 
   const myPoints = transactions.reduce((s, t) => s + (t.points || 0), 0);
-  const myRedemptions = redemptions.filter(r => r.employee_id === user?.id);
+  const myRedemptions = redemptions.filter(r =>
+    r.employee_id === user?.id ||
+    (profile && (r.employee_id === profile.id || r.employee_id === profile.user_id))
+  );
   // availablePoints já é calculado pelas transações (que incluem débitos negativos de resgates)
   const availablePoints = myPoints;
   const spentPoints = myRedemptions.filter(r => r.status !== "cancelado").reduce((s, r) => s + (r.points_spent || 0), 0);
