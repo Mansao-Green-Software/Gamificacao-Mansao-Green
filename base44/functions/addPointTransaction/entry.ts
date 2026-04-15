@@ -19,7 +19,8 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'employee_id e points são obrigatórios' }, { status: 400 });
   }
 
-  if (points > MAX_POINTS) {
+  // Limite de 300 pts apenas para pontos positivos (tarefas/prêmios)
+  if (points > 0 && points > MAX_POINTS) {
     return Response.json({ error: `O limite máximo de pontos por tarefa é ${MAX_POINTS} pts.` }, { status: 400 });
   }
 
