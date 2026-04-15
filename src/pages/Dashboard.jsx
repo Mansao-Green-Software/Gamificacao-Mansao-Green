@@ -61,7 +61,11 @@ export default function Dashboard() {
     setProfile(myProfile || null);
     const sector = myProfile?.sector;
     const myProfile2 = myProfile;
-    const myTxs2 = txs.filter(t => t.employee_id === u.id || t.employee_name === u.full_name || (myProfile2 && t.employee_id === myProfile2.id));
+    const myTxs2 = txs.filter(t =>
+      t.employee_id === u.id ||
+      (myProfile2 && (t.employee_id === myProfile2.id || t.employee_id === myProfile2.user_id)) ||
+      t.employee_name === (myProfile2?.full_name || u.full_name)
+    );
     const total = myTxs2.reduce((s, t) => s + (t.points || 0), 0);
     setMyPoints(total);
     if (sector) {
@@ -69,7 +73,11 @@ export default function Dashboard() {
       const empPoints = {};
       sectorTxs.forEach(t => { empPoints[t.employee_id] = (empPoints[t.employee_id] || 0) + t.points; });
       const sorted = Object.entries(empPoints).sort((a, b) => b[1] - a[1]);
-      const rank = sorted.findIndex(([id]) => id === u.id || id === myProfile2?.id || id === u.full_name) + 1;
+      const rank = sorted.findIndex(([id]) =>
+        id === u.id ||
+        (myProfile2 && (id === myProfile2.id || id === myProfile2.user_id)) ||
+        id === (myProfile2?.full_name || u.full_name)
+      ) + 1;
       setMyRank(rank || null);
     }
     const excludedFromSector = new Set(
@@ -137,8 +145,12 @@ export default function Dashboard() {
     load();
   }, []);
 
-  const myProfile3 = employees.find(p => p.user_id === user?.id || p.email === user?.email);
-  const myTxs = transactions.filter(t => t.employee_id === user?.id || t.employee_name === user?.full_name || (myProfile3 && t.employee_id === myProfile3.id));
+  const myProfile3 = employees.find(p => (p.user_id && p.user_id === user?.id) || p.email === user?.email);
+  const myTxs = transactions.filter(t =>
+    t.employee_id === user?.id ||
+    (myProfile3 && (t.employee_id === myProfile3.id || t.employee_id === myProfile3.user_id)) ||
+    t.employee_name === (myProfile3?.full_name || user?.full_name)
+  );
   const isAdmin = user?.role === "admin";
   const isManager = user?.role === "manager" || isAdmin;
   const mySector = profile?.sector;
