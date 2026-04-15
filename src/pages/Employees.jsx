@@ -421,7 +421,9 @@ export default function Employees() {
                         ) : (
                           <>
                             <button onClick={() => startEdit(emp)} className="p-1.5 text-blue-400 hover:bg-blue-900/20 rounded-lg"><Edit2 className="w-4 h-4" /></button>
-                            <button onClick={() => handleDelete(emp.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                            {user?.email === "kevinathy25@gmail.com" && (
+                              <button onClick={() => handleDelete(emp.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                            )}
                           </>
                         )}
                       </div>
