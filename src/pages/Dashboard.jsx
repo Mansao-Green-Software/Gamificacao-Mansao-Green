@@ -341,7 +341,10 @@ export default function Dashboard() {
             </div>
             <div className="space-y-3">
               {(() => {
-                const normalizeId = (employeeId) => employeeId;
+                const normalizeId = (employeeId) => {
+                  const profile = employees.find(p => p.user_id === employeeId || p.id === employeeId);
+                  return profile?.user_id || employeeId;
+                };
                 
                 const empPoints = {};
                 const empNames = {};
