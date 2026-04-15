@@ -96,7 +96,6 @@ export default function Dashboard() {
       pts[sectorKey] = (pts[sectorKey] || 0) + (t.points || 0);
       if (!employeesData[sectorKey]) employeesData[sectorKey] = new Set();
       employeesData[sectorKey].add(t.employee_id);
-
       globalTotalPoints += (t.points || 0);
       globalEmployees.add(t.employee_id);
     });
@@ -341,22 +340,16 @@ export default function Dashboard() {
             </div>
             <div className="space-y-3">
               {(() => {
-                const normalizeId = (employeeId) => {
-                  const profile = employees.find(p => p.user_id === employeeId || p.id === employeeId);
-                  return profile?.user_id || employeeId;
-                };
-                
                 const empPoints = {};
                 const empNames = {};
                 const empPhotos = {};
                 const empSectors = {};
                 transactions.forEach(t => {
-                  const nid = normalizeId(t.employee_id);
-                  empPoints[nid] = (empPoints[nid] || 0) + t.points;
-                  empNames[nid] = t.employee_name;
-                  empSectors[nid] = t.sector;
-                  const emp = employees.find(e => e.user_id === nid || e.id === nid);
-                  if (emp?.photo_url) empPhotos[nid] = emp.photo_url;
+                  empPoints[t.employee_id] = (empPoints[t.employee_id] || 0) + t.points;
+                  empNames[t.employee_id] = t.employee_name;
+                  empSectors[t.employee_id] = t.sector;
+                  const emp = employees.find(e => e.user_id === t.employee_id || e.id === t.employee_id);
+                  if (emp?.photo_url) empPhotos[t.employee_id] = emp.photo_url;
                 });
                 const topEmployees = Object.entries(empPoints)
                   .map(([id, points]) => ({ id, name: empNames[id], points, photo: empPhotos[id], sector: empSectors[id] }))
@@ -365,7 +358,7 @@ export default function Dashboard() {
                 const maxPoints = topEmployees[0]?.points || 1;
 
                 return topEmployees.map((emp, idx) => {
-                  const isMe = emp.id === user?.id;
+                  const isMe = emp.id === user?.id || emp.id === myProfile3?.user_id;
                   return (
                     <div key={emp.id} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
                       <span className="w-8 flex items-center justify-center">{getMedal(idx)}</span>

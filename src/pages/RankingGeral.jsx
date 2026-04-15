@@ -147,7 +147,6 @@ export default function RankingGeral() {
       pts[sectorKey] = (pts[sectorKey] || 0) + (t.points || 0);
       if (!employees[sectorKey]) employees[sectorKey] = new Set();
       employees[sectorKey].add(t.employee_id);
-
       globalTotalPoints += (t.points || 0);
       globalEmployees.add(t.employee_id);
     });
@@ -179,11 +178,7 @@ export default function RankingGeral() {
     }).sort((a, b) => b.points - a.points);
   };
 
-  // Normaliza IDs para usar sempre o user_id quando disponível
-  const normalizeId = (employeeId) => {
-    const profile = allProfiles.find(p => p.user_id === employeeId || p.id === employeeId);
-    return profile?.user_id || employeeId;
-  };
+
 
   const getEmployeeRanking = (sector) => {
     // Setor virtual "Supervisor": agrupa todos os colaboradores com role supervisor
@@ -191,13 +186,12 @@ export default function RankingGeral() {
       const supervisorIds = new Set(
         allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
       );
-      const filtered = rankingTxs.filter(t => supervisorIds.has(normalizeId(t.employee_id)));
+      const filtered = rankingTxs.filter(t => supervisorIds.has(t.employee_id));
       const pts = {};
       const names = {};
       filtered.forEach(t => {
-        const nid = normalizeId(t.employee_id);
-        pts[nid] = (pts[nid] || 0) + (t.points || 0);
-        names[nid] = t.employee_name;
+        pts[t.employee_id] = (pts[t.employee_id] || 0) + (t.points || 0);
+        names[t.employee_id] = t.employee_name;
       });
       return Object.entries(pts)
         .map(([id, points]) => ({ id, name: profiles[id]?.full_name || names[id], points, photo_url: profiles[id]?.photo_url }))
@@ -210,16 +204,15 @@ export default function RankingGeral() {
     );
 
     const baseTxs = sector && sector !== "geral"
-      ? rankingTxs.filter(t => t.sector === sector && !excludedSupervisorIds.has(normalizeId(t.employee_id)))
-      : rankingTxs.filter(t => !excludedSupervisorIds.has(normalizeId(t.employee_id)));
+      ? rankingTxs.filter(t => t.sector === sector && !excludedSupervisorIds.has(t.employee_id))
+      : rankingTxs.filter(t => !excludedSupervisorIds.has(t.employee_id));
     const pts = {};
     const names = {};
     const sectors = {};
     baseTxs.forEach(t => {
-      const nid = normalizeId(t.employee_id);
-      pts[nid] = (pts[nid] || 0) + (t.points || 0);
-      names[nid] = t.employee_name;
-      sectors[nid] = t.sector;
+      pts[t.employee_id] = (pts[t.employee_id] || 0) + (t.points || 0);
+      names[t.employee_id] = t.employee_name;
+      sectors[t.employee_id] = t.sector;
     });
     return Object.entries(pts)
       .map(([id, points]) => ({ id, name: profiles[id]?.full_name || names[id], points, sector: sectors[id], photo_url: profiles[id]?.photo_url }))
