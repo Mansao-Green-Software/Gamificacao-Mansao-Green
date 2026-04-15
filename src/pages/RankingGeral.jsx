@@ -179,8 +179,11 @@ export default function RankingGeral() {
     }).sort((a, b) => b.points - a.points);
   };
 
-  // Retorna o employee_id diretamente sem normalização
-  const normalizeId = (employeeId) => employeeId;
+  // Normaliza IDs para usar sempre o user_id quando disponível
+  const normalizeId = (employeeId) => {
+    const profile = allProfiles.find(p => p.user_id === employeeId || p.id === employeeId);
+    return profile?.user_id || employeeId;
+  };
 
   const getEmployeeRanking = (sector) => {
     // Setor virtual "Supervisor": agrupa todos os colaboradores com role supervisor
