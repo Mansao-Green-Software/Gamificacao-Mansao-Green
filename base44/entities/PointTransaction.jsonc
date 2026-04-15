@@ -1,0 +1,67 @@
+{
+  "name": "PointTransaction",
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string"
+    },
+    "employee_name": {
+      "type": "string"
+    },
+    "sector": {
+      "type": "string"
+    },
+    "points": {
+      "type": "number"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "mission"
+      ],
+      "default": "manual"
+    },
+    "mission_id": {
+      "type": "string"
+    },
+    "mission_title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "awarded_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "employee_id",
+    "employee_name",
+    "sector",
+    "points"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": [
+          "admin",
+          "manager",
+          "supervisor",
+          "director"
+        ]
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

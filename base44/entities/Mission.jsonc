@@ -68,5 +68,33 @@
   "required": [
     "title",
     "points"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": [
+          "admin",
+          "manager",
+          "supervisor",
+          "director"
+        ]
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": [
+          "admin",
+          "manager",
+          "supervisor",
+          "director"
+        ]
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }
