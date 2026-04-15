@@ -197,7 +197,8 @@ export default function Missions() {
     setApproving(request.id);
     const empProfile = allProfiles.find(p => p.user_id === request.employee_id || p.id === request.employee_id);
     const empName = empProfile?.full_name || request.employee_name;
-    const empId = empProfile?.user_id || empProfile?.id || request.employee_id;
+    // Sempre prioriza user_id para garantir vínculo correto com o perfil
+    const empId = empProfile?.user_id || request.employee_id;
     await base44.entities.MissionRequest.update(request.id, { status: "aprovado", employee_name: empName, approved_by_name: profile?.full_name || user.full_name });
     await base44.entities.PointTransaction.create({
       employee_id: empId,

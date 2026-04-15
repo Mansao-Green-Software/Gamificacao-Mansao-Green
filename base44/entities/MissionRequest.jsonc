@@ -61,26 +61,12 @@
         },
         {
           "user_condition": {
-            "role": [
-              "admin",
-              "manager",
-              "supervisor",
-              "director"
-            ]
+            "role": "admin"
           }
         }
       ]
     },
-    "update": {
-      "user_condition": {
-        "role": [
-          "admin",
-          "manager",
-          "supervisor",
-          "director"
-        ]
-      }
-    },
+    "update": {},
     "delete": {
       "user_condition": {
         "role": "admin"

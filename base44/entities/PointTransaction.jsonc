@@ -42,16 +42,7 @@
     "points"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": [
-          "admin",
-          "manager",
-          "supervisor",
-          "director"
-        ]
-      }
-    },
+    "create": {},
     "read": {},
     "update": {
       "user_condition": {
