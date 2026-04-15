@@ -594,8 +594,10 @@ export default function Missions() {
                   </div>
                 </div>
               </div>
-              {r.status === "rejeitado" && r.notes && (
-                <p className="mt-2 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-3 py-2">Motivo: {r.notes}</p>
+              {r.status === "rejeitado" && (
+                <p className="mt-2 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-3 py-2">
+                  {r.notes ? `Motivo: ${r.notes}` : "Nenhum motivo informado."}
+                </p>
               )}
             </div>
             ))}
