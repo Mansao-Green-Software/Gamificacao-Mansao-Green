@@ -142,8 +142,15 @@ export default function ManagePoints() {
     setSelectedSubSector("");
   };
 
+  const MAX_POINTS = 300;
+
   const handleAddPoints = async () => {
     if (!form.employee_id || !form.points) return;
+    const pts = parseInt(form.points);
+    if (pts > MAX_POINTS) {
+      alert(`O limite máximo de pontos por tarefa é ${MAX_POINTS} pts.`);
+      return;
+    }
     setSaving(true);
 
     const emp = employees.find(e => e.user_id === form.employee_id || e.id === form.employee_id);
@@ -332,7 +339,7 @@ export default function ManagePoints() {
                             <button
                               key={m.id}
                               type="button"
-                              onClick={() => { setForm(p => ({ ...p, mission_id: m.id, points: String(m.points), description: m.title })); setMissionDropdownOpen(false); }}
+                              onClick={() => { setForm(p => ({ ...p, mission_id: m.id, points: String(Math.min(m.points, MAX_POINTS)), description: m.title })); setMissionDropdownOpen(false); }}
                               className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-800 transition-colors flex items-center justify-between gap-2 ${ form.mission_id === m.id ? "bg-green-900/30 text-green-300" : "text-white" }`}
                             >
                               <div className="flex items-center gap-2 min-w-0 truncate">
@@ -358,13 +365,19 @@ export default function ManagePoints() {
                 </div>
               </div>
               <div>
-                <label className="text-gray-400 text-xs mb-1.5 block">Pontos</label>
+                <label className="text-gray-400 text-xs mb-1.5 block">Pontos <span className="text-gray-500">(máx. 300 por tarefa)</span></label>
                 <input
-                  type="number"
-                  value={form.points}
-                  onChange={e => setForm(p => ({ ...p, points: e.target.value }))}
-                  placeholder="Ex: 50"
-                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
+                 type="number"
+                 value={form.points}
+                 onChange={e => {
+                   const val = e.target.value;
+                   const num = parseInt(val);
+                   if (val !== "" && num > MAX_POINTS) return;
+                   setForm(p => ({ ...p, points: val }));
+                 }}
+                 placeholder="Ex: 50"
+                 max={300}
+                 className={`w-full bg-gray-900 border text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 ${parseInt(form.points) > MAX_POINTS ? "border-red-500" : "border-gray-600"}`}
                 />
               </div>
               <div>
