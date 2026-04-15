@@ -330,7 +330,7 @@ export default function Dashboard() {
             <div className="space-y-3">
               {(() => {
                 const normalizeId = (employeeId) => {
-                  const p = employees.find(p => p.user_id === employeeId || p.id === employeeId);
+                  const p = employees.find(p => (p.user_id && p.user_id === employeeId) || p.id === employeeId);
                   return p?.user_id || employeeId;
                 };
                 

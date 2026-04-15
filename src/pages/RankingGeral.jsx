@@ -181,8 +181,8 @@ export default function RankingGeral() {
 
   // Normaliza employee_id: se o ID bate com user_id de algum perfil, retorna esse user_id; senão retorna o próprio id
   const normalizeId = (employeeId) => {
-    const p = allProfiles.find(p => p.user_id === employeeId || p.id === employeeId);
-    return p?.user_id || employeeId;
+    const p = allProfiles.find(p => (p.user_id && p.user_id === employeeId) || p.id === employeeId);
+    return (p?.user_id) || employeeId;
   };
 
   const getEmployeeRanking = (sector) => {
