@@ -197,10 +197,9 @@ export default function Missions() {
     setApproving(request.id);
     const empProfile = allProfiles.find(p => p.user_id === request.employee_id || p.id === request.employee_id);
     const empName = empProfile?.full_name || request.employee_name;
-    // Sempre prioriza user_id para garantir vínculo correto com o perfil
     const empId = empProfile?.user_id || request.employee_id;
     await base44.entities.MissionRequest.update(request.id, { status: "aprovado", employee_name: empName, approved_by_name: profile?.full_name || user.full_name });
-    await base44.entities.PointTransaction.create({
+    await base44.functions.invoke('addPointTransaction', {
       employee_id: empId,
       employee_name: empName,
       sector: request.sector,
@@ -212,7 +211,6 @@ export default function Missions() {
       awarded_by_name: profile?.full_name || user.full_name,
     });
     setApproving(null);
-    // Recarrega do banco para garantir estado atualizado
     const freshReqs = await base44.entities.MissionRequest.list("-created_date", 2000);
     setRequests(freshReqs);
   };
