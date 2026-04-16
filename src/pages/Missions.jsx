@@ -135,6 +135,9 @@ export default function Missions() {
     );
     return relevantRequests.some(r => {
       const d = new Date(r.created_date);
+      if (mission.frequency === "Diária") {
+        return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      }
       if (mission.frequency === "Semanal") {
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - now.getDay());
@@ -416,7 +419,7 @@ export default function Missions() {
               const hasSub = !!mission.sub_sector;
               const blockedByFrequency = isRequestBlockedByFrequency(mission);
               const isBlocked = pending || blockedByFrequency;
-              const freqLabel = mission.frequency === "Semanal" ? "esta semana" : "este mês";
+              const freqLabel = mission.frequency === "Diária" ? "hoje" : mission.frequency === "Semanal" ? "esta semana" : "este mês";
 
               return (
                 <div key={mission.id} className={`group relative bg-gray-900/40 backdrop-blur-sm border rounded-2xl p-6 flex flex-col gap-4 overflow-hidden transition-all duration-300  hover:-translate-y-1 ${approved ? "border-green-700" : "border-gray-800"}`}>
