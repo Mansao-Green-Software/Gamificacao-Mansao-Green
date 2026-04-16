@@ -63,34 +63,34 @@ export default function QuarterlyPrizeBanner({ isAdmin }) {
       )}
       
       {/* Left to right gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 sm:via-black/80 to-transparent" />
       
       {/* Bottom up gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 sm:via-black/40 to-transparent" />
 
-      <div className="relative p-8 lg:p-12 min-h-[320px] flex flex-col justify-center w-full lg:w-3/4">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2.5 bg-amber-500/20 rounded-xl border border-amber-500/30 backdrop-blur-md shadow-inner">
-            <Trophy className="w-6 h-6 text-amber-400" />
+      <div className="relative p-6 sm:p-10 lg:p-12 min-h-[260px] sm:min-h-[320px] flex flex-col justify-center w-full lg:w-4/5">
+        <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
+          <div className="p-2 sm:p-2.5  rounded-xl border border-amber-500/30 backdrop-blur-md shadow-inner">
+            <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
           </div>
-          <span className="text-amber-400 text-sm font-bold uppercase tracking-[0.2em] drop-shadow-md">
+          <span className="text-amber-400 text-xs sm:text-sm font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] drop-shadow-md">
             Prêmio do {prize?.quarter || "Trimestre"}
           </span>
         </div>
         
-        <h2 className="text-white text-3xl lg:text-5xl font-extrabold leading-tight mb-4 drop-shadow-lg">
+        <h2 className="text-white text-xl sm:text-3xl lg:text-5xl font-extrabold leading-tight mb-3 sm:mb-4 drop-shadow-lg">
           {prize?.title || "Configure o prêmio do trimestre"}
         </h2>
         
         {prize?.description && (
-          <p className="text-gray-300 text-base md:text-lg max-w-2xl leading-relaxed mb-6 font-medium">
+          <p className="text-gray-300 text-sm sm:text-base md:text-lg max-w-2xl leading-relaxed mb-5 sm:mb-6 font-medium line-clamp-3 sm:line-clamp-none">
             {prize.description}
           </p>
         )}
         
-        <div className="flex items-center gap-2 mt-auto self-start bg-black/50 backdrop-blur-xl px-5 py-3 rounded-2xl border border-amber-500/20 shadow-lg shadow-black/50">
-          <Star className="w-5 h-5 text-amber-400 fill-amber-400 drop-shadow-sm" />
-          <span className="text-amber-50 text-sm font-semibold tracking-wide">Exclusivo para o 1º lugar do TOP 5 MG do trimestre</span>
+        <div className="flex items-center gap-2 mt-auto self-start bg-black/60 backdrop-blur-xl px-4 py-2 sm:px-5 sm:py-3 rounded-xl sm:rounded-2xl border border-amber-500/20 shadow-lg shadow-black/50">
+          <Star className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 fill-amber-400 shrink-0 drop-shadow-sm" />
+          <span className="text-amber-50 text-[10px] sm:text-sm font-semibold tracking-wide">Exclusivo para o 1º lugar do TOP 5 MG do trimestre</span>
         </div>
       </div>
 
@@ -98,8 +98,8 @@ export default function QuarterlyPrizeBanner({ isAdmin }) {
       {isAdmin && !editing && (
         <button
           onClick={openEdit}
-          className="absolute top-5 right-5 p-3 text-amber-400 hover:text-white bg-black/40 hover:bg-amber-500 backdrop-blur-md rounded-2xl transition-all duration-300 border border-amber-500/30 z-10 shadow-xl group-hover:scale-105">
-          {prize ? <Edit2 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+          className="absolute top-3 right-3 sm:top-5 sm:right-5 p-2 sm:p-3 text-amber-400 hover:text-white bg-black/40 hover:bg-amber-500 backdrop-blur-md rounded-xl sm:rounded-2xl transition-all duration-300 border border-amber-500/30 z-10 shadow-xl group-hover:scale-105">
+          {prize ? <Edit2 className="w-4 h-4 sm:w-5 sm:h-5" /> : <Plus className="w-4 h-4 sm:w-5 sm:h-5" />}
         </button>
       )}
 

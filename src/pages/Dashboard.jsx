@@ -34,14 +34,14 @@ const SECTOR_COLORS = {
 const getMedal = (idx) => {
   if (idx === 0) return (
     <motion.div
-      animate={{ 
+      animate={{
         y: [0, -4, 0],
         filter: ["drop-shadow(0 0 0px #fbbf24)", "drop-shadow(0 0 10px #fbbf24)", "drop-shadow(0 0 0px #fbbf24)"]
       }}
-      transition={{ 
-        duration: 3, 
+      transition={{
+        duration: 3,
         repeat: Infinity,
-        ease: "easeInOut" 
+        ease: "easeInOut"
       }}
       className="relative"
     >
@@ -196,7 +196,7 @@ export default function Dashboard() {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-2 bg-gray-900 hover:bg-gray-600 text-green-400 border border-green-400 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
           >
             <RotateCcw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             {refreshing ? "Atualizando..." : "Atualizar"}
@@ -209,9 +209,8 @@ export default function Dashboard() {
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
-                className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center gap-1.5 ${
-                  activeTab === t.id ? "text-gray-900" : "text-gray-400 hover:text-white"
-                }`}
+                className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center gap-1.5 ${activeTab === t.id ? "text-gray-900" : "text-gray-400 hover:text-white"
+                  }`}
               >
                 {activeTab === t.id && (
                   <motion.div

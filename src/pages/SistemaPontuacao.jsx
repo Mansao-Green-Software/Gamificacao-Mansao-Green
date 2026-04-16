@@ -174,7 +174,7 @@ export default function SistemaPontuacao() {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="sm:text-md text-xl font-bold text-white flex items-center gap-2 uppercase">
+          <h1 className="sm:text-md font-bold text-white flex items-center gap-2 uppercase">
             <Zap className="w-6 h-6 text-green-400" />
             Sistema de Pontuação
           </h1>

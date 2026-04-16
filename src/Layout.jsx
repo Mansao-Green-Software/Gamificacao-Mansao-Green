@@ -75,11 +75,11 @@ export default function Layout({ children, currentPageName }) {
       <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-gray-900/50 border-r border-gray-800 z-40">
         <div className="p-6 border-b border-gray-800">
           <div className="flex items-center gap-3">
-            <div className="relative group w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center overflow-hidden shrink-0">
+            <div className="relative group w-10 h-10 rounded-xl  flex items-center justify-center overflow-hidden shrink-0">
               {logoUrl ? (
                 <img src={logoUrl} alt="logo" className="w-full h-full object-cover" />
               ) : (
-                <Crown className="w-5 h-5 text-white" />
+                <Crown className="w-5 h-5 text-green-500" />
               )}
               {isAdmin && (
                 <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
