@@ -103,7 +103,7 @@ export default function Layout({ children, currentPageName }) {
         {user && (
           <div className="px-4 py-3 border-b border-gray-800">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0">
+              <div className="w-14 h-14 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0">
                 {profile?.photo_url ? (
                   <img src={profile.photo_url} alt={user.full_name} className="w-full h-full object-cover" />
                 ) : (
@@ -113,7 +113,7 @@ export default function Layout({ children, currentPageName }) {
               <div className="min-w-0">
                 <p className="text-white text-sm font-medium truncate">{profile?.full_name || user.full_name}</p>
                 {(profile?.sector || user.sector) && <p className="text-green-400 text-xs truncate">{profile?.sector || user.sector}</p>}
-                <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-300">
+                <span className="inline-block mt-0.5 p-1 rounded-md text-xs font-medium border border-green-500/30 text-green-300">
                   {(() => {
                     const role = profile?.role || user.role;
                     if (role === "admin") return "Admin";
@@ -178,14 +178,14 @@ export default function Layout({ children, currentPageName }) {
       {/* Mobile header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-[100] bg-gray-900 border-b border-gray-800 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center">
-            <Crown className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 rounded-lg  flex items-center justify-center">
+            <Crown className="w-4 h-4 text-green-500" />
           </div>
-          <span className="text-white font-bold text-sm">Mansão Green</span>
+          <span className="bg-gradient-to-r from-green-600 via-green-400 to-green-600 bg-clip-text text-transparent text-sm font-black uppercase tracking-wider">Mansão Green</span>
         </div>
         <button
           onClick={() => setMobileOpen(prev => !prev)}
-          className="text-gray-400 hover:text-white rounded-lg"
+          className="text-green-400 hover:text-white rounded-lg"
           style={{ padding: '10px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -197,8 +197,8 @@ export default function Layout({ children, currentPageName }) {
         <div className="lg:hidden fixed inset-0 z-[90] bg-gray-900 pt-16 overflow-y-auto">
           {/* User info */}
           {user && (
-            <div className="px-4 py-4 border-b border-gray-800 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0">
+            <div className="px-4 py-4 border-b  border-gray-800 flex items-center gap-3">
+              <div className="w-14 h-14 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0">
                 {profile?.photo_url ? (
                   <img src={profile.photo_url} alt={user.full_name} className="w-full h-full object-cover" />
                 ) : (
@@ -208,7 +208,7 @@ export default function Layout({ children, currentPageName }) {
               <div className="min-w-0">
                 <p className="text-white text-sm font-medium truncate">{profile?.full_name || user.full_name}</p>
                 {(profile?.sector || user.sector) && <p className="text-green-400 text-xs truncate">{profile?.sector || user.sector}</p>}
-                <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-300">
+                <span className="inline-block mt-0.5 p-1 rounded-md text-xs font-medium border border-green-500/30 text-green-300">
                   {(() => {
                     const role = profile?.role || user.role;
                     if (role === "admin") return "Admin";
@@ -221,13 +221,13 @@ export default function Layout({ children, currentPageName }) {
               </div>
             </div>
           )}
-          <nav className="p-4 space-y-1">
+          <nav className=" space-y-1 mt-1">
             {navItems.map(({ label, page, icon: Icon }) => (
               <Link
                 key={page}
                 to={createPageUrl(page)}
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
+                className={`flex items-center gap-3 px-3 py-3 rounded-r-full mr-4 text-sm font-medium transition-all ${
                   currentPageName === page
                     ? "bg-green-500 text-black"
                     : "text-gray-400 hover:text-white hover:bg-gray-800"

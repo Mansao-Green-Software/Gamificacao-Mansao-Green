@@ -398,7 +398,7 @@ export default function Dashboard() {
                           />
                         </div>
                       </div>
-                      <span className="text-green-400 font-bold text-sm shrink-0">{emp.points.toLocaleString()} pts</span>
+                      <span className="text-green-400 font-bold text-xs shrink-0">{emp.points.toLocaleString()} pts</span>
                     </div>
                   );
                 });
