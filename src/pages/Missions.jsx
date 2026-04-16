@@ -126,6 +126,31 @@ export default function Missions() {
 
   const myId = profile?.user_id || profile?.id || user?.id;
 
+  // Verifica se já existe solicitação (pendente ou aprovada) para a missão no período
+  const isRequestBlockedByFrequency = (mission) => {
+    if (!mission.frequency) return false;
+    const now = new Date();
+    const relevantRequests = myRequests.filter(r =>
+      r.mission_id === mission.id && (r.status === "pendente" || r.status === "aprovado")
+    );
+    return relevantRequests.some(r => {
+      const d = new Date(r.created_date);
+      if (mission.frequency === "Diária") {
+        return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      }
+      if (mission.frequency === "Semanal") {
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+        return d >= startOfWeek;
+      }
+      if (mission.frequency === "Mensal") {
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      }
+      return false;
+    });
+  };
+
   // Pending requests visible to manager/supervisor/director - respecting hierarchy
   const pendingRequests = isManager
     ? requests.filter(r => {
@@ -173,8 +198,25 @@ export default function Missions() {
     setUploadingAttachment(false);
   };
 
+  const MONTHLY_LIMIT_EMAIL = "financeiro@gruporoyalty.com";
+
   const handleSubmitRequest = async () => {
     if (!requestModal) return;
+
+    // Usuário com limite de 1 solicitação por mês
+    if (user?.email === MONTHLY_LIMIT_EMAIL) {
+      const now = new Date();
+      const thisMonthRequests = myRequests.filter(r => {
+        const d = new Date(r.created_date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && r.status !== "rejeitado";
+      });
+      if (thisMonthRequests.length >= 1) {
+        alert("Você já realizou sua solicitação deste mês. Aguarde o próximo mês para solicitar novamente.");
+        setRequestModal(null);
+        return;
+      }
+    }
+
     setSubmitting(requestModal.id);
     const requestSector = (effectiveRole === "manager" || effectiveRole === "admin" || effectiveRole === "director") ? "Gerência" : effectiveRole === "supervisor" ? "Supervisor" : mySector;
     const req = await base44.entities.MissionRequest.create({
@@ -405,6 +447,16 @@ export default function Missions() {
               const pending = req?.status === "pendente";
               const rejected = req?.status === "rejeitado";
               const hasSub = !!mission.sub_sector;
+              const blockedByFrequency = isRequestBlockedByFrequency(mission);
+              const blockedByMonthlyLimit = user?.email === MONTHLY_LIMIT_EMAIL && (() => {
+                const now = new Date();
+                return myRequests.filter(r => {
+                  const d = new Date(r.created_date);
+                  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && r.status !== "rejeitado";
+                }).length >= 1;
+              })();
+              const isBlocked = pending || blockedByFrequency || blockedByMonthlyLimit;
+              const freqLabel = mission.frequency === "Diária" ? "hoje" : mission.frequency === "Semanal" ? "esta semana" : "este mês";
 
               return (
                 <div key={mission.id} className={`group relative bg-gray-900 backdrop-blur-sm border rounded-2xl p-6 flex flex-col gap-4 overflow-hidden transition-all duration-300  hover:-translate-y-1 ${pending ? "border-yellow-700" : ""} ${rejected ? "border-red-700/50" : ""} ${approved ? "border-green-700" : "border-gray-800"}`}>
@@ -423,9 +475,14 @@ export default function Missions() {
                             <Clock className="w-3 h-3" /> Em Análise
                           </span>
                         )}
-                        {rejected && (
+                        {rejected && !blockedByFrequency && (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full shrink-0">
                             <XCircle className="w-3 h-3" /> Rejeitado
+                          </span>
+                        )}
+                        {blockedByFrequency && !pending && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full shrink-0">
+                            <Clock className="w-3 h-3" /> Já solicitado {freqLabel}
                           </span>
                         )}
                       </div>
@@ -454,15 +511,16 @@ export default function Missions() {
                   </div>
                   <div className="flex gap-2 z-10">
                       <button
-                        onClick={() => !pending && openRequestModal(mission)}
-                        disabled={pending}
+                        onClick={() => !isBlocked && openRequestModal(mission)}
+                        disabled={isBlocked}
                         className={`flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm ${
                           pending ? "bg-amber-900/20 text-amber-500/80 border border-amber-900/30 cursor-not-allowed" :
+                          blockedByFrequency || blockedByMonthlyLimit ? "bg-purple-900/20 text-purple-400/80 border border-purple-900/30 cursor-not-allowed" :
                           (approved || rejected) ? "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 hover:border-gray-600 shadow-none" :
                           "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-black active:scale-[0.98]"
                         }`}
                       >
-                        {pending ? <><Clock className="w-3.5 h-3.5" /> Aguardando</> : (approved || rejected) ? <><RotateCcw className="w-3.5 h-3.5" /> Solicitar de novo</> : submitting === mission.id ? "... " : "Solicitar"}
+                        {pending ? <><Clock className="w-3.5 h-3.5" /> Aguardando</> : blockedByMonthlyLimit ? <><Clock className="w-3.5 h-3.5" /> Limite mensal atingido</> : blockedByFrequency ? <><Clock className="w-3.5 h-3.5" /> Já solicitado {freqLabel}</> : (approved || rejected) ? <><RotateCcw className="w-3.5 h-3.5" /> Solicitar de novo</> : submitting === mission.id ? "... " : "Solicitar"}
                       </button>
                     {isManager && (
                       <button onClick={() => handleDelete(mission.id)} className="p-2.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 rounded-xl transition-all shadow-sm">
