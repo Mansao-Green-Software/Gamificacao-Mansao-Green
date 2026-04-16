@@ -198,8 +198,25 @@ export default function Missions() {
     setUploadingAttachment(false);
   };
 
+  const MONTHLY_LIMIT_EMAIL = "financeiro@gruporoyalty.com";
+
   const handleSubmitRequest = async () => {
     if (!requestModal) return;
+
+    // Usuário com limite de 1 solicitação por mês
+    if (user?.email === MONTHLY_LIMIT_EMAIL) {
+      const now = new Date();
+      const thisMonthRequests = myRequests.filter(r => {
+        const d = new Date(r.created_date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && r.status !== "rejeitado";
+      });
+      if (thisMonthRequests.length >= 1) {
+        alert("Você já realizou sua solicitação deste mês. Aguarde o próximo mês para solicitar novamente.");
+        setRequestModal(null);
+        return;
+      }
+    }
+
     setSubmitting(requestModal.id);
     const requestSector = (effectiveRole === "manager" || effectiveRole === "admin" || effectiveRole === "director") ? "Gerência" : effectiveRole === "supervisor" ? "Supervisor" : mySector;
     const req = await base44.entities.MissionRequest.create({
@@ -418,7 +435,14 @@ export default function Missions() {
               const rejected = req?.status === "rejeitado";
               const hasSub = !!mission.sub_sector;
               const blockedByFrequency = isRequestBlockedByFrequency(mission);
-              const isBlocked = pending || blockedByFrequency;
+              const blockedByMonthlyLimit = user?.email === MONTHLY_LIMIT_EMAIL && (() => {
+                const now = new Date();
+                return myRequests.filter(r => {
+                  const d = new Date(r.created_date);
+                  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && r.status !== "rejeitado";
+                }).length >= 1;
+              })();
+              const isBlocked = pending || blockedByFrequency || blockedByMonthlyLimit;
               const freqLabel = mission.frequency === "Diária" ? "hoje" : mission.frequency === "Semanal" ? "esta semana" : "este mês";
 
               return (
@@ -478,12 +502,12 @@ export default function Missions() {
                         disabled={isBlocked}
                         className={`flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm ${
                           pending ? "bg-amber-900/20 text-amber-500/80 border border-amber-900/30 cursor-not-allowed" :
-                          blockedByFrequency ? "bg-purple-900/20 text-purple-400/80 border border-purple-900/30 cursor-not-allowed" :
+                          blockedByFrequency || blockedByMonthlyLimit ? "bg-purple-900/20 text-purple-400/80 border border-purple-900/30 cursor-not-allowed" :
                           (approved || rejected) ? "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 hover:border-gray-600 shadow-none" :
                           "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-black active:scale-[0.98]"
                         }`}
                       >
-                        {pending ? <><Clock className="w-3.5 h-3.5" /> Aguardando</> : blockedByFrequency ? <><Clock className="w-3.5 h-3.5" /> Já solicitado {freqLabel}</> : (approved || rejected) ? <><RotateCcw className="w-3.5 h-3.5" /> Solicitar de novo</> : submitting === mission.id ? "... " : "Solicitar"}
+                        {pending ? <><Clock className="w-3.5 h-3.5" /> Aguardando</> : blockedByMonthlyLimit ? <><Clock className="w-3.5 h-3.5" /> Limite mensal atingido</> : blockedByFrequency ? <><Clock className="w-3.5 h-3.5" /> Já solicitado {freqLabel}</> : (approved || rejected) ? <><RotateCcw className="w-3.5 h-3.5" /> Solicitar de novo</> : submitting === mission.id ? "... " : "Solicitar"}
                       </button>
                     {isManager && (
                       <button onClick={() => handleDelete(mission.id)} className="p-2.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 rounded-xl transition-all shadow-sm">
