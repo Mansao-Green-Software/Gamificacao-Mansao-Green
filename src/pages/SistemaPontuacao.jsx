@@ -106,7 +106,8 @@ export default function SistemaPontuacao() {
   };
 
   const handleSaveEdit = async (id) => {
-    await base44.entities.Mission.update(id, {
+    await base44.functions.invoke('updateMission', {
+      id,
       title: editing.title,
       points: parseInt(editing.points),
       description: editing.description,
@@ -124,7 +125,7 @@ export default function SistemaPontuacao() {
   };
 
   const handleDelete = async (id) => {
-    await base44.entities.Mission.update(id, { is_active: false });
+    await base44.functions.invoke('updateMission', { id, is_active: false });
     setMissions(prev => prev.filter(m => m.id !== id));
   };
 
@@ -150,7 +151,7 @@ export default function SistemaPontuacao() {
 
     const missionsToUpdate = missions.filter(m => m.sub_sector === subToDelete.name);
     for (const m of missionsToUpdate) {
-      await base44.entities.Mission.update(m.id, { sub_sector: "" });
+      await base44.functions.invoke('updateMission', { id: m.id, sub_sector: "" });
     }
     setMissions(prev => prev.map(m => m.sub_sector === subToDelete.name ? { ...m, sub_sector: "" } : m));
   };
