@@ -771,20 +771,36 @@ export default function Missions() {
                 <h3 className="text-white font-bold mb-4">Histórico da Gerência</h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {gerenteHistory.map(r => (
-                    <div key={r.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
-                      <div>
-                        <p className="text-white text-sm">{r.mission_title}</p>
-                        <p className="text-gray-500 text-xs">{r.employee_name} · {formatBRT(r.created_date, "date")}</p>
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
-                           {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
+                    <div key={r.id} className="p-3 bg-gray-900/50 rounded-xl space-y-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm font-medium">{r.mission_title}</p>
+                          <p className="text-gray-500 text-xs">{r.employee_name} · {formatBRT(r.created_date, "date")}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
+                            {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
                           </span>
                           {r.status === "aprovado" && r.approved_by_name && (
                             <p className="text-xs text-gray-500">por {r.approved_by_name}</p>
                           )}
-                         {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
+                          {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
+                        </div>
                       </div>
+                      {r.justification && (
+                        <p className="flex items-center gap-1.5 text-gray-300 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
+                          <FaComment className="text-gray-500 shrink-0" /> {r.justification}
+                        </p>
+                      )}
+                      {r.attachments?.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {r.attachments.map((url, idx) => (
+                            <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
+                              <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -911,20 +927,36 @@ export default function Missions() {
                 <h3 className="text-white font-bold mb-4">Histórico</h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {history.map(r => (
-                    <div key={r.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
-                      <div>
-                        <p className="text-white text-sm">{r.mission_title}</p>
-                        <p className="text-gray-500 text-xs">{r.employee_name} · {formatBRT(r.created_date, "date")}</p>
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
-                           {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
+                    <div key={r.id} className="p-3 bg-gray-900/50 rounded-xl space-y-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm font-medium">{r.mission_title}</p>
+                          <p className="text-gray-500 text-xs">{r.employee_name} · {formatBRT(r.created_date, "date")}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
+                            {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
                           </span>
                           {r.status === "aprovado" && r.approved_by_name && (
                             <p className="text-xs text-gray-500">por {r.approved_by_name}</p>
                           )}
-                         {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
+                          {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
+                        </div>
                       </div>
+                      {r.justification && (
+                        <p className="flex items-center gap-1.5 text-gray-300 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
+                          <FaComment className="text-gray-500 shrink-0" /> {r.justification}
+                        </p>
+                      )}
+                      {r.attachments?.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {r.attachments.map((url, idx) => (
+                            <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
+                              <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
