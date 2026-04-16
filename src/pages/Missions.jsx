@@ -7,12 +7,12 @@ import { FaRocket, FaClipboardList, FaHeart, FaStar, FaExclamationCircle, FaBull
 
 
 const CATEGORIES = [
-  { key: "Performance & Resultados", Icon: FaRocket, color: "text-purple  -400 border-purple-700 bg-purple-700" },
-  { key: "Disciplina & Organização", Icon: FaClipboardList, color: "text-blue-400 border-blue-700 bg-blue-900" },
-  { key: "Cultura & Atitude Green", Icon: FaHeart, iconColor: "text-green-400", color: "text-green-400 border-green-700 bg-green-800" },
-  { key: "Bônus de Pontuação", Icon: FaStar, color: "text-yellow-400 border-yellow-700 bg-yellow-900" },
-  { key: "Punições (Perda de Pontos)", Icon: FaExclamationCircle, iconColor: "text-red-500", color: "text-red-400 border-red-700/50 bg-red-900" },
-  { key: "Participação em Ações", Icon: FaBullseye, iconColor: "text-white/80", color: "text-cyan-400 border-cyan-700/50 bg-cyan-900" },
+  { key: "Performance & Resultados", Icon: FaRocket, bg: "bg-gradient-to-br from-purple-900/80 via-purple-800/40 to-purple-900/80", border: "border-purple-500/30", text: "text-purple-300" },
+  { key: "Disciplina & Organização", Icon: FaClipboardList, bg: "bg-gradient-to-br from-blue-900/80 via-blue-800/40 to-blue-900/80", border: "border-blue-500/30", text: "text-blue-300" },
+  { key: "Cultura & Atitude Green", Icon: FaHeart, iconColor: "text-green-400", bg: "bg-gradient-to-br from-green-600/80 via-green-500/30 to-green-600/80", border: "border-green-500/30", text: "text-green-300" },
+  { key: "Bônus de Pontuação", Icon: FaStar, bg: "bg-gradient-to-br from-yellow-900/80 via-yellow-700/40 to-yellow-900/80", border: "border-yellow-500/30", text: "text-yellow-300" },
+  { key: "Punições (Perda de Pontos)", Icon: FaExclamationCircle, iconColor: "text-red-500", bg: "bg-gradient-to-br from-red-900/80 via-red-800/40 to-red-900/80", border: "border-red-500/30", text: "text-red-300" },
+  { key: "Participação em Ações", Icon: FaBullseye, iconColor: "text-white/80", bg: "bg-gradient-to-br from-cyan-900/80 via-cyan-800/40 to-cyan-900/80", border: "border-cyan-500/30", text: "text-cyan-300" },
 ];
 
 const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "Feira FC", "Todos"];
@@ -262,7 +262,7 @@ export default function Missions() {
           <button
             onClick={() => loadData(true)}
             disabled={refreshing}
-            className="flex items-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-2 bg-gray-900 border border-green-700 hover:bg-gray-800 text-green-300 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
           >
             <RotateCcw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             {refreshing ? "Atualizando..." : "Atualizar"}
@@ -371,20 +371,33 @@ export default function Missions() {
               if (catMissions.length === 0) return null;
               const collapsed = collapsedCategories[cat.key];
               return (
-                <div key={cat.key} className={`border rounded-2xl overflow-hidden ${cat.color}`}>
+                <div key={cat.key} className={`border rounded-xl overflow-hidden bg-gray-900/40 transition-all duration-300 hover:shadow-xl hover:shadow-black/40 ${cat.border} ${cat.text}`}>
                   <button
                     onClick={() => toggleCategory(cat.key)}
-                    className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-black/10 transition-colors"
+                    className={`w-full flex items-center justify-between px-5 py-3.5 hover:brightness-110 active:scale-[0.99] transition-all ${cat.bg}`}
                   >
                     <div className="flex items-center gap-2">
                       <cat.Icon className={`w-4 h-4 ${cat.iconColor || "text-white/80"}`} />
                       <span className="font-bold text-sm text-white">{cat.key}</span>
                       <span className="text-xs px-2 py-0.5 bg-black/20 rounded-full text-white/70">{catMissions.length}</span>
                     </div>
-                    {collapsed ? <ChevronRight className="w-4 h-4 text-white/60" /> : <ChevronDown className="w-4 h-4 text-white/60" />}
+                    {collapsed ? (
+                      <motion.div animate={{ rotate: 0 }} transition={{ duration: 0.2 }}>
+                        <ChevronRight className="w-4 h-4 text-white/60" />
+                      </motion.div>
+                    ) : (
+                      <motion.div animate={{ rotate: 90 }} transition={{ duration: 0.2 }}>
+                        <ChevronRight className="w-4 h-4 text-white/60" />
+                      </motion.div>
+                    )}
                   </button>
                   {!collapsed && (
-                    <div className="bg-gray-800 border-t border-gray-700">
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      className="bg-gray-900/60 backdrop-blur-md border-t border-white/5"
+                    >
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
                         {catMissions.map(mission => {
               const req = myRequestMap[mission.id];
@@ -394,7 +407,7 @@ export default function Missions() {
               const hasSub = !!mission.sub_sector;
 
               return (
-                <div key={mission.id} className={`group relative bg-gray-900/40 backdrop-blur-sm border rounded-2xl p-6 flex flex-col gap-4 overflow-hidden transition-all duration-300  hover:-translate-y-1 ${approved ? "border-green-700" : "border-gray-800"}`}>
+                <div key={mission.id} className={`group relative bg-gray-900 backdrop-blur-sm border rounded-2xl p-6 flex flex-col gap-4 overflow-hidden transition-all duration-300  hover:-translate-y-1 ${pending ? "border-yellow-700" : ""} ${rejected ? "border-red-700/50" : ""} ${approved ? "border-green-700" : "border-gray-800"}`}>
                   
                   <div className="flex items-start justify-between gap-4 z-10">
                     <div className="flex-1 min-w-0">
@@ -429,7 +442,7 @@ export default function Missions() {
                   </div>
                   
                   <div className="flex items-center gap-2 flex-wrap mt-auto z-10">
-                    <span className="text-[10px] px-2.5 py-1 bg-gray-800 border border-gray-700/50 shadow-sm text-gray-300 rounded-md font-semibold tracking-wide uppercase">{mission.sector}</span>
+                    <span className="text-[10px] px-2.5 py-1 bg-gray-900 border border-gray-700/50 shadow-sm text-gray-300 rounded-md font-semibold tracking-wide uppercase">{mission.sector}</span>
                     {hasSub && <span className="text-[10px] px-2.5 py-1 bg-blue-900/30 border border-blue-800/50 shadow-sm text-blue-300 rounded-md font-semibold tracking-wide uppercase">{mission.sub_sector}</span>}
                     {mission.frequency && (
                       <span className={`text-[10px] px-2.5 py-1 border shadow-sm rounded-md font-semibold tracking-wide uppercase ${
@@ -461,7 +474,7 @@ export default function Missions() {
               );
                         })}
                       </div>
-                    </div>
+                    </motion.div>
                   )}
                 </div>
               );
