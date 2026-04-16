@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Users, BarChart2, RotateCcw, Info } from "lucide-react";
+import { Trophy, Users, BarChart2, RotateCcw, Info, Crown } from "lucide-react";
 import { FaMedal } from 'react-icons/fa';
+import { motion } from "framer-motion";
 import EmployeeHistoryModal from "@/components/EmployeeHistoryModal";
 
 const SECTORS = ["Administrativo", "Affiliates", "Audiovisual", "Comercial", "Contingência", "Feira FC", "Financeiro", "Gerência", "IA/Automação", "Líder de Projeto", "Saúde e Bem Estar", "Serviços Gerais", "Social Media", "Suporte", "TI", "Tipster", "Tráfego"];
@@ -48,9 +49,25 @@ const SECTOR_ICON_COLORS = {
 };
 
 const getMedal = (idx) => {
-  if (idx === 0) return <FaMedal className="w-5 h-5 text-amber-400" />;
-  if (idx === 1) return <FaMedal className="w-5 h-5 text-slate-300" />;
-  if (idx === 2) return <FaMedal className="w-5 h-5 text-amber-700" />;
+  if (idx === 0) return (
+    <motion.div
+      animate={{ 
+        y: [0, -4, 0],
+        filter: ["drop-shadow(0 0 0px #fbbf24)", "drop-shadow(0 0 10px #fbbf24)", "drop-shadow(0 0 0px #fbbf24)"]
+      }}
+      transition={{ 
+        duration: 3, 
+        repeat: Infinity,
+        ease: "easeInOut" 
+      }}
+      className="relative flex items-center justify-center w-full"
+    >
+      <Crown className="w-6 h-6 text-amber-400 fill-amber-400/20 drop-shadow-md" />
+      <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-300 rounded-full blur-[2px] animate-pulse" />
+    </motion.div>
+  );
+  if (idx === 1) return <Crown className="w-5 h-5 text-slate-300 drop-shadow-sm opacity-80" />;
+  if (idx === 2) return <Crown className="w-5 h-5 text-amber-500 drop-shadow-sm opacity-80" />;
   return <span className="text-gray-500 font-bold text-sm">{idx + 1}</span>;
 };
 

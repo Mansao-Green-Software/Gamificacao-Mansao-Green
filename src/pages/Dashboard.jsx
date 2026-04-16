@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
-import { Trophy, Star, Target, TrendingUp, Medal, History, TrendingDown, RotateCcw } from "lucide-react";
+import { Trophy, Star, Target, TrendingUp, Medal, History, TrendingDown, RotateCcw, Crown } from "lucide-react";
 import { formatBRT } from "@/utils/dateUtils";
 import { FaMedal, FaHandPaper } from 'react-icons/fa';
 import { GoGraph } from "react-icons/go";
@@ -32,9 +32,25 @@ const SECTOR_COLORS = {
 };
 
 const getMedal = (idx) => {
-  if (idx === 0) return <FaMedal className="w-5 h-5 text-amber-400" />;
-  if (idx === 1) return <FaMedal className="w-5 h-5 text-slate-300" />;
-  if (idx === 2) return <FaMedal className="w-5 h-5 text-amber-700" />;
+  if (idx === 0) return (
+    <motion.div
+      animate={{ 
+        y: [0, -4, 0],
+        filter: ["drop-shadow(0 0 0px #fbbf24)", "drop-shadow(0 0 10px #fbbf24)", "drop-shadow(0 0 0px #fbbf24)"]
+      }}
+      transition={{ 
+        duration: 3, 
+        repeat: Infinity,
+        ease: "easeInOut" 
+      }}
+      className="relative"
+    >
+      <Crown className="w-6 h-6 text-amber-400 fill-amber-400/20 drop-shadow-md" />
+      <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-300 rounded-full blur-[2px] animate-pulse" />
+    </motion.div>
+  );
+  if (idx === 1) return <Crown className="w-5 h-5 text-slate-300 drop-shadow-sm opacity-80" />;
+  if (idx === 2) return <Crown className="w-5 h-5 text-amber-500 drop-shadow-sm opacity-80" />;
   return <span className="text-gray-500 font-bold text-sm">{idx + 1}</span>;
 };
 
@@ -275,7 +291,7 @@ export default function Dashboard() {
           <div className="bg-gray-800/40 border-l-4 border-green-600 rounded-xl p-5">
             <div className="flex items-center gap-3 mb-3">
 
-              <span className="text-gray-400 text-xs uppercase">Meus Pontos</span>
+              <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Meus Pontos</span>
             </div>
             <p className="text-3xl font-bold text-white">{myPoints.toLocaleString()}</p>
           </div>
@@ -313,16 +329,20 @@ export default function Dashboard() {
               {sectorRanking.slice(0, 5).map((item, idx) => {
                 const isMe = item.sector === mySector;
                 return (
-                  <div key={item.sector} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
-                    <span className="w-8 flex items-center justify-center">{getMedal(idx)}</span>
-                    <div className={`flex-1 h-2 rounded-full bg-gray-700 overflow-hidden`}>
-                      <div
-                        className={`h-full rounded-full bg-gradient-to-r ${SECTOR_COLORS[item.sector] || "from-green-500 to-teal-500"}`}
-                        style={{ width: sectorRanking[0].points > 0 ? `${(item.points / sectorRanking[0].points) * 100}%` : "0%" }}
-                      />
+                  <div key={item.sector} className={`flex items-center gap-4 p-5 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
+                    <span className="w-8 flex items-center justify-center shrink-0">{getMedal(idx)}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-center mb-1.5">
+                        <span className="text-white text-sm font-bold truncate">{item.sector}</span>
+                        <span className="text-green-400 font-bold text-xs">{item.points.toLocaleString()} pts</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-gray-700 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full bg-gradient-to-r ${SECTOR_COLORS[item.sector] || "from-green-500 to-teal-500"}`}
+                          style={{ width: sectorRanking[0].points > 0 ? `${(item.points / sectorRanking[0].points) * 100}%` : "0%" }}
+                        />
+                      </div>
                     </div>
-                    <span className="text-white text-sm font-medium w-24 truncate">{item.sector}</span>
-                    <span className="text-green-400 font-bold text-sm">{item.points.toLocaleString()} pts</span>
                   </div>
                 );
               })}
