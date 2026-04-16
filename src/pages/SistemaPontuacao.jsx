@@ -93,13 +93,14 @@ export default function SistemaPontuacao() {
 
   const handleCreate = async () => {
     if (!form.title || !form.points || !form.sector) return;
-    const created = await base44.entities.Mission.create({
+    const response = await base44.functions.invoke('updateMission', {
       ...form,
       points: parseInt(form.points),
       frequency: form.frequency || "",
       sub_sector: form.sub_sector || "",
       is_active: true,
     });
+    const created = response.data;
     setMissions(prev => [...prev, created]);
     setForm({ title: "", description: "", points: "", sector: "", category: "Performance & Resultados", frequency: "", sub_sector: "" });
     setShowForm(false);

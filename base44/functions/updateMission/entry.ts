@@ -13,10 +13,13 @@ Deno.serve(async (req) => {
   const body = await req.json();
   const { id, ...data } = body;
 
+  // Create
   if (!id) {
-    return Response.json({ error: 'id é obrigatório' }, { status: 400 });
+    const created = await base44.asServiceRole.entities.Mission.create(data);
+    return Response.json(created);
   }
 
+  // Update
   const updated = await base44.asServiceRole.entities.Mission.update(id, data);
   return Response.json(updated);
 });
