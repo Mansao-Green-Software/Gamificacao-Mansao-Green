@@ -104,6 +104,13 @@ export default function Missions() {
     return allMySectors.includes(s.sector);
   });
 
+  // Bloqueia qualquer user (exceto admin) de dar ponto para si mesmo via ManagePoints
+  const isSelf = (employeeId) => {
+    return employeeId === user?.id || 
+      (profile?.user_id && employeeId === profile.user_id) ||
+      (profile?.id && employeeId === profile.id);
+  };
+
   const visibleMissions = missions.filter(m => {
     if (!m.is_active) return false;
     if (isAdmin) return true;
@@ -248,6 +255,8 @@ export default function Missions() {
   };
 
   const handleApprove = async (request) => {
+    // Bloqueia aprovação própria (exceto admin)
+    if (!isAdmin && isSelf(request.employee_id)) return;
     setApproving(request.id);
     const empProfile = allProfiles.find(p => 
       (p.user_id && p.user_id === request.employee_id) || 

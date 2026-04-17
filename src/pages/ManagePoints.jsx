@@ -54,10 +54,13 @@ export default function ManagePoints() {
       if (isAdmin && !mySector) {
         filtered = emps;
       } else if (isDirector) {
-        // Diretor vê apenas gerentes
-        filtered = emps.filter(e => e.role === "manager");
+        // Diretor vê apenas gerentes (exceto ele mesmo)
+        filtered = emps.filter(e => e.role === "manager" && (e.user_id || e.id) !== u.id);
       } else {
         filtered = emps.filter(e => {
+          // Nenhum usuário (exceto admin) pode dar ponto para si mesmo
+          const empId = e.user_id || e.id;
+          if (!isAdmin && empId === u.id) return false;
           if (isGerencia) return e.role === "manager" || e.role === "supervisor";
           return allMySectors.includes(e.sector) && e.role !== "admin" && e.role !== "director";
         });
@@ -151,6 +154,11 @@ export default function ManagePoints() {
 
   const handleAddPoints = async () => {
     if (!form.employee_id || !form.points) return;
+    // Bloqueia dar ponto para si mesmo (exceto admin)
+    if (!isAdmin && form.employee_id === user?.id) {
+      alert("Você não pode adicionar pontos para si mesmo.");
+      return;
+    }
     const pts = parseInt(form.points);
     if (pts > MAX_POINTS) {
       alert(`O limite máximo de pontos por tarefa é ${MAX_POINTS} pts.`);
