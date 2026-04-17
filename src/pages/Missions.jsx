@@ -173,17 +173,14 @@ export default function Missions() {
           return allMySectors.includes(effectiveSector);
         }
         // Resolve sector from request or fallback to employee profile
-        const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id || p.user_id === r.employee_id);
+        const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
         const effectiveSector = r.sector || empProfile?.sector;
         if (effectiveRole === "supervisor") {
-          if (effectiveSector === "Supervisor") return false;
+          // Supervisor só vê colaboradores do seu setor (não outros supervisores)
+          if (empProfile?.role === "supervisor" || empProfile?.role === "manager" || empProfile?.role === "admin") return false;
           return allMySectors.includes(effectiveSector);
         }
-        // Gerente: aprova colaboradores e supervisores do seu setor
-        if (effectiveSector === "Supervisor") {
-          if (!empProfile) return false;
-          return allMySectors.includes(empProfile.sector) || (empProfile.extra_sectors || []).some(s => allMySectors.includes(s));
-        }
+        // Gerente: aprova colaboradores E supervisores do seu setor
         return allMySectors.includes(effectiveSector);
       })
     : [];
@@ -224,7 +221,7 @@ export default function Missions() {
     }
 
     setSubmitting(requestModal.id);
-    const requestSector = (effectiveRole === "manager" || effectiveRole === "admin" || effectiveRole === "director") ? "Gerência" : effectiveRole === "supervisor" ? "Supervisor" : mySector;
+    const requestSector = (effectiveRole === "manager" || effectiveRole === "admin" || effectiveRole === "director") ? "Gerência" : mySector;
     const req = await base44.entities.MissionRequest.create({
       employee_id: profile?.user_id || user.id,
       employee_name: profile?.full_name || user.full_name,
@@ -941,11 +938,10 @@ export default function Missions() {
                 return allMySectors.includes(effectiveSector);
               }
               if (effectiveRole === "supervisor") {
-                return effectiveSector !== "Supervisor" && allMySectors.includes(effectiveSector);
+                if (emp?.role === "supervisor" || emp?.role === "manager" || emp?.role === "admin") return false;
+                return allMySectors.includes(effectiveSector);
               }
-              if (effectiveSector === "Supervisor") {
-                return emp && allMySectors.includes(emp.sector);
-              }
+              // Gerente: vê colaboradores e supervisores do seu setor
               return allMySectors.includes(effectiveSector);
             }).filter(r => !selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter);
             if (history.length === 0) return null;
