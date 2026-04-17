@@ -116,7 +116,7 @@ export default function Missions() {
     if (isAdmin) return true;
     if (isDirector) return false;
     if (effectiveRole === "manager") return m.sector === "Gerência";
-    if (effectiveRole === "supervisor") return m.sector === "Supervisor" || allMySectors.includes(m.sector) || m.sector === "Todos";
+    if (effectiveRole === "supervisor") return m.sector === "Supervisor";
     return allMySectors.includes(m.sector) || m.sector === "Todos";
   });
 
