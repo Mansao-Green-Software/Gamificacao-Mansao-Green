@@ -15,6 +15,15 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     checkAppState();
+    
+    // Also recheck auth state when token in storage changes (after login redirect)
+    const handleStorageChange = () => {
+      refreshAppParams();
+      checkAppState();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const checkAppState = async () => {
@@ -118,14 +127,15 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingAuth(false);
       setIsAuthenticated(false);
       
+      // Only set error if there's a specific reason from the backend
       if (error.status === 401 || error.status === 403) {
-        // Only set auth_required error if no specific reason given
-        if (!error.data?.extra_data?.reason) {
+        if (error.data?.extra_data?.reason) {
           setAuthError({
-            type: 'auth_required',
-            message: 'Authentication required'
+            type: error.data.extra_data.reason,
+            message: error.message
           });
         }
+        // Otherwise don't set error — let it be null until we explicitly need auth
       }
     }
   };
