@@ -60,7 +60,7 @@ export default function ManagePoints() {
         filtered = emps.filter(e => {
           // Nenhum usuário (exceto admin) pode dar ponto para si mesmo
           const empId = e.user_id || e.id;
-          if (!isAdmin && empId === u.id) return false;
+          if (empId === u.id || e.email === u.email) return false;
           if (isGerencia) return e.role === "manager" || e.role === "supervisor";
           return allMySectors.includes(e.sector) && e.role !== "admin" && e.role !== "director";
         });
