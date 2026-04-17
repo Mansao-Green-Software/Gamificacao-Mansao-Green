@@ -187,42 +187,42 @@ export default function Dashboard() {
       <SurpriseMissionBanner isAdmin={isAdmin} userSector={mySector} />
 
       {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-black flex items-center gap-2 shimmer-green">Olá, {user?.full_name?.split(" ")[0]} </h1>
-          <p className="text-gray-200/70 text-sm mt-1">Bem-vindo ao Gamificação Mansão Green</p>
-        </div>
-        <div className="flex items-center gap-2">
+      <div className="space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-black flex items-center gap-2 shimmer-green">Olá, {user?.full_name?.split(" ")[0]} </h1>
+            <p className="text-gray-200/70 text-sm mt-1">Bem-vindo ao Gamificação Mansão Green</p>
+          </div>
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2 px-3 py-2 bg-gray-900 hover:bg-gray-600 text-green-400 border border-green-400 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-2 bg-gray-900 hover:bg-gray-600 text-green-400 border border-green-400 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 shrink-0"
           >
             <RotateCcw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-            {refreshing ? "Atualizando..." : "Atualizar"}
+            <span className="hidden sm:inline">{refreshing ? "Atualizando..." : "Atualizar"}</span>
           </button>
-          <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-fit relative z-0">
-            {[
-              { id: "overview", label: "Visão Geral" },
-              { id: "mypoints", label: "Meus Pontos" }
-            ].map(t => (
-              <button
-                key={t.id}
-                onClick={() => setActiveTab(t.id)}
-                className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center gap-1.5 ${activeTab === t.id ? "text-gray-900" : "text-gray-400 hover:text-white"
-                  }`}
-              >
-                {activeTab === t.id && (
-                  <motion.div
-                    layoutId="activeDashboardTab"
-                    className="absolute inset-0 bg-green-500 rounded-lg -z-10 shadow-sm"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <span className="relative z-10 block">{t.label}</span>
-              </button>
-            ))}
-          </div>
+        </div>
+        <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-full sm:w-fit">
+          {[
+            { id: "overview", label: "Visão Geral" },
+            { id: "mypoints", label: "Meus Pontos" }
+          ].map(t => (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              className={`relative flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center justify-center gap-1.5 ${activeTab === t.id ? "text-gray-900" : "text-gray-400 hover:text-white"}`}
+            >
+              {activeTab === t.id && (
+                <motion.div
+                  layoutId="activeDashboardTab"
+                  className="absolute inset-0 bg-green-500 rounded-lg shadow-sm"
+                  style={{ zIndex: 0 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
+              <span style={{ position: "relative", zIndex: 1 }}>{t.label}</span>
+            </button>
+          ))}
         </div>
       </div>
 

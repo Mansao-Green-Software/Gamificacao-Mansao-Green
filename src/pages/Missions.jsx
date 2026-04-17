@@ -322,30 +322,31 @@ export default function Missions() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-fit relative z-0 flex-wrap">
+      <div className="flex flex-wrap gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-full sm:w-fit">
         {[
           { id: "missoes", label: "Missões", onClick: () => { setTab("missoes"); setSelectedEmployeeFilter(""); } },
-          { id: "minhas", label: "Minhas Solicitações", onClick: () => { setTab("minhas"); setSelectedEmployeeFilter(""); } },
+          { id: "minhas", label: "Minhas Sol.", onClick: () => { setTab("minhas"); setSelectedEmployeeFilter(""); } },
           ...(isGerenteViewer ? [{ id: "gerencia", label: "Gerência", badge: requests.filter(r => r.status === "pendente" && r.sector === "Gerência").length, onClick: () => setTab("gerencia") }] : []),
           ...(isManager ? [{ id: "solicitacoes", label: "Solicitações", badge: pendingCount, onClick: () => setTab("solicitacoes") }] : [])
         ].map(t => (
           <button
             key={t.id}
             onClick={t.onClick}
-            className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center gap-1.5 ${
+            className={`relative flex-1 sm:flex-none px-3 py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center justify-center gap-1.5 ${
               tab === t.id ? "text-gray-900" : "text-gray-400 hover:text-white"
             }`}
           >
             {tab === t.id && (
               <motion.div
                 layoutId="activeMissionsTab"
-                className="absolute inset-0 bg-green-500 rounded-lg -z-10 shadow-sm"
+                className="absolute inset-0 bg-green-500 rounded-lg shadow-sm"
+                style={{ zIndex: 0 }}
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
               />
             )}
-            <span className="relative z-10 block">{t.label}</span>
+            <span style={{ position: "relative", zIndex: 1 }}>{t.label}</span>
             {t.badge > 0 && (
-              <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-colors ${
+              <span style={{ position: "relative", zIndex: 1 }} className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-colors ${
                 tab === t.id ? "bg-red-400 text-gray-900" : "bg-red-500 text-white"
               }`}>
                 {t.badge}
