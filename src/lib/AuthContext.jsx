@@ -73,14 +73,17 @@ export const AuthProvider = ({ children }) => {
             });
           }
         } else if (appError.status === 401 || appError.status === 403) {
-          // Token expired, invalid, or auth check failed - retry auth flow
+          // Token expired, invalid, or auth check failed - try to validate user with token
           if (tokenToUse) {
+            // Try to validate the user with the token we have
             await checkUserAuth();
           } else {
             setAuthError({
               type: 'auth_required',
               message: 'Authentication required'
             });
+            setIsLoadingPublicSettings(false);
+            setIsLoadingAuth(false);
           }
           setIsLoadingPublicSettings(false);
           return;
