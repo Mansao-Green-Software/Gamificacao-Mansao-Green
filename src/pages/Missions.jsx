@@ -222,15 +222,15 @@ export default function Missions() {
   const handleSubmitRequest = async () => {
     if (!requestModal) return;
 
-    // Usuário com limite de 1 solicitação por mês
+    // Usuário com limite de 1 solicitação por mês (por missão)
     if (user?.email === MONTHLY_LIMIT_EMAIL) {
       const now = new Date();
-      const thisMonthRequests = myRequests.filter(r => {
+      const thisMonthRequestsForMission = myRequests.filter(r => {
         const d = new Date(r.created_date);
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && r.status !== "rejeitado";
+        return r.mission_id === requestModal.id && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && r.status !== "rejeitado";
       });
-      if (thisMonthRequests.length >= 1) {
-        alert("Você já realizou sua solicitação deste mês. Aguarde o próximo mês para solicitar novamente.");
+      if (thisMonthRequestsForMission.length >= 1) {
+        alert("Você já solicitou esta missão este mês. Aguarde o próximo mês para solicitar novamente.");
         setRequestModal(null);
         return;
       }
@@ -478,7 +478,7 @@ export default function Missions() {
                 const now = new Date();
                 return myRequests.filter(r => {
                   const d = new Date(r.created_date);
-                  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && r.status !== "rejeitado";
+                  return r.mission_id === mission.id && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && r.status !== "rejeitado";
                 }).length >= 1;
               })();
               const isBlocked = pending || blockedByFrequency || blockedByMonthlyLimit;
