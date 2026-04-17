@@ -140,12 +140,13 @@ Deno.serve(async (req) => {
 
     // Step 3: Populate data - first sheet with daily totals, then sectors
     const dailyHeaders = [['Colaborador', `Pontos do Dia (${todayString})`]];
+    const dailySheetId = sheetIdMap['Totais Diários'] !== undefined ? sheetIdMap['Totais Diários'] : 0;
     const updateRequests = [
-      // First request: daily totals on sheetId 0
+      // First request: daily totals on "Totais Diários" sheet
       {
         updateCells: {
           range: {
-            sheetId: 0,
+            sheetId: dailySheetId,
             startRowIndex: 0,
             startColumnIndex: 0
           },
