@@ -22,7 +22,8 @@ const AuthenticatedApp = () => {
   // Redirect to login as a side effect, not during render
   React.useEffect(() => {
     if (!isLoadingAuth && !isLoadingPublicSettings) {
-      if (!isAuthenticated && (!authError || authError.type === 'auth_required')) {
+      // Only redirect if explicitly not authenticated AND auth is required
+      if (!isAuthenticated && authError?.type === 'auth_required') {
         navigateToLogin();
       }
     }

@@ -119,10 +119,13 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
       
       if (error.status === 401 || error.status === 403) {
-        setAuthError({
-          type: 'auth_required',
-          message: 'Authentication required'
-        });
+        // Only set auth_required error if no specific reason given
+        if (!error.data?.extra_data?.reason) {
+          setAuthError({
+            type: 'auth_required',
+            message: 'Authentication required'
+          });
+        }
       }
     }
   };
