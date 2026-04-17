@@ -30,6 +30,29 @@ Deno.serve(async (req) => {
       base44.asServiceRole.entities.EmployeeProfile.list(null, 1000)
     ]);
 
+    // Get today's date in BRT timezone
+    const today = new Date();
+    const brazilDate = new Date(today.toLocaleString('pt-BR', { timeZone: 'America/Bahia' }));
+    const todayString = brazilDate.toLocaleDateString('pt-BR', { timeZone: 'America/Bahia' });
+
+    // Calculate daily totals by employee
+    const dailyTotals = {};
+    transactions.forEach(t => {
+      const txDate = new Date(t.created_date).toLocaleDateString('pt-BR', { timeZone: 'America/Bahia' });
+      if (txDate === todayString) {
+        const empName = t.employee_name || 'Desconhecido';
+        if (!dailyTotals[empName]) {
+          dailyTotals[empName] = 0;
+        }
+        dailyTotals[empName] += t.points || 0;
+      }
+    });
+
+    const dailyData = Object.entries(dailyTotals).map(([name, total]) => [
+      name,
+      total
+    ]);
+
     // Group transactions by sector
     const transactionsBySector = {};
     transactions.forEach(t => {
@@ -90,19 +113,20 @@ Deno.serve(async (req) => {
       sheetIdMap[sheet.properties.title] = sheet.properties.sheetId;
     });
 
-    // Step 3: Populate data for each sector
-    const updateRequests = sectors.map(sector => {
-      const sheetId = sheetIdMap[sector] !== undefined ? sheetIdMap[sector] : 0;
-      return {
+    // Step 3: Populate data - first sheet with daily totals, then sectors
+    const dailyHeaders = [['Colaborador', `Pontos do Dia (${todayString})`]];
+    const updateRequests = [
+      // First request: daily totals on sheetId 0
+      {
         updateCells: {
           range: {
-            sheetId: sheetId,
+            sheetId: 0,
             startRowIndex: 0,
             startColumnIndex: 0
           },
           rows: [
-            ...headers,
-            ...transactionsBySector[sector]
+            ...dailyHeaders,
+            ...dailyData.sort((a, b) => b[1] - a[1]) // Sort by points descending
           ].map(row => ({
             values: row.map(val => ({
               userEnteredValue: {
@@ -112,8 +136,32 @@ Deno.serve(async (req) => {
           })),
           fields: 'userEnteredValue'
         }
-      };
-    });
+      },
+      // Then populate sector sheets
+      ...sectors.map(sector => {
+        const sheetId = sheetIdMap[sector] !== undefined ? sheetIdMap[sector] : 0;
+        return {
+          updateCells: {
+            range: {
+              sheetId: sheetId,
+              startRowIndex: 0,
+              startColumnIndex: 0
+            },
+            rows: [
+              ...headers,
+              ...transactionsBySector[sector]
+            ].map(row => ({
+              values: row.map(val => ({
+                userEnteredValue: {
+                  stringValue: String(val)
+                }
+              }))
+            })),
+            fields: 'userEnteredValue'
+          }
+        };
+      })
+    ];
 
     const response = await fetch(sheetsUrl, {
       method: 'POST',
