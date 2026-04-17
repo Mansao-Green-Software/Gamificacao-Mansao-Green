@@ -72,8 +72,8 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       {/* Sidebar Desktop */}
-      <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-gray-900/50 border-r border-gray-800 z-40">
-        <div className="p-6 border-b border-gray-800">
+      <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-gray-900/50 border-r border-gray-900 z-40">
+        <div className="p-6 border-b border-gray-900">
           <div className="flex items-center gap-3">
             <div className="relative group w-10 h-10 rounded-xl  flex items-center justify-center overflow-hidden shrink-0">
               {logoUrl ? (
@@ -101,9 +101,9 @@ export default function Layout({ children, currentPageName }) {
         </div>
 
         {user && (
-          <div className="px-4 py-3 border-b border-gray-800">
+          <div className="px-4 py-3 border-b border-gray-900">
             <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0">
+              <div className="w-14 h-14 rounded-full bg-gray-900 overflow-hidden flex items-center justify-center shrink-0">
                 {profile?.photo_url ? (
                   <img src={profile.photo_url} alt={user.full_name} className="w-full h-full object-cover" />
                 ) : (

@@ -270,3 +270,24 @@
 [data-theme="light"] .text-gray-600 {
   color: #374151 !important;
 }
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.shimmer-green {
+  background: linear-gradient(
+    to right, 
+    #CFF900 0%, 
+    #CFF900 40%,    
+    #ffffff 60%, 
+    #CFF900 60%, 
+    #CFF900 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}

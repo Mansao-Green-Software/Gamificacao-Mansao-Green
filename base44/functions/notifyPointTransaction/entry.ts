@@ -41,6 +41,11 @@ Deno.serve(async (req) => {
             ${isPositive ? "Você acaba de receber uma nova pontuação:" : "Sua pontuação foi atualizada:"}
           </p>
 
+          ${isPositive ? `
+          <div style="text-align: center; margin-bottom: 24px;">
+            <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHR0NDlyeG1ueXR0NDlyeG1ueXR0NDlyeG1ueXR0NDlyeG1ueCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/L1mMR6kS45O4M4hZ2U/giphy.gif" alt="Sucesso" style="width: 140px; border-radius: 8px;" />
+          </div>` : ''}
+
           <div style="background: #1f2937; border-radius: 10px; padding: 20px; text-align: center; margin-bottom: 24px;">
             <p style="font-size: 42px; font-weight: bold; margin: 0; color: ${isPositive ? '#4ade80' : '#f87171'};">${pointsLabel}</p>
             <p style="color: #9ca3af; margin: 4px 0 0; font-size: 13px;">pontos</p>
