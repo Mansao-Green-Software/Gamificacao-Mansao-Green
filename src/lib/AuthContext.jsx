@@ -22,6 +22,11 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingPublicSettings(true);
       setAuthError(null);
       
+      // Get fresh token from URL or storage in case it was updated during login
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenFromUrl = urlParams.get('access_token');
+      const tokenToUse = tokenFromUrl || appParams.token;
+      
       // First, check app public settings (with token if available)
       // This will tell us if auth is required, user not registered, etc.
       const appClient = createAxiosClient({
@@ -29,7 +34,7 @@ export const AuthProvider = ({ children }) => {
         headers: {
           'X-App-Id': appParams.appId
         },
-        token: appParams.token, // Include token if available
+        token: tokenToUse, // Include token if available
         interceptResponses: true
       });
       
@@ -38,8 +43,8 @@ export const AuthProvider = ({ children }) => {
         setAppPublicSettings(publicSettings);
         
         // If we got the app public settings successfully, check if user is authenticated
-        if (appParams.token) {
-          await checkUserAuth();
+        if (tokenToUse) {
+          await checkUserAuth(tokenToUse);
         } else {
           setIsLoadingAuth(false);
           setIsAuthenticated(false);
@@ -87,13 +92,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const checkUserAuth = async () => {
+  const checkUserAuth = async (token) => {
     try {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
-      setIsAuthenticated(true);
+      
+      // If a specific token was provided, create a client with it
+      if (token && token !== appParams.token) {
+        const customClient = createAxiosClient({
+          baseURL: appParams.appBaseUrl,
+          token: token,
+          interceptResponses: true
+        });
+        // Get user info with custom client
+        const currentUser = await customClient.get('/auth/me');
+        setUser(currentUser);
+        setIsAuthenticated(true);
+      } else {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
+        setIsAuthenticated(true);
+      }
       setIsLoadingAuth(false);
     } catch (error) {
       console.error('User auth check failed:', error);
