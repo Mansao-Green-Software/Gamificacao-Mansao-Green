@@ -68,7 +68,7 @@ export default function Dashboard() {
 
   const loadData = async (u) => {
     const [txs, emps] = await Promise.all([
-      base44.entities.PointTransaction.list("-created_date", 5000),
+      base44.entities.PointTransaction.list("-created_date", 2000),
       base44.entities.EmployeeProfile.list(null, 1000),
     ]);
     setTransactions(txs);
@@ -152,10 +152,15 @@ export default function Dashboard() {
 
   useEffect(() => {
     const load = async () => {
-      const u = await base44.auth.me();
-      setUser(u);
-      await loadData(u);
-      setLoading(false);
+      try {
+        const u = await base44.auth.me();
+        setUser(u);
+        await loadData(u);
+      } catch (e) {
+        console.error("Dashboard load error:", e);
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, []);
