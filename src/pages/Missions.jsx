@@ -173,7 +173,7 @@ export default function Missions() {
           return allMySectors.includes(effectiveSector);
         }
         // Resolve sector from request or fallback to employee profile
-        const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
+        const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id || p.user_id === r.employee_id);
         const effectiveSector = r.sector || empProfile?.sector;
         if (effectiveRole === "supervisor") {
           if (effectiveSector === "Supervisor") return false;
@@ -181,7 +181,8 @@ export default function Missions() {
         }
         // Gerente: aprova colaboradores e supervisores do seu setor
         if (effectiveSector === "Supervisor") {
-          return empProfile && allMySectors.includes(empProfile.sector);
+          if (!empProfile) return false;
+          return allMySectors.includes(empProfile.sector) || (empProfile.extra_sectors || []).some(s => allMySectors.includes(s));
         }
         return allMySectors.includes(effectiveSector);
       })
@@ -847,7 +848,7 @@ export default function Missions() {
                 if (p.user_id === user?.id || p.id === profile?.id) return false;
                 if (isAdmin) return true;
                 if (effectiveRole === "supervisor") return allMySectors.includes(p.sector) && p.role !== "supervisor" && p.role !== "manager" && p.role !== "admin";
-                if (effectiveRole === "manager") return allMySectors.includes(p.sector) && p.role !== "manager" && p.role !== "admin";
+                if (effectiveRole === "manager") return allMySectors.includes(p.sector) && p.role !== "manager" && p.role !== "admin" && p.role !== "director";
                 return allMySectors.includes(p.sector);
               });
 
