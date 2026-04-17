@@ -1,14 +1,13 @@
 import { createClient } from '@base44/sdk';
-import { appParams } from '@/lib/app-params';
+import { appParams, refreshAppParams } from '@/lib/app-params';
 
-const { appId, token, functionsVersion, appBaseUrl } = appParams;
-
-//Create a client with authentication required
+// Create a client that dynamically gets the token from appParams
+// This ensures the token is always fresh, even after login
 export const base44 = createClient({
-  appId,
-  token,
-  functionsVersion,
+  get appId() { return appParams.appId; },
+  get token() { return appParams.token; },
+  get functionsVersion() { return appParams.functionsVersion; },
   serverUrl: '',
   requiresAuth: true,
-  appBaseUrl
+  get appBaseUrl() { return appParams.appBaseUrl; }
 });
