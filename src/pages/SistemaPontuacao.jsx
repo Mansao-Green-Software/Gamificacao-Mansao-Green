@@ -80,6 +80,7 @@ export default function SistemaPontuacao() {
   }, []);
 
   const effectiveRole = profile?.role || user?.role;
+  const isAdmin = effectiveRole === "admin";
   const isAdminOrManager = effectiveRole === "admin" || effectiveRole === "manager" || effectiveRole === "supervisor";
   const availableSectors = isAdminOrManager ? SECTORS : [selectedSector].filter(Boolean);
 
@@ -186,24 +187,24 @@ export default function SistemaPontuacao() {
           <p className="text-gray-400 text-xs mt-1">Todas as tarefas e quantos pontos cada uma vale</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          {isAdminOrManager && (
-            <button
-              onClick={() => setShowSubSectorMgmt(p => !p)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-colors ${showSubSectorMgmt ? "bg-blue-600 text-white" : "bg-gray-700 hover:bg-gray-600 text-gray-300"}`}
-            >
-              <Tag className="w-4 h-4" />
-              Sub-setores
-            </button>
-          )}
-          {isAdminOrManager && (
-            <button
-              onClick={() => { setShowForm(!showForm); setForm({ title: "", description: "", points: "", sector: selectedSector === "Todos" ? "" : selectedSector, category: "Performance & Resultados", frequency: "", sub_sector: "" }); }}
-              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium text-sm transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Nova Tarefa
-            </button>
-          )}
+           {isAdminOrManager && (
+             <button
+               onClick={() => setShowSubSectorMgmt(p => !p)}
+               className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-colors ${showSubSectorMgmt ? "bg-blue-600 text-white" : "bg-gray-700 hover:bg-gray-600 text-gray-300"}`}
+             >
+               <Tag className="w-4 h-4" />
+               Sub-setores
+             </button>
+           )}
+           {isAdmin && (
+             <button
+               onClick={() => { setShowForm(!showForm); setForm({ title: "", description: "", points: "", sector: selectedSector === "Todos" ? "" : selectedSector, category: "Performance & Resultados", frequency: "", sub_sector: "" }); }}
+               className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium text-sm transition-colors"
+             >
+               <Plus className="w-4 h-4" />
+               Nova Tarefa
+             </button>
+           )}
         </div>
       </div>
 
@@ -249,7 +250,7 @@ export default function SistemaPontuacao() {
       )}
 
       {/* Create form */}
-      {showForm && isAdminOrManager && (
+       {showForm && isAdmin && (
         <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
           <h3 className="text-white font-bold mb-4">Nova Tarefa</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
