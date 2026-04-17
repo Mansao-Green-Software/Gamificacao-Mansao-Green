@@ -72,12 +72,18 @@ export const AuthProvider = ({ children }) => {
               message: appError.message
             });
           }
-        } else if (appError.status === 401) {
-          // Token expired or invalid
-          setAuthError({
-            type: 'auth_required',
-            message: 'Authentication required'
-          });
+        } else if (appError.status === 401 || appError.status === 403) {
+          // Token expired, invalid, or auth check failed - retry auth flow
+          if (tokenToUse) {
+            await checkUserAuth();
+          } else {
+            setAuthError({
+              type: 'auth_required',
+              message: 'Authentication required'
+            });
+          }
+          setIsLoadingPublicSettings(false);
+          return;
         } else {
           // Don't set generic unknown error - just fail silently
           setAuthError(null);
