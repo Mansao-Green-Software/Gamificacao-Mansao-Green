@@ -274,19 +274,27 @@ export default function RankingGeral() {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2 px-3 py-2 bg-gray-900 border border-green-500/30 hover:bg-gray-600 text-green-300 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-3 sm:py-3 bg-gray-900 border border-green-500/30 hover:bg-gray-600 text-green-300 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
           >
             <RotateCcw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             {refreshing ? "Atualizando..." : "Atualizar"}
           </button>
-          <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-xl p-1">
+          <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1">
             {PERIODS.map(p => (
               <button
                 key={p.key}
                 onClick={() => setSelectedPeriod(p.key)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${selectedPeriod === p.key ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
+                className={`relative px-2 sm:px-4 py-0 sm:py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center justify-center ${selectedPeriod === p.key ? "text-gray-900" : "text-gray-400 hover:text-white"}`}
               >
-                {p.label}
+                {selectedPeriod === p.key && (
+                  <motion.div
+                    layoutId="activePeriodTab"
+                    className="absolute inset-0 bg-green-500 rounded-lg shadow-sm"
+                    style={{ zIndex: 0 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span style={{ position: "relative", zIndex: 1 }}>{p.label}</span>
               </button>
             ))}
           </div>
