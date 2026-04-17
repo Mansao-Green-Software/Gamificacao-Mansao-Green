@@ -30,52 +30,98 @@ Deno.serve(async (req) => {
       base44.asServiceRole.entities.EmployeeProfile.list(null, 1000)
     ]);
 
-    // Prepare data for sheet
-    const data = transactions.map(t => [
-      t.employee_name || '',
-      t.sector || '',
-      t.points || 0,
-      t.type || 'manual',
-      t.mission_title || t.description || '',
-      t.awarded_by_name || '',
-      new Date(t.created_date).toLocaleDateString('pt-BR', { timeZone: 'America/Bahia' })
-    ]);
+    // Group transactions by sector
+    const transactionsBySector = {};
+    transactions.forEach(t => {
+      const sector = t.sector || 'Sem Setor';
+      if (!transactionsBySector[sector]) {
+        transactionsBySector[sector] = [];
+      }
+      transactionsBySector[sector].push([
+        t.employee_name || '',
+        t.sector || '',
+        t.points || 0,
+        t.type || 'manual',
+        t.mission_title || t.description || '',
+        t.awarded_by_name || '',
+        new Date(t.created_date).toLocaleDateString('pt-BR', { timeZone: 'America/Bahia' })
+      ]);
+    });
 
-    // Use default sheet name
-    const sheetName = 'Sheet1';
-
-    // Headers for the sheet
     const headers = [['Colaborador', 'Setor', 'Pontos', 'Tipo', 'Missão/Descrição', 'Atribuído por', 'Data']];
     const sheetsUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`;
+    const sectors = Object.keys(transactionsBySector);
+
+    // Step 1: Create sheets for each sector (except first which already exists)
+    const createSheetRequests = sectors.slice(1).map(sector => ({
+      addSheet: {
+        properties: {
+          title: sector.substring(0, 31) // Sheet titles max 31 chars
+        }
+      }
+    }));
+
+    if (createSheetRequests.length > 0) {
+      const createResponse = await fetch(sheetsUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ requests: createSheetRequests })
+      });
+
+      if (!createResponse.ok) {
+        const error = await createResponse.text();
+        console.error('Failed to create sheets:', error);
+        // Continue anyway - sheets may already exist
+      }
+    }
+
+    // Step 2: Get current sheets to find sheetIds
+    const metadataUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`;
+    const metadataResponse = await fetch(metadataUrl, {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    });
+    const metadata = await metadataResponse.json();
     
+    const sheetIdMap = {};
+    metadata.sheets?.forEach(sheet => {
+      sheetIdMap[sheet.properties.title] = sheet.properties.sheetId;
+    });
+
+    // Step 3: Populate data for each sector
+    const updateRequests = sectors.map(sector => {
+      const sheetId = sheetIdMap[sector] !== undefined ? sheetIdMap[sector] : 0;
+      return {
+        updateCells: {
+          range: {
+            sheetId: sheetId,
+            startRowIndex: 0,
+            startColumnIndex: 0
+          },
+          rows: [
+            ...headers,
+            ...transactionsBySector[sector]
+          ].map(row => ({
+            values: row.map(val => ({
+              userEnteredValue: {
+                stringValue: String(val)
+              }
+            }))
+          })),
+          fields: 'userEnteredValue'
+        }
+      };
+    });
+
     const response = await fetch(sheetsUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        requests: [{
-          updateCells: {
-            range: {
-              sheetId: 0,
-              startRowIndex: 0,
-              startColumnIndex: 0
-            },
-            rows: [
-              ...headers,
-              ...data
-            ].map(row => ({
-              values: row.map(val => ({
-                userEnteredValue: {
-                  stringValue: String(val)
-                }
-              }))
-            })),
-            fields: 'userEnteredValue'
-          }
-        }]
-      })
+      body: JSON.stringify({ requests: updateRequests })
     });
 
     if (!response.ok) {
@@ -88,9 +134,9 @@ Deno.serve(async (req) => {
 
     return Response.json({
       status: 'success',
-      message: `Synced ${data.length} transactions to sheet`,
-      sheetName,
-      rowsUpdated: result.updates?.updatedRows || 0
+      message: `Synced ${transactions.length} transactions to ${Object.keys(transactionsBySector).length} sheets (by sector)`,
+      sectors: Object.keys(transactionsBySector),
+      rowsUpdated: result.replies?.length || 0
     });
 
   } catch (error) {
