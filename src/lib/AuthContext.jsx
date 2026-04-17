@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
         
         // If we got the app public settings successfully, check if user is authenticated
         if (tokenToUse) {
-          await checkUserAuth(tokenToUse);
+          await checkUserAuth();
         } else {
           setIsLoadingAuth(false);
           setIsAuthenticated(false);
@@ -96,29 +96,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const checkUserAuth = async (token) => {
+  const checkUserAuth = async () => {
     try {
-      // Now check if the user is authenticated
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
       setUser(currentUser);
       setIsAuthenticated(true);
-      setAuthError(null); // Clear any previous errors on successful auth
+      setAuthError(null);
       setIsLoadingAuth(false);
     } catch (error) {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
       setIsAuthenticated(false);
       
-      // If user auth fails, it might be an expired token
       if (error.status === 401 || error.status === 403) {
         setAuthError({
           type: 'auth_required',
           message: 'Authentication required'
         });
-      } else {
-        // Don't set unknown error - let the user through if public settings loaded
-        setAuthError(null);
       }
     }
   };
