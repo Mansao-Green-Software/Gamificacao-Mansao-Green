@@ -55,27 +55,29 @@ const getAppParamValue = (paramName, { defaultValue = undefined, removeFromUrl =
   const urlParams = new URLSearchParams(window.location.search);
   const searchParam = urlParams.get(paramName);
   
-  // Save to storage BEFORE removing from URL
+  // 1. Save to storage BEFORE removing from URL (critical for tokens!)
   if (searchParam) {
     storage.setItem(storageKey, searchParam);
   }
   
+  // 2. Remove from URL only after saving to storage
   if (removeFromUrl && searchParam) {
     urlParams.delete(paramName);
     const newUrl = `${window.location.pathname}${urlParams.toString() ? `?${urlParams.toString()}` : ''}${window.location.hash}`;
     window.history.replaceState({}, document.title, newUrl);
   }
   
+  // 3. Return from URL first (has priority), then storage, then default
   if (searchParam) {
     return searchParam;
-  }
-  if (defaultValue) {
-    storage.setItem(storageKey, defaultValue);
-    return defaultValue;
   }
   const storedValue = storage.getItem(storageKey);
   if (storedValue) {
     return storedValue;
+  }
+  if (defaultValue) {
+    storage.setItem(storageKey, defaultValue);
+    return defaultValue;
   }
   return null;
 };
