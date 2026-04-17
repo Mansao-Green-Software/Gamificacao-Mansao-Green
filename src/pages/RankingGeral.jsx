@@ -125,14 +125,16 @@ export default function RankingGeral() {
 
   useEffect(() => {
     const load = async () => {
-      const u = await base44.auth.me();
-      setUser(u);
-      await loadData(u);
-      const profs = await base44.entities.EmployeeProfile.list();
-      const myProfile = profs.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
-      const effectiveRoleInner = myProfile?.role || u.role;
-      setSelectedSector("geral");
-      setLoading(false);
+      try {
+        const u = await base44.auth.me();
+        setUser(u);
+        await loadData(u);
+        setSelectedSector("geral");
+      } catch (e) {
+        console.error("RankingGeral load error:", e);
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, []);

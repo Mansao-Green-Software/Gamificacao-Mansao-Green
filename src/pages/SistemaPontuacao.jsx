@@ -55,21 +55,26 @@ export default function SistemaPontuacao() {
 
   useEffect(() => {
     const load = async () => {
-      const u = await base44.auth.me();
-      setUser(u);
-      const [ms, profs, subs] = await Promise.all([
-        base44.entities.Mission.filter({ is_active: true }),
-        base44.entities.EmployeeProfile.list(),
-        base44.entities.SubSector.list(),
-      ]);
-      setMissions(ms);
-      setSubSectors(subs);
-      const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
-      setProfile(myProfile || null);
-      const effectiveRole = myProfile?.role || u.role;
-      const isAdminOrManagerLocal = effectiveRole === "admin" || effectiveRole === "manager" || effectiveRole === "supervisor";
-      setSelectedSector(isAdminOrManagerLocal ? SECTORS[0] : (myProfile?.sector || u.sector));
-      setLoading(false);
+      try {
+        const u = await base44.auth.me();
+        setUser(u);
+        const [ms, profs, subs] = await Promise.all([
+          base44.entities.Mission.filter({ is_active: true }),
+          base44.entities.EmployeeProfile.list(),
+          base44.entities.SubSector.list(),
+        ]);
+        setMissions(ms);
+        setSubSectors(subs);
+        const myProfile = profs.find(p => p.user_id === u.id || p.email === u.email);
+        setProfile(myProfile || null);
+        const effectiveRole = myProfile?.role || u.role;
+        const isAdminOrManagerLocal = effectiveRole === "admin" || effectiveRole === "manager" || effectiveRole === "supervisor";
+        setSelectedSector(isAdminOrManagerLocal ? SECTORS[0] : (myProfile?.sector || u.sector));
+      } catch (e) {
+        console.error("SistemaPontuacao load error:", e);
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, []);

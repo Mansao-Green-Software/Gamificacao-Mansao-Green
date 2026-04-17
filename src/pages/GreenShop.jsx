@@ -219,7 +219,7 @@ export default function GreenShop() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-fit relative z-0">
+      <div className="flex flex-wrap gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-full sm:w-fit">
         {[
           { id: "loja", label: "Loja" },
           { id: "resgates", label: "Meus Resgates", badge: myRedemptions.length },
@@ -228,20 +228,21 @@ export default function GreenShop() {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center gap-1.5 ${
+            className={`relative flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center justify-center gap-1.5 ${
               tab === t.id ? "text-gray-900" : "text-gray-400 hover:text-white"
             }`}
           >
             {tab === t.id && (
               <motion.div
                 layoutId="activeShopTab"
-                className="absolute inset-0 bg-green-500 rounded-lg -z-10 shadow-sm"
+                className="absolute inset-0 bg-green-500 rounded-lg shadow-sm"
+                style={{ zIndex: 0 }}
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
               />
             )}
-            <span className="relative z-10 block">{t.label}</span>
+            <span style={{ position: "relative", zIndex: 1 }}>{t.label}</span>
             {t.badge > 0 && (
-              <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-colors ${
+              <span style={{ position: "relative", zIndex: 1 }} className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold transition-colors ${
                 tab === t.id ? "bg-gray-900 text-green-400" : "bg-gray-700 text-gray-300"
               }`}>
                 {t.badge}

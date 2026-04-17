@@ -65,21 +65,26 @@ export default function Missions() {
 
   useEffect(() => {
     const init = async () => {
-      const u = await base44.auth.me();
-      setUser(u);
-      const [ms, profs, reqs, subs] = await Promise.all([
-        base44.entities.Mission.filter({ is_active: true }),
-        base44.entities.EmployeeProfile.list(null, 1000),
-        base44.entities.MissionRequest.list("-created_date", 2000),
-        base44.entities.SubSector.list(),
-      ]);
-      setMissions(ms);
-      setRequests(reqs);
-      setAllProfiles(profs);
-      setSubSectors(subs);
-      const myProfile = profs.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
-      setProfile(myProfile || null);
-      setLoading(false);
+      try {
+        const u = await base44.auth.me();
+        setUser(u);
+        const [ms, profs, reqs, subs] = await Promise.all([
+          base44.entities.Mission.filter({ is_active: true }),
+          base44.entities.EmployeeProfile.list(null, 1000),
+          base44.entities.MissionRequest.list("-created_date", 2000),
+          base44.entities.SubSector.list(),
+        ]);
+        setMissions(ms);
+        setRequests(reqs);
+        setAllProfiles(profs);
+        setSubSectors(subs);
+        const myProfile = profs.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
+        setProfile(myProfile || null);
+      } catch (e) {
+        console.error("Missions load error:", e);
+      } finally {
+        setLoading(false);
+      }
     };
     init();
   }, []);
