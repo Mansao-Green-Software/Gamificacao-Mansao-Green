@@ -21,87 +21,44 @@ export const AuthProvider = ({ children }) => {
 
   const checkAppState = async () => {
     try {
-      setIsLoadingPublicSettings(true);
       setAuthError(null);
-      
-      // Refresh params to get fresh token from URL (after login)
       refreshAppParams();
       const tokenToUse = appParams.token;
-      
-      // First, check app public settings (with token if available)
-      // This will tell us if auth is required, user not registered, etc.
-      const appClient = createAxiosClient({
-        baseURL: `/api/apps/public`,
-        headers: {
-          'X-App-Id': appParams.appId
-        },
-        token: tokenToUse, // Include token if available
-        interceptResponses: true
-      });
-      
+
+      // Check app public settings
       try {
+        const appClient = createAxiosClient({
+          baseURL: `/api/apps/public`,
+          headers: { 'X-App-Id': appParams.appId },
+          token: tokenToUse,
+          interceptResponses: true
+        });
         const publicSettings = await appClient.get(`/prod/public-settings/by-id/${appParams.appId}`);
         setAppPublicSettings(publicSettings);
-        setAuthError(null); // Clear any previous errors
-        
-        // If we got the app public settings successfully, check if user is authenticated
-        if (tokenToUse) {
-          await checkUserAuth();
-        } else {
-          setIsLoadingAuth(false);
-          setIsAuthenticated(false);
-        }
-        setIsLoadingPublicSettings(false);
       } catch (appError) {
         console.error('App state check failed:', appError);
-        
-        // Handle app-level errors
-        if (appError.status === 403 && appError.data?.extra_data?.reason) {
-          const reason = appError.data.extra_data.reason;
-          if (reason === 'auth_required') {
-            setAuthError({
-              type: 'auth_required',
-              message: 'Authentication required'
-            });
-          } else if (reason === 'user_not_registered') {
-            setAuthError({
-              type: 'user_not_registered',
-              message: 'User not registered for this app'
-            });
-          } else {
-            setAuthError({
-              type: reason,
-              message: appError.message
-            });
-          }
-        } else if (appError.status === 401 || appError.status === 403) {
-          // Token expired, invalid, or auth check failed - try to validate user with token
-          if (tokenToUse) {
-            // Try to validate the user with the token we have
-            await checkUserAuth();
-          } else {
-            setAuthError({
-              type: 'auth_required',
-              message: 'Authentication required'
-            });
-            setIsLoadingPublicSettings(false);
-            setIsLoadingAuth(false);
-          }
-          setIsLoadingPublicSettings(false);
-          return;
-        } else {
-          // Don't set generic unknown error - just fail silently
-          setAuthError(null);
+        const reason = appError?.data?.extra_data?.reason;
+        if (reason === 'user_not_registered') {
+          setAuthError({ type: 'user_not_registered', message: 'User not registered for this app' });
+        } else if (reason === 'auth_required' && !tokenToUse) {
+          setAuthError({ type: 'auth_required', message: 'Authentication required' });
         }
-        setIsLoadingPublicSettings(false);
-        setIsLoadingAuth(false);
+        // Otherwise: continue and let auth check validate the token
+      }
+
+      // Always check user auth if we have a token, regardless of publicSettings result
+      if (tokenToUse) {
+        await checkUserAuth();
+      } else {
+        setIsAuthenticated(false);
+        if (!authError) {
+          setAuthError({ type: 'auth_required', message: 'Authentication required' });
+        }
       }
     } catch (error) {
       console.error('Unexpected error:', error);
-      setAuthError({
-        type: 'unknown',
-        message: error.message || 'An unexpected error occurred'
-      });
+      setAuthError({ type: 'unknown', message: error.message || 'An unexpected error occurred' });
+    } finally {
       setIsLoadingPublicSettings(false);
       setIsLoadingAuth(false);
     }
@@ -109,26 +66,20 @@ export const AuthProvider = ({ children }) => {
 
   const checkUserAuth = async () => {
     try {
-      setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
       setUser(currentUser);
       setIsAuthenticated(true);
       setAuthError(null);
-      setIsLoadingAuth(false);
     } catch (error) {
       console.error('User auth check failed:', error);
-      setIsLoadingAuth(false);
       setIsAuthenticated(false);
-      
-      // Only set error if there's a specific reason from the backend
-      if (error.status === 401 || error.status === 403) {
-        if (error.data?.extra_data?.reason) {
-          setAuthError({
-            type: error.data.extra_data.reason,
-            message: error.message
-          });
-        }
-        // Otherwise don't set error — let it be null until we explicitly need auth
+      const reason = error?.data?.extra_data?.reason;
+      if (reason === 'user_not_registered') {
+        setAuthError({ type: 'user_not_registered', message: error.message });
+      } else if (error.status === 401 || error.status === 403) {
+        setAuthError({ type: 'auth_required', message: error.message });
+      } else {
+        setAuthError({ type: 'auth_required', message: error.message || 'Authentication required' });
       }
     }
   };
