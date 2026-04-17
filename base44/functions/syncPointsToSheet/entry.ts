@@ -41,24 +41,40 @@ Deno.serve(async (req) => {
       new Date(t.created_date).toLocaleDateString('pt-BR', { timeZone: 'America/Bahia' })
     ]);
 
-    // Get today's date for sheet naming
-    const today = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Bahia' });
-    const sheetName = `Pontos ${today}`;
+    // Use default sheet name
+    const sheetName = 'Sheet1';
 
-    // Prepare the request to Google Sheets API
-    const sheetsUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/'${sheetName}'!A1`;
-
+    // Headers for the sheet
     const headers = [['Colaborador', 'Setor', 'Pontos', 'Tipo', 'Missão/Descrição', 'Atribuído por', 'Data']];
+    const sheetsUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`;
     
     const response = await fetch(sheetsUrl, {
-      method: 'PUT',
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        values: [...headers, ...data],
-        majorDimension: 'ROWS'
+        requests: [{
+          updateCells: {
+            range: {
+              sheetId: 0,
+              startRowIndex: 0,
+              startColumnIndex: 0
+            },
+            rows: [
+              ...headers,
+              ...data
+            ].map(row => ({
+              values: row.map(val => ({
+                userEnteredValue: {
+                  stringValue: String(val)
+                }
+              }))
+            })),
+            fields: 'userEnteredValue'
+          }
+        }]
       })
     });
 
