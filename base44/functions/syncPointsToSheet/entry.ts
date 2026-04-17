@@ -75,14 +75,41 @@ Deno.serve(async (req) => {
     const sheetsUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`;
     const sectors = Object.keys(transactionsBySector);
 
-    // Step 1: Create sheets for each sector (except first which already exists)
-    const createSheetRequests = sectors.slice(1).map(sector => ({
-      addSheet: {
-        properties: {
-          title: sector.substring(0, 31) // Sheet titles max 31 chars
+    // Step 1: Get current sheets first to know which exist
+    const metadataUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`;
+    const metadataResponse = await fetch(metadataUrl, {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    });
+    const metadata = await metadataResponse.json();
+    
+    const sheetIdMap = {};
+    const existingTitles = new Set();
+    metadata.sheets?.forEach(sheet => {
+      sheetIdMap[sheet.properties.title] = sheet.properties.sheetId;
+      existingTitles.add(sheet.properties.title);
+    });
+
+    // Create requests: rename first sheet + create missing sector sheets
+    const createSheetRequests = [
+      // Rename first sheet (sheetId 0) to "Totais Diários" if not already
+      ...(!existingTitles.has("Totais Diários") ? [{
+        updateSheetProperties: {
+          properties: {
+            sheetId: 0,
+            title: "Totais Diários"
+          },
+          fields: "title"
         }
-      }
-    }));
+      }] : []),
+      // Create sheets for sectors that don't exist
+      ...sectors.filter(s => !existingTitles.has(s)).map(sector => ({
+        addSheet: {
+          properties: {
+            title: sector.substring(0, 31)
+          }
+        }
+      }))
+    ];
 
     if (createSheetRequests.length > 0) {
       const createResponse = await fetch(sheetsUrl, {
@@ -97,21 +124,19 @@ Deno.serve(async (req) => {
       if (!createResponse.ok) {
         const error = await createResponse.text();
         console.error('Failed to create sheets:', error);
-        // Continue anyway - sheets may already exist
       }
+      
+      // Refresh metadata after creating sheets
+      const refreshMetadata = await fetch(metadataUrl, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      const refreshedData = await refreshMetadata.json();
+      refreshedData.sheets?.forEach(sheet => {
+        sheetIdMap[sheet.properties.title] = sheet.properties.sheetId;
+      });
     }
 
-    // Step 2: Get current sheets to find sheetIds
-    const metadataUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`;
-    const metadataResponse = await fetch(metadataUrl, {
-      headers: { 'Authorization': `Bearer ${accessToken}` }
-    });
-    const metadata = await metadataResponse.json();
-    
-    const sheetIdMap = {};
-    metadata.sheets?.forEach(sheet => {
-      sheetIdMap[sheet.properties.title] = sheet.properties.sheetId;
-    });
+
 
     // Step 3: Populate data - first sheet with daily totals, then sectors
     const dailyHeaders = [['Colaborador', `Pontos do Dia (${todayString})`]];
