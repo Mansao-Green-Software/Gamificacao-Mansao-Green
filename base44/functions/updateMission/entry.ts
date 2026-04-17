@@ -14,11 +14,11 @@ Deno.serve(async (req) => {
     const { id, ...data } = body;
 
     if (!id) {
-      const created = await base44.entities.Mission.create(data);
+      const created = await base44.asServiceRole.entities.Mission.create(data);
       return Response.json(created);
     }
 
-    const updated = await base44.entities.Mission.update(id, data);
+    const updated = await base44.asServiceRole.entities.Mission.update(id, data);
     return Response.json(updated);
   } catch (error) {
     console.error('Error:', error);
