@@ -1,6 +1,45 @@
 const isNode = typeof window === 'undefined';
-const windowObj = isNode ? { localStorage: new Map() } : window;
-const storage = windowObj.localStorage;
+
+// Safe storage with in-memory fallback when localStorage is unavailable (iOS private mode, etc.)
+const createSafeStorage = () => {
+  const memoryStore = {};
+  
+  const isLocalStorageAvailable = () => {
+    try {
+      const testKey = '__base44_test__';
+      localStorage.setItem(testKey, '1');
+      localStorage.removeItem(testKey);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const useLocalStorage = !isNode && isLocalStorageAvailable();
+
+  return {
+    getItem: (key) => {
+      if (useLocalStorage) {
+        try { return localStorage.getItem(key); } catch (e) {}
+      }
+      return memoryStore[key] ?? null;
+    },
+    setItem: (key, value) => {
+      if (useLocalStorage) {
+        try { localStorage.setItem(key, value); return; } catch (e) {}
+      }
+      memoryStore[key] = value;
+    },
+    removeItem: (key) => {
+      if (useLocalStorage) {
+        try { localStorage.removeItem(key); return; } catch (e) {}
+      }
+      delete memoryStore[key];
+    }
+  };
+};
+
+const storage = isNode ? { getItem: () => null, setItem: () => {}, removeItem: () => {} } : createSafeStorage();
 
 const toSnakeCase = (str) => {
 	return str.replace(/([A-Z])/g, '_$1').toLowerCase();
