@@ -164,8 +164,12 @@ export default function Missions() {
         if (isAdmin) return true;
         // Diretor: vê solicitações de todos do seu setor (incluindo gerentes)
         if (isDirector) {
-          const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
-          const effectiveSector = r.sector || empProfile?.sector;
+          const empProfile = allProfiles.find(p => 
+            (p.user_id && p.user_id === r.employee_id) || 
+            p.id === r.employee_id ||
+            (r.created_by && p.email === r.created_by)
+          );
+          const effectiveSector = (r.sector !== "Supervisor" ? r.sector : null) || empProfile?.sector;
           // Para gerentes, o sector da solicitação é "Gerência", mas o perfil tem o setor real
           if (empProfile?.role === "manager" || empProfile?.role === "director") {
             return allMySectors.includes(empProfile.sector);
@@ -173,8 +177,13 @@ export default function Missions() {
           return allMySectors.includes(effectiveSector);
         }
         // Resolve sector from request or fallback to employee profile
-        const empProfile = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
-        const effectiveSector = r.sector || empProfile?.sector;
+        // Note: some profiles have empty user_id, so also match by created_by email
+        const empProfile = allProfiles.find(p => 
+          (p.user_id && p.user_id === r.employee_id) || 
+          p.id === r.employee_id ||
+          (r.created_by && p.email === r.created_by)
+        );
+        const effectiveSector = (r.sector !== "Supervisor" ? r.sector : null) || empProfile?.sector;
         if (effectiveRole === "supervisor") {
           // Supervisor só vê colaboradores do seu setor (não outros supervisores)
           if (empProfile?.role === "supervisor" || empProfile?.role === "manager" || empProfile?.role === "admin") return false;
@@ -240,7 +249,11 @@ export default function Missions() {
 
   const handleApprove = async (request) => {
     setApproving(request.id);
-    const empProfile = allProfiles.find(p => p.user_id === request.employee_id || p.id === request.employee_id);
+    const empProfile = allProfiles.find(p => 
+      (p.user_id && p.user_id === request.employee_id) || 
+      p.id === request.employee_id ||
+      (request.created_by && p.email === request.created_by)
+    );
     const empName = empProfile?.full_name || request.employee_name;
     const empId = empProfile?.user_id || request.employee_id;
     await base44.entities.MissionRequest.update(request.id, { status: "aprovado", employee_name: empName, approved_by_name: profile?.full_name || user.full_name });
@@ -928,8 +941,12 @@ export default function Missions() {
             const history = requests.filter(r => {
               if (r.status === "pendente") return false;
               if (isAdmin) return true;
-              const emp = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id);
-              const effectiveSector = r.sector || emp?.sector;
+              const emp = allProfiles.find(p => 
+                (p.user_id && p.user_id === r.employee_id) || 
+                p.id === r.employee_id ||
+                (r.created_by && p.email === r.created_by)
+              );
+              const effectiveSector = (r.sector !== "Supervisor" ? r.sector : null) || emp?.sector;
               if (isDirector) {
                 // Para gerentes, o sector da solicitação é "Gerência", mas o perfil tem o setor real
                 if (emp?.role === "manager" || emp?.role === "director") {
