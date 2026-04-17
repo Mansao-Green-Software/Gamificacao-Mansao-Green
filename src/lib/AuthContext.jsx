@@ -41,6 +41,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const publicSettings = await appClient.get(`/prod/public-settings/by-id/${appParams.appId}`);
         setAppPublicSettings(publicSettings);
+        setAuthError(null); // Clear any previous errors
         
         // If we got the app public settings successfully, check if user is authenticated
         if (tokenToUse) {
@@ -72,11 +73,15 @@ export const AuthProvider = ({ children }) => {
               message: appError.message
             });
           }
-        } else {
+        } else if (appError.status === 401) {
+          // Token expired or invalid
           setAuthError({
-            type: 'unknown',
-            message: appError.message || 'Failed to load app'
+            type: 'auth_required',
+            message: 'Authentication required'
           });
+        } else {
+          // Don't set generic unknown error - just fail silently
+          setAuthError(null);
         }
         setIsLoadingPublicSettings(false);
         setIsLoadingAuth(false);
@@ -96,23 +101,10 @@ export const AuthProvider = ({ children }) => {
     try {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
-      
-      // If a specific token was provided, create a client with it
-      if (token && token !== appParams.token) {
-        const customClient = createAxiosClient({
-          baseURL: appParams.appBaseUrl,
-          token: token,
-          interceptResponses: true
-        });
-        // Get user info with custom client
-        const currentUser = await customClient.get('/auth/me');
-        setUser(currentUser);
-        setIsAuthenticated(true);
-      } else {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
-        setIsAuthenticated(true);
-      }
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
+      setIsAuthenticated(true);
+      setAuthError(null); // Clear any previous errors on successful auth
       setIsLoadingAuth(false);
     } catch (error) {
       console.error('User auth check failed:', error);
@@ -125,6 +117,9 @@ export const AuthProvider = ({ children }) => {
           type: 'auth_required',
           message: 'Authentication required'
         });
+      } else {
+        // Don't set unknown error - let the user through if public settings loaded
+        setAuthError(null);
       }
     }
   };
