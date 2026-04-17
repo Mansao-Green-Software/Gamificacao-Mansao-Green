@@ -82,6 +82,7 @@ export default function ManagePoints() {
 
   const isAdmin = user?.role === "admin";
   const isDirector = user?.role === "director";
+  const isManager = user?.role === "manager" || user?.role === "supervisor";
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -257,7 +258,14 @@ export default function ManagePoints() {
       {/* Add points tab */}
       {tab === "add" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Form */}
+          {/* Form - Only admin can use manual scoring */}
+          {!isAdmin ? (
+            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+              <div className="text-center py-8">
+                <p className="text-gray-400 text-sm">Apenas administradores podem adicionar pontos com critério manual.</p>
+              </div>
+            </div>
+          ) : (
           <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
             <h3 className="text-white font-bold mb-4 flex items-center gap-2">
               <Plus className="w-4 h-4 text-green-400" />
@@ -416,6 +424,7 @@ export default function ManagePoints() {
               )}
             </div>
           </div>
+          )}
 
           {/* Employee list with points */}
           <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
@@ -499,9 +508,11 @@ export default function ManagePoints() {
                       <span className={`font-bold text-sm ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>
                         {tx.points >= 0 ? "+" : ""}{tx.points}
                       </span>
-                      <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      {isAdmin && (
+                        <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -552,9 +563,11 @@ export default function ManagePoints() {
                         <span className="text-green-400 font-bold text-sm">{tx.points >= 0 ? "+" : ""}{tx.points}</span>
                         <p className="text-gray-600 text-xs capitalize">{tx.type}</p>
                       </div>
-                      <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      {isAdmin && (
+                        <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
