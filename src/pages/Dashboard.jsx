@@ -231,27 +231,31 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* TAB: Meus Pontos */}
       {activeTab === "mypoints" && (
-        <div className="space-y-4">
-          {/* Resumo */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
-              <p className="text-gray-400 text-xs mb-1">Total Ganho</p>
-              <p className="text-2xl font-bold text-green-400">+{myTxs.filter(t => t.points > 0).reduce((s, t) => s + t.points, 0).toLocaleString()}</p>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-gray-800/40 border-l-4 border-green-600 rounded-xl p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Total Ganho</span>
+              </div>
+              <p className="text-3xl font-bold text-green-400 mb-5">+{myTxs.filter(t => t.points > 0).reduce((s, t) => s + t.points, 0).toLocaleString()}</p>
             </div>
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5">
-              <p className="text-gray-400 text-xs mb-1">Total Descontado</p>
-              <p className="text-2xl font-bold text-red-400">{myTxs.filter(t => t.points < 0).reduce((s, t) => s + t.points, 0).toLocaleString()}</p>
+            <div className="bg-gray-800/40 border-l-4 border-red-600 rounded-xl p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Total Descontado</span>
+              </div>
+              <p className="text-3xl font-bold text-red-500 mb-5">{myTxs.filter(t => t.points < 0).reduce((s, t) => s + t.points, 0).toLocaleString()}</p>
             </div>
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-5 col-span-2 sm:col-span-1">
-              <p className="text-gray-400 text-xs mb-1">Saldo Atual</p>
-              <p className="text-2xl font-bold text-white">{myPoints.toLocaleString()} pts</p>
+            <div className="bg-gray-800/40 border-l-4 border-blue-500 rounded-xl p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Saldo Atual</span>
+              </div>
+              <p className="text-3xl font-bold text-white mb-5">{myPoints.toLocaleString()} <span className="text-sm font-normal text-gray-500">pts</span></p>
             </div>
           </div>
 
           {/* Histórico */}
-          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+          <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-6">
             <h2 className="text-white font-bold mb-4 flex items-center gap-2">
               <History className="w-5 h-5 text-green-400" />
               Histórico de Pontuações
@@ -261,7 +265,7 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
                 {myTxs.map(tx => (
-                  <div key={tx.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl gap-3">
+                  <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl gap-3">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${tx.points >= 0 ? "bg-green-900/40" : "bg-red-900/40"}`}>
                       {tx.points >= 0
                         ? <TrendingUp className="w-4 h-4 text-green-400" />
@@ -272,7 +276,7 @@ export default function Dashboard() {
                       <p className="text-white text-sm font-medium truncate">
                         {tx.mission_title || tx.description || "Pontuação manual"}
                       </p>
-                      <p className="text-gray-500 text-xs mt-0.5">
+                      <p className="text-gray-500 text-[10px] mt-0.5">
                         por {tx.awarded_by_name || "Sistema"} · {formatBRT(tx.created_date)}
                       </p>
                     </div>
@@ -303,7 +307,7 @@ export default function Dashboard() {
           <div className="bg-gray-800/40 border-l-4 border-amber-500 rounded-xl p-5">
             <div className="flex items-center gap-3 mb-3">
 
-              <span className="text-gray-400 text-xs uppercase">Meu Ranking</span>
+              <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Meu Ranking</span>
             </div>
             <p className="text-3xl font-bold text-white">{myRank ? `#${myRank}` : "-"}</p>
             {mySector && <p className="text-xs text-gray-500 mt-1">no {mySector}</p>}
@@ -312,7 +316,7 @@ export default function Dashboard() {
           <div className="bg-gray-800/40 border-l-4 border-blue-500 rounded-xl p-5">
             <div className="flex items-center gap-3 mb-3">
 
-              <span className="text-gray-400 text-xs uppercase">Setor</span>
+              <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Setor</span>
             </div>
             <p className="text-lg font-bold text-white truncate">{mySector || "Não definido"}</p>
           </div>
@@ -333,16 +337,16 @@ export default function Dashboard() {
               {sectorRanking.slice(0, 5).map((item, idx) => {
                 const isMe = item.sector === mySector;
                 return (
-                  <div key={item.sector} className={`flex items-center gap-4 p-5 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
+                  <div key={item.sector} className={`flex items-center gap-4 p-6 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
                     <span className="w-8 flex items-center justify-center shrink-0">{getMedal(idx)}</span>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center mb-1.5">
                         <span className="text-white text-sm font-bold truncate">{item.sector}</span>
                         <span className="text-green-400 font-bold text-xs">{item.points.toLocaleString()} pts</span>
                       </div>
-                      <div className="h-2 rounded-full bg-gray-700 overflow-hidden">
+                      <div className="h-2.5 rounded-sm bg-gray-700 overflow-hidden">
                         <div
-                          className={`h-full rounded-full bg-gradient-to-r ${SECTOR_COLORS[item.sector] || "from-green-500 to-teal-500"}`}
+                          className={`h-full rounded-sm bg-gradient-to-tr ${SECTOR_COLORS[item.sector] || "from-green-500 to-teal-500"}`}
                           style={{ width: sectorRanking[0].points > 0 ? `${(item.points / sectorRanking[0].points) * 100}%` : "0%" }}
                         />
                       </div>
@@ -384,9 +388,9 @@ export default function Dashboard() {
                 return topEmployees.map((emp, idx) => {
                   const isMe = emp.id === user?.id || emp.id === myProfile3?.user_id;
                   return (
-                    <div key={emp.id} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
-                      <span className="w-8 flex items-center justify-center">{getMedal(idx)}</span>
-                      <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0">
+                    <div key={emp.id} className={`flex items-center gap-4 p-5 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
+                      <span className="w-8 flex items-center justify-center shrink-0">{getMedal(idx)}</span>
+                      <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0 border border-gray-700">
                         {emp.photo ? (
                           <img src={emp.photo} alt={emp.name} className="w-full h-full object-cover" />
                         ) : (
@@ -394,16 +398,20 @@ export default function Dashboard() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-medium truncate">{emp.name}</p>
-                        {emp.sector && <p className="text-gray-500 text-xs truncate">{emp.sector}</p>}
-                        <div className="h-1.5 bg-gray-700 rounded-full mt-1 overflow-hidden">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <div className="min-w-0 flex flex-col">
+                            <p className="text-white text-sm font-bold truncate">{emp.name}</p>
+                            {emp.sector && <p className="text-gray-500 text-[10px] uppercase tracking-wider truncate -mt-0.5">{emp.sector}</p>}
+                          </div>
+                          <span className="text-green-400 font-bold text-xs shrink-0">{emp.points.toLocaleString()} pts</span>
+                        </div>
+                        <div className="h-2.5 rounded-sm bg-gray-700 overflow-hidden">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-green-500 to-teal-500"
+                            className={`h-full rounded-sm bg-gradient-to-tr  ${SECTOR_COLORS[emp.sector] || "from-green-500 to-teal-500"}`}
                             style={{ width: `${(emp.points / maxPoints) * 100}%` }}
                           />
                         </div>
                       </div>
-                      <span className="text-green-400 font-bold text-xs shrink-0">{emp.points.toLocaleString()} pts</span>
                     </div>
                   );
                 });
