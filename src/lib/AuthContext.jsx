@@ -64,6 +64,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const clearStoredTokens = () => {
+    try {
+      localStorage.removeItem('base44_access_token');
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('base44_access_token');
+      sessionStorage.removeItem('token');
+    } catch (e) {}
+    appParams.token = null;
+  };
+
   const checkUserAuth = async () => {
     try {
       const currentUser = await base44.auth.me();
@@ -76,9 +86,9 @@ export const AuthProvider = ({ children }) => {
       const reason = error?.data?.extra_data?.reason;
       if (reason === 'user_not_registered') {
         setAuthError({ type: 'user_not_registered', message: error.message });
-      } else if (error.status === 401 || error.status === 403) {
-        setAuthError({ type: 'auth_required', message: error.message });
       } else {
+        // Token is invalid/expired — clear it so the app can redirect to login
+        clearStoredTokens();
         setAuthError({ type: 'auth_required', message: error.message || 'Authentication required' });
       }
     }
