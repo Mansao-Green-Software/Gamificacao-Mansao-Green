@@ -11,12 +11,20 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true, skipped: "no employee data" });
     }
 
-    // Find employee profile to get email
+    // Find employee profile to get full name
     const profiles = await base44.asServiceRole.entities.EmployeeProfile.list();
     const profile = profiles.find(p => p.user_id === tx.employee_id || p.id === tx.employee_id);
 
-    if (!profile?.email) {
-      return Response.json({ ok: true, skipped: "no email found" });
+    if (!profile) {
+      return Response.json({ ok: true, skipped: "no profile found" });
+    }
+
+    // Get User from app to find email
+    const users = await base44.asServiceRole.entities.User.list();
+    const user = users.find(u => u.id === tx.employee_id || u.id === profile.user_id);
+
+    if (!user?.email) {
+      return Response.json({ ok: true, skipped: "no user email found" });
     }
 
     const isPositive = tx.points >= 0;
@@ -75,7 +83,7 @@ Deno.serve(async (req) => {
     `;
 
     await base44.asServiceRole.integrations.Core.SendEmail({
-      to: profile.email,
+      to: user.email,
       subject,
       body: body_html,
     });
