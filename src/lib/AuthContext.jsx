@@ -16,14 +16,38 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     checkAppState();
     
-    // Also recheck auth state when token in storage changes (after login redirect)
+    // Monitor URL for token changes (after login redirect with ?access_token=...)
+    const checkUrlToken = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('access_token')) {
+        refreshAppParams();
+        checkAppState();
+      }
+    };
+    
+    // Check initially and on any navigation
+    const handlePopState = () => {
+      checkUrlToken();
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    
+    // Also recheck auth state when token in storage changes
     const handleStorageChange = () => {
       refreshAppParams();
       checkAppState();
     };
     
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    
+    // Check URL periodically in case redirect happens while page is open
+    const urlCheckInterval = setInterval(checkUrlToken, 1000);
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(urlCheckInterval);
+    };
   }, []);
 
   const checkAppState = async () => {
