@@ -331,16 +331,16 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
               style={{ background: cardBgGradient }}
             >
               <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/15 to-transparent pointer-events-none" />
-              <div className="relative p-5 flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3">
+              <div className="relative p-4 sm:p-5 flex flex-col sm:flex-row items-start justify-between gap-4">
+                <div className="flex items-start gap-3 w-full">
                   <div className="w-10 h-10 rounded-xl bg-black/20 flex items-center justify-center shrink-0 mt-0.5">
                     <MissionIcon className="w-5 h-5" style={{ color: textColor }} />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2 mb-1 flex-wrap py-2 ">
-                      <span className="text-xs font-bold uppercase tracking-wider" style={{ color: textColor }}>Missão Surpresa</span>
+                    <div className="flex items-center gap-2 mb-1 flex-wrap py-1.5 sm:py-2">
+                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider" style={{ color: textColor }}>Missão Surpresa</span>
                       {m.sector !== "Todos" && (
-                        <span className="text-xs px-2 py-0.5 bg-black/30 rounded-full" style={{ color: textColor }}>{m.sector}</span>
+                        <span className="text-[10px] sm:text-xs px-2 py-0.5 bg-black/30 rounded-full" style={{ color: textColor }}>{m.sector}</span>
                       )}
                     </div>
                     {m.expires_at && (() => {
@@ -361,19 +361,19 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                         </div>
                       );
                     })()}
-                    <h3 className="font-bold text-base leading-tight" style={{ color: textColor }}>{m.title}</h3>
-                    {m.description && <p className="text-sm mt-0.5" style={{ color: textColor }}>{m.description}</p>}
-                    <p className="font-bold text-lg mt-1  text-green-400">{m.points > 0 ? "+" : ""}{m.points} pts</p>
+                    <h3 className="font-bold text-sm sm:text-base leading-tight" style={{ color: textColor }}>{m.title}</h3>
+                    {m.description && <p className="text-xs sm:text-sm mt-0.5 opacity-90" style={{ color: textColor }}>{m.description}</p>}
+                    <p className="font-bold text-base sm:text-lg mt-1 text-green-400">{m.points > 0 ? "+" : ""}{m.points} pts</p>
                     {user && (() => {
                       const status = getReqStatus(m.id);
                       return (
                         <button
                           onClick={() => { if (!status) { setRequestModal(m); setJustification(""); } }}
                           disabled={!!status}
-                          className={`mt-2 flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold transition-colors ${status === "pendente" ? "bg-amber-900/40 text-amber-400 cursor-not-allowed" :
+                          className={`mt-3 flex items-center justify-center sm:justify-start gap-1.5 px-3 py-2.5 sm:py-2 rounded-lg sm:rounded-md text-[11px] sm:text-xs font-semibold transition-colors w-full sm:w-auto ${status === "pendente" ? "bg-amber-900/40 text-amber-400 cursor-not-allowed" :
                             status === "aprovado" ? "bg-green-900/40 text-green-400 cursor-not-allowed" :
                               status === "rejeitado" ? "bg-red-900/40 text-red-400 cursor-not-allowed" :
-                                "bg-yellow-500 hover:bg-yellow-400 text-black"
+                                "bg-yellow-500 hover:bg-yellow-400 text-black border border-yellow-400/20"
                             }`}
                         >
                           {status === "pendente" ? <><Clock className="w-3.5 h-3.5" /> Aguardando aprovação</> :
@@ -409,7 +409,7 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                   </div>
                 </div>
                 {isAdmin && (
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex items-center gap-1 shrink-0 bg-black/20 p-1 sm:p-0 sm:bg-transparent rounded-lg self-end sm:self-start">
                     <button onClick={() => openEdit(m)} className="p-1.5 text-yellow-400 hover:bg-yellow-900/40 rounded-lg transition-colors">
                       <Edit2 className="w-4 h-4" />
                     </button>
@@ -475,11 +475,11 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
                 </label>
               </div>
             </div>
-            <div className="flex gap-3 mt-5">
-              <button onClick={handleSubmitRequest} disabled={submitting} className="flex-1 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-xl text-sm transition-colors disabled:opacity-50">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-5">
+              <button onClick={handleSubmitRequest} disabled={submitting} className="w-full py-3 sm:py-2.5 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-xl text-sm transition-colors disabled:opacity-50 order-1 sm:order-2">
                 {submitting ? "Enviando..." : "Enviar Solicitação"}
               </button>
-              <button onClick={() => setRequestModal(null)} className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors">
+              <button onClick={() => setRequestModal(null)} className="w-full py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors order-2 sm:order-1">
                 Cancelar
               </button>
             </div>

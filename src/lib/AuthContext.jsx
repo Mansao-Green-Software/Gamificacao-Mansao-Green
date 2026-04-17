@@ -111,6 +111,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = (shouldRedirect = true) => {
+    // Clear our own storage used by app-params
+    try {
+      localStorage.removeItem('base44_access_token');
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('base44_access_token');
+      sessionStorage.removeItem('token');
+    } catch (e) {
+      console.error('Failed to clear storage:', e);
+    }
+
     setUser(null);
     setIsAuthenticated(false);
     

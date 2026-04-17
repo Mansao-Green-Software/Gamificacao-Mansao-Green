@@ -15,7 +15,7 @@ const createSafeStorage = () => {
     }
   };
 
-  const backend = tryStorage(localStorage) || tryStorage(sessionStorage) || null;
+  const backend = tryStorage(sessionStorage) || tryStorage(localStorage) || null;
 
   return {
     getItem: (key) => {

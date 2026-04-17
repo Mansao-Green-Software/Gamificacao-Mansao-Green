@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/lib/AuthContext";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
@@ -8,9 +9,8 @@ const SECTORS = [
   "Social Media", "Audiovisual", "Tráfego", "Líder de Projeto",
   "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "Feira FC", "IA/Automação"
 ];
-
 export default function Layout({ children, currentPageName }) {
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
   const [profile, setProfile] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem("app_logo_url") || "");
@@ -35,13 +35,13 @@ export default function Layout({ children, currentPageName }) {
   };
 
   useEffect(() => {
-    base44.auth.me().then(async (u) => {
-      setUser(u);
-      const all = await base44.entities.EmployeeProfile.list();
-      const found = all.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
-      if (found) setProfile(found);
-    }).catch(() => {});
-  }, []);
+    if (user) {
+      base44.entities.EmployeeProfile.list().then(all => {
+        const found = all.find(p => (p.user_id && p.user_id === user.id) || p.email === user.email);
+        if (found) setProfile(found);
+      }).catch(() => {});
+    }
+  }, [user]);
 
   const isAdmin = user?.role === "admin";
   const isSupervisor = user?.role === "supervisor";
@@ -166,7 +166,7 @@ export default function Layout({ children, currentPageName }) {
             </button>
           </div>
           <button
-            onClick={() => base44.auth.logout()}
+            onClick={() => logout()}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-all w-full"
           >
             <LogOut className="w-4 h-4" />
@@ -255,7 +255,7 @@ export default function Layout({ children, currentPageName }) {
               </button>
             </div>
             <button
-              onClick={() => base44.auth.logout()}
+              onClick={() => logout()}
               className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-all w-full mt-2"
             >
               <LogOut className="w-4 h-4" />

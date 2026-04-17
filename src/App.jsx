@@ -17,16 +17,16 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   : <>{children}</>;
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isAuthenticated, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
   // Redirect to login as a side effect, not during render
   React.useEffect(() => {
-    if (!isLoadingAuth && !isLoadingPublicSettings && authError) {
-      if (authError.type === 'auth_required' || authError.type === 'unknown') {
+    if (!isLoadingAuth && !isLoadingPublicSettings) {
+      if (!isAuthenticated || (authError && (authError.type === 'auth_required' || authError.type === 'unknown'))) {
         navigateToLogin();
       }
     }
-  }, [isLoadingAuth, isLoadingPublicSettings, authError]);
+  }, [isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated]);
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
