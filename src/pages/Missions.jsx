@@ -641,30 +641,42 @@ export default function Missions() {
           ) : (
             <div className="space-y-3">
             {myRequests.map(r => (
-            <div key={r.id} className="p-4 bg-gray-900/50 rounded-xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white font-medium text-sm">{r.mission_title}</p>
-                  <p className="text-gray-500 text-xs">{formatBRT(r.created_date, "date")}</p>
+            <div key={r.id} className="p-4 bg-gray-900/50 rounded-xl border border-gray-700/50 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
+                  <p className="text-gray-500 text-xs mt-0.5">{formatBRT(r.created_date, "date")}</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col items-end gap-1 shrink-0">
                   <span className={`font-bold text-sm ${r.mission_points >= 0 ? "text-green-400" : "text-red-400"}`}>{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
-                      r.status === "aprovado" ? "bg-green-900/50 text-green-300" :
-                      r.status === "rejeitado" ? "bg-red-900/50 text-red-300" :
-                      "bg-amber-900/50 text-amber-300"
-                    }`}>
-                      {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "rejeitado" ? <><XCircle className="w-3 h-3" /> Rejeitado</> : <><Clock className="w-3 h-3" /> Pendente</>}
-                    </span>
-                    {r.status === "aprovado" && r.approved_by_name && (
-                      <p className="text-xs text-gray-500">aprovado por {r.approved_by_name}</p>
-                    )}
-                  </div>
+                  <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${
+                    r.status === "aprovado" ? "bg-green-900/50 text-green-300" :
+                    r.status === "rejeitado" ? "bg-red-900/50 text-red-300" :
+                    "bg-amber-900/50 text-amber-300"
+                  }`}>
+                    {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "rejeitado" ? <><XCircle className="w-3 h-3" /> Rejeitado</> : <><Clock className="w-3 h-3" /> Pendente</>}
+                  </span>
+                  {r.status === "aprovado" && r.approved_by_name && (
+                    <p className="text-[10px] text-gray-500 text-right">por {r.approved_by_name}</p>
+                  )}
                 </div>
               </div>
+              {r.justification && (
+                <p className="flex items-start gap-1.5 text-gray-300 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
+                  <FaComment className="text-gray-500 shrink-0 mt-0.5" /> {r.justification}
+                </p>
+              )}
+              {r.attachments?.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {r.attachments.map((url, idx) => (
+                    <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
+                      <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                    </a>
+                  ))}
+                </div>
+              )}
               {r.status === "rejeitado" && (
-                <p className="mt-2 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-3 py-2">
+                <p className="text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-3 py-2">
                   {r.notes ? `Motivo: ${r.notes}` : "Nenhum motivo informado."}
                 </p>
               )}
@@ -715,37 +727,41 @@ export default function Missions() {
                     return (
                       <div className="space-y-3">
                         {filtered.map(r => (
-                          <div key={r.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl flex-wrap gap-3">
-                            <div className="flex-1 min-w-0">
-                              <p className="text-white font-medium text-sm">{r.mission_title}</p>
-                              <p className="text-gray-400 text-xs">{r.employee_name} · {r.sector}</p>
-                              <p className="text-gray-500 text-xs">{formatBRT(r.created_date, "date")}</p>
-                              {r.justification && (
-                                <p className="flex items-center gap-1.5 text-gray-300 text-xs mt-1.5 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">{r.justification}</p>
-                              )}
-                              {r.attachments?.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                  {r.attachments.map((url, idx) => (
-                                    <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
-                                      <img src={url} alt="anexo" className="w-full h-full object-cover" />
-                                    </a>
-                                  ))}
-                                </div>
-                              )}
+                          <div key={r.id} className="p-4 bg-gray-900/50 rounded-xl space-y-3 border border-gray-700/50">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
+                                <p className="text-gray-400 text-xs mt-0.5">{r.employee_name}</p>
+                                <p className="text-gray-500 text-xs">{r.sector} · {formatBRT(r.created_date, "date")}</p>
+                              </div>
+                              <span className="text-green-400 font-bold text-sm shrink-0">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
                             </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <span className="text-green-400 font-bold text-sm">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
+                            {r.justification && (
+                              <p className="flex items-start gap-1.5 text-gray-300 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
+                                <FaComment className="text-gray-500 shrink-0 mt-0.5" /> {r.justification}
+                              </p>
+                            )}
+                            {r.attachments?.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {r.attachments.map((url, idx) => (
+                                  <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
+                                    <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+                            <div className="flex gap-2 pt-1">
                               <button
                                 onClick={() => handleApprove(r)}
                                 disabled={approving === r.id}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50"
                               >
                                 <CheckCircle className="w-3.5 h-3.5" />
-                                {approving === r.id ? "..." : "Aprovar"}
+                                {approving === r.id ? "Aprovando..." : "Aprovar"}
                               </button>
                               <button
                                 onClick={() => { setRejectModal(r); setRejectNote(""); }}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
+                                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-semibold transition-colors border border-red-700/40"
                               >
                                 <XCircle className="w-3.5 h-3.5" />
                                 Rejeitar
@@ -854,37 +870,41 @@ export default function Missions() {
                   ) : (
                     <div className="space-y-3">
                       {filteredPending.map(r => (
-                        <div key={r.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl flex-wrap gap-3">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white font-medium text-sm">{r.mission_title}</p>
-                            <p className="text-gray-400 text-xs">{r.employee_name} · {r.sector}</p>
-                            <p className="text-gray-500 text-xs">{formatBRT(r.created_date, "date")}</p>
-                            {r.justification && (
-                              <p className="flex items-center gap-1.5 text-gray-300 text-xs mt-1.5 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700"><FaComment className="text-gray-500 shrink-0" /> {r.justification}</p>
-                            )}
-                            {r.attachments?.length > 0 && (
-                              <div className="flex flex-wrap gap-2 mt-2">
-                                {r.attachments.map((url, idx) => (
-                                  <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
-                                    <img src={url} alt="anexo" className="w-full h-full object-cover" />
-                                  </a>
-                                ))}
-                              </div>
-                            )}
+                        <div key={r.id} className="p-4 bg-gray-900/50 rounded-xl space-y-3 border border-gray-700/50">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
+                              <p className="text-gray-400 text-xs mt-0.5">{r.employee_name}</p>
+                              <p className="text-gray-500 text-xs">{r.sector} · {formatBRT(r.created_date, "date")}</p>
+                            </div>
+                            <span className="text-green-400 font-bold text-sm shrink-0">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
                           </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-green-400 font-bold text-sm">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
+                          {r.justification && (
+                            <p className="flex items-start gap-1.5 text-gray-300 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
+                              <FaComment className="text-gray-500 shrink-0 mt-0.5" /> {r.justification}
+                            </p>
+                          )}
+                          {r.attachments?.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {r.attachments.map((url, idx) => (
+                                <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
+                                  <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                          <div className="flex gap-2 pt-1">
                             <button
                               onClick={() => handleApprove(r)}
                               disabled={approving === r.id}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50"
                             >
                               <CheckCircle className="w-3.5 h-3.5" />
-                              {approving === r.id ? "..." : "Aprovar"}
+                              {approving === r.id ? "Aprovando..." : "Aprovar"}
                             </button>
                             <button
                               onClick={() => { setRejectModal(r); setRejectNote(""); }}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg text-xs font-medium transition-colors border border-red-700/40"
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-semibold transition-colors border border-red-700/40"
                             >
                               <XCircle className="w-3.5 h-3.5" />
                               Rejeitar
