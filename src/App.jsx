@@ -23,15 +23,8 @@ const AuthenticatedApp = () => {
   React.useEffect(() => {
     if (!isLoadingAuth && !isLoadingPublicSettings) {
       // Only redirect if explicitly not authenticated AND auth is required
-      // AND there's no token in URL or storage (avoid redirect loop right after login)
       if (!isAuthenticated && authError?.type === 'auth_required') {
-        const urlHasToken = new URLSearchParams(window.location.search).has('access_token');
-        const storageHasToken =
-          localStorage.getItem('base44_access_token') ||
-          sessionStorage.getItem('base44_access_token');
-        if (!urlHasToken && !storageHasToken) {
-          navigateToLogin();
-        }
+        navigateToLogin();
       }
     }
   }, [isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated]);
