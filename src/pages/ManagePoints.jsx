@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
-import { Star, Plus, History, Trash2, Search, X, ChevronDown } from "lucide-react";
+import { Star, Plus, History, Trash2, Search, X, ChevronDown, Upload } from "lucide-react";
 import { formatBRT, nowBRT, dateToBRT } from "@/utils/dateUtils";
 
 const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "Feira FC", "TI", "IA/Automação"];
@@ -26,6 +26,19 @@ export default function ManagePoints() {
   const [success, setSuccess] = useState(false);
   const [subSectors, setSubSectors] = useState([]);
   const [selectedSubSector, setSelectedSubSector] = useState("");
+  const [syncingSheet, setSyncingSheet] = useState(false);
+
+  const handleSyncToSheet = async () => {
+    setSyncingSheet(true);
+    try {
+      const response = await base44.functions.invoke('syncPointsToSheet', {});
+      alert(`✓ ${response.data.message}\nPlanilha: ${response.data.sheetName}`);
+    } catch (e) {
+      alert(`Erro ao sincronizar: ${e.message}`);
+    } finally {
+      setSyncingSheet(false);
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -218,14 +231,26 @@ export default function ManagePoints() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-md font-bold text-white flex items-center gap-2 uppercase">
-          <Star className="w-6 h-6 text-green-400" />
-          Gerenciar Pontos
-        </h1>
-        <p className="text-gray-400 text-xs mt-1">
-          {isAdmin ? "Gerencie pontos de todos os setores" : `Setor: ${user?.sector}`}
-        </p>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-md font-bold text-white flex items-center gap-2 uppercase">
+            <Star className="w-6 h-6 text-green-400" />
+            Gerenciar Pontos
+          </h1>
+          <p className="text-gray-400 text-xs mt-1">
+            {isAdmin ? "Gerencie pontos de todos os setores" : `Setor: ${user?.sector}`}
+          </p>
+        </div>
+        {(isAdmin || isManager) && (
+          <button
+            onClick={handleSyncToSheet}
+            disabled={syncingSheet}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-sm transition-colors disabled:opacity-50"
+          >
+            <Upload className="w-4 h-4" />
+            {syncingSheet ? "Sincronizando..." : "Enviar para Planilha"}
+          </button>
+        )}
       </div>
 
       {/* Tabs */}
