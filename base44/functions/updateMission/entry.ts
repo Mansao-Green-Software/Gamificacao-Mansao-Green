@@ -13,8 +13,11 @@ Deno.serve(async (req) => {
   const body = await req.json();
   const { id, ...data } = body;
 
-  // Create
+  // Create - only admin
   if (!id) {
+    if (user.role !== 'admin') {
+      return Response.json({ error: 'Only admins can create missions' }, { status: 403 });
+    }
     const created = await base44.asServiceRole.entities.Mission.create(data);
     return Response.json(created);
   }
