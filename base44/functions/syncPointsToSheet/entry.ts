@@ -48,10 +48,9 @@ Deno.serve(async (req) => {
       }
     });
 
-    const dailyData = Object.entries(dailyTotals).map(([name, total]) => [
-      name,
-      total
-    ]);
+    const dailyData = Object.entries(dailyTotals).length > 0 
+      ? Object.entries(dailyTotals).map(([name, total]) => [name, total])
+      : [['Nenhum dado para hoje', 0]];
 
     // Group transactions by sector
     const transactionsBySector = {};
