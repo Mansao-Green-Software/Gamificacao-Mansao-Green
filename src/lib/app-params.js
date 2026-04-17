@@ -88,6 +88,18 @@ const getAppParams = () => {
   };
 };
 
-export const appParams = {
-  ...getAppParams()
+let cachedParams = null;
+
+export const appParams = new Proxy({}, {
+  get(target, prop) {
+    if (!cachedParams) {
+      cachedParams = getAppParams();
+    }
+    return cachedParams[prop];
+  }
+});
+
+// Allow external code to refresh params (e.g., after login)
+export const refreshAppParams = () => {
+  cachedParams = getAppParams();
 };

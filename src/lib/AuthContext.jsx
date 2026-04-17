@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { appParams } from '@/lib/app-params';
+import { appParams, refreshAppParams } from '@/lib/app-params';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
@@ -22,10 +22,9 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingPublicSettings(true);
       setAuthError(null);
       
-      // Get fresh token from URL or storage in case it was updated during login
-      const urlParams = new URLSearchParams(window.location.search);
-      const tokenFromUrl = urlParams.get('access_token');
-      const tokenToUse = tokenFromUrl || appParams.token;
+      // Refresh params to get fresh token from URL (after login)
+      refreshAppParams();
+      const tokenToUse = appParams.token;
       
       // First, check app public settings (with token if available)
       // This will tell us if auth is required, user not registered, etc.
