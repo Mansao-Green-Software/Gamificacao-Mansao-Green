@@ -60,7 +60,18 @@ export default function GreenShop() {
         t.employee_name === (found?.full_name || u.full_name)
       );
       setRewards(rws);
-      setRedemptions(reds);
+
+      // Busca extra: todos os resgates criados pelo usuário logado (garante que apareçam mesmo se o list() do RLS não trouxer)
+      let combinedReds = reds;
+      try {
+        const myOwnReds = await base44.entities.RewardRedemption.filter({ created_by: u.email }, "-created_date", 200);
+        const map = new Map();
+        [...reds, ...myOwnReds].forEach(r => map.set(r.id, r));
+        combinedReds = Array.from(map.values()).sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+      } catch (e) {
+        // ignora se falhar
+      }
+      setRedemptions(combinedReds);
       setTransactions(txs);
     } catch (e) {
       setError(true);
