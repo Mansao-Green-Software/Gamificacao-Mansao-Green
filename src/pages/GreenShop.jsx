@@ -220,27 +220,68 @@ export default function GreenShop() {
         )}
       </div>
 
-      {/* Points banner */}
-      <div className="bg-gradient-to-br from-teal-900/60 via-gray-800/60 to-teal-900/60 border-2 border-green-700/50 rounded-xl p-5 flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <p className="text-white text-sm font-medium">Seus pontos disponíveis</p>
-          <p className="text-4xl font-bold text-white mt-1">{availablePoints.toLocaleString()} <span className="text-green-400 text-lg">pts</span></p>
-          <p className="text-gray-400 text-xs mt-1">{myPoints.toLocaleString()} ganhos · {spentPoints.toLocaleString()} gastos</p>
-        </div>
-        {lockedPoints > 0 && (
-          <div className="flex items-center gap-3 bg-gray-900/60 border border-amber-700/40 rounded-xl px-4 py-3">
-            <Lock className="w-5 h-5 text-amber-400 shrink-0" />
-            <div>
-              <p className="text-amber-300 text-xs font-semibold uppercase tracking-wide">Bloqueado neste mês</p>
-              <p className="text-white font-bold text-lg leading-tight">{lockedPoints.toLocaleString()} <span className="text-amber-400 text-sm">pts</span></p>
-              <p className="text-gray-500 text-[10px]">Liberam no próximo mês</p>
+      {/* Pontuação */}
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden bg-gradient-to-br from-teal-900/60 via-gray-800/60 to-gray-900/60 border-2 border-green-700/50 rounded-2xl flex flex-col group shadow-2xl shadow-black/20"
+      >
+        {/* Seção Principal: Disponível */}
+        <div className="p-6 flex items-center justify-between relative z-10 w-full">
+          <div>
+            <p className="text-green-400 text-xs font-bold uppercase tracking-wider mb-1">Pontos Disponíveis</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-5xl font-black text-white tracking-tighter">
+                {availablePoints.toLocaleString()}
+              </span>
+              <span className="text-green-400/80 font-bold text-lg">pts</span>
+            </div>
+            <div className="flex items-center gap-4 mt-4">
+              <div className="text-gray-400 text-[11px] font-medium flex items-center gap-1.5 bg-gray-900/40 px-2.5 py-1 rounded-lg border border-gray-700/30">
+                <Plus className="w-3 h-3 text-green-500" />
+                {myPoints.toLocaleString()} ganhos
+              </div>
+              <div className="text-gray-400 text-[11px] font-medium flex items-center gap-1.5 bg-gray-900/40 px-2.5 py-1 rounded-lg border border-gray-700/30">
+                <ShoppingBag className="w-3 h-3 text-red-500/60" />
+                {spentPoints.toLocaleString()} usados
+              </div>
             </div>
           </div>
-        )}
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center">
-          <Star className="w-8 h-8 text-green-400" />
+          
+          <div className="relative z-10 bg-green-500/10 p-5 rounded-2xl border border-green-500/20 group-hover:bg-green-500/20 transition-all duration-500 group-hover:scale-110 shadow-lg ">
+            <Star className="w-10 h-10 text-green-400 group-hover:rotate-12 transition-transform duration-500" />
+          </div>
         </div>
-      </div>
+
+        {/* Seção Integrada: Bloqueado */}
+        {lockedPoints > 0 && (
+          <div className="mx-2 mb-2 rounded-xl bg-gray-900/60 border border-amber-700/30 p-4 flex items-center justify-between relative z-10 group-hover:border-amber-700/50 transition-colors">
+             <div className="flex items-center gap-3">
+              <div className="p-2  rounded-lg border border-amber-500/20">
+                <Lock className="w-4 h-4 text-amber-500" />
+              </div>
+              <div>
+                <p className="text-amber-400/80 text-[9px] md:text-[10px] font-bold uppercase tracking-widest leading-none mb-1">Bloqueado este mês</p>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-white font-black text-2xl tracking-tight">{lockedPoints.toLocaleString()}</span>
+                  <span className="text-amber-500/60 text-[10px] font-black">pts</span>
+                </div>
+              </div>
+             </div>
+             <div className="text-right flex flex-col items-end gap-1">
+               <span className="text-gray-500 text-[10px] md:text-[12px] font-medium flex items-center gap-1.5">
+                 <Clock className="w-3 h-3 text-amber-500/40" />
+                 Liberam no próximo mês
+               </span>
+               
+             </div>
+          </div>
+        )}
+
+        {/* Efeitos de Fundo */}
+        <div className="absolute -right-8 -top-8 w-32 h-32 bg-green-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+        <div className="absolute -left-8 -bottom-8 w-24 h-24 bg-teal-500/10 rounded-full blur-2xl opacity-50" />
+      </motion.div>
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-full sm:w-fit">
