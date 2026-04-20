@@ -32,6 +32,7 @@ export default function Missions() {
   const [collapsedCategories, setCollapsedCategories] = useState({});
   const toggleCategory = (cat) => setCollapsedCategories(p => ({ ...p, [cat]: !p[cat] }));
   const [requestModal, setRequestModal] = useState(null);
+  const [requestQuantity, setRequestQuantity] = useState(1);
   const [justification, setJustification] = useState("");
   const [attachments, setAttachments] = useState([]);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
@@ -217,6 +218,7 @@ export default function Missions() {
 
   const openRequestModal = (mission) => {
     setRequestModal(mission);
+    setRequestQuantity(1);
     setJustification("");
     setAttachments([]);
   };
@@ -250,7 +252,9 @@ export default function Missions() {
 
     setSubmitting(requestModal.id);
     const requestSector = (effectiveRole === "manager" || effectiveRole === "admin" || effectiveRole === "director") ? "Gerência" : mySector;
-    const req = await base44.entities.MissionRequest.create({
+    const hasCustomLimit = MULTI_REQUEST_LIMITS[requestModal.title] !== undefined;
+    const qty = hasCustomLimit ? Math.max(1, Math.min(requestQuantity, MULTI_REQUEST_LIMITS[requestModal.title])) : 1;
+    const baseData = {
       employee_id: profile?.user_id || user.id,
       employee_name: profile?.full_name || user.full_name,
       sector: requestSector,
@@ -260,8 +264,11 @@ export default function Missions() {
       status: "pendente",
       justification: justification || "",
       attachments: attachments,
-    });
-    setRequests(prev => [req, ...prev]);
+    };
+    const created = await Promise.all(
+      Array.from({ length: qty }, () => base44.entities.MissionRequest.create(baseData))
+    );
+    setRequests(prev => [...created, ...prev]);
     setSubmitting(null);
     setRequestModal(null);
   };
@@ -622,6 +629,30 @@ export default function Missions() {
             <h3 className="text-white font-bold text-lg mb-1">Solicitar Pontuação</h3>
             <p className="text-gray-400 text-sm mb-4">{requestModal.title} · <span className="text-green-400 font-bold">{requestModal.points > 0 ? "+" : ""}{requestModal.points} pts</span></p>
             <div className="space-y-4">
+              {MULTI_REQUEST_LIMITS[requestModal.title] !== undefined && (() => {
+                const limit = MULTI_REQUEST_LIMITS[requestModal.title];
+                const already = myRequests.filter(r => r.mission_id === requestModal.id && (r.status === "pendente" || r.status === "aprovado")).length;
+                const maxQty = limit - already;
+                return (
+                  <div>
+                    <label className="text-gray-400 text-xs mb-1.5 block">Quantidade <span className="text-gray-600">(máx. {maxQty} restante{maxQty !== 1 ? "s" : ""})</span></label>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setRequestQuantity(q => Math.max(1, q - 1))}
+                        className="w-9 h-9 rounded-xl bg-gray-700 hover:bg-gray-600 text-white font-bold text-lg flex items-center justify-center transition-colors"
+                      >−</button>
+                      <span className="text-white font-bold text-xl w-8 text-center">{requestQuantity}</span>
+                      <button
+                        type="button"
+                        onClick={() => setRequestQuantity(q => Math.min(maxQty, q + 1))}
+                        className="w-9 h-9 rounded-xl bg-gray-700 hover:bg-gray-600 text-white font-bold text-lg flex items-center justify-center transition-colors"
+                      >+</button>
+                      <span className="text-gray-500 text-xs ml-1">× {requestModal.points} = <span className="text-green-400 font-bold">{requestQuantity * requestModal.points} pts</span></span>
+                    </div>
+                  </div>
+                );
+              })()}
               <div>
                 <label className="text-gray-400 text-xs mb-1.5 block">Justificativa (opcional)</label>
                 <textarea
@@ -660,7 +691,7 @@ export default function Missions() {
                 disabled={submitting === requestModal.id}
                 className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-black font-semibold rounded-xl text-sm transition-colors disabled:opacity-50"
               >
-                {submitting === requestModal.id ? "Enviando..." : "Enviar Solicitação"}
+                {submitting === requestModal.id ? "Enviando..." : requestQuantity > 1 ? `Enviar ${requestQuantity} Solicitações` : "Enviar Solicitação"}
               </button>
               <button onClick={() => setRequestModal(null)} className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors">
                 Cancelar
