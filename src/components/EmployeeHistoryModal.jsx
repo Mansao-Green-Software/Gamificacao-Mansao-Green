@@ -8,7 +8,9 @@ export default function EmployeeHistoryModal({ employee, transactions, onClose }
     .filter(t => t.employee_id === employee.id)
     .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
-  const total = empTxs.reduce((s, t) => s + (t.points || 0), 0);
+  const total = empTxs
+    .filter(t => !t.description?.startsWith("Resgate:"))
+    .reduce((s, t) => s + (t.points || 0), 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
