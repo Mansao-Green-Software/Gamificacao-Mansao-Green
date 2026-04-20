@@ -141,7 +141,7 @@ export default function Missions() {
 
   // Missões com limite customizado de solicitações simultâneas (título exato → limite)
   const MULTI_REQUEST_LIMITS = {
-    "Criativo que gera +1000 leads": 5,
+    "Criativo que gera +1000 leads": 10,
   };
 
   // Verifica se já existe solicitação (pendente ou aprovada) para a missão no período
