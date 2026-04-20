@@ -145,7 +145,7 @@ export default function RankingGeral() {
 
   const periodTxs = filterByPeriod(transactions, selectedPeriod);
 
-  // Excluir transações de resgate da Green Shop do ranking
+  // Excluir apenas resgates da Green Shop do ranking (punições continuam contando)
   const rankingTxs = periodTxs.filter(t => !t.description?.startsWith("Resgate:"));
 
   const getSectorPoints = () => {

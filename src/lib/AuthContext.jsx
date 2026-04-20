@@ -19,14 +19,25 @@ export const AuthProvider = ({ children }) => {
     refreshAppParams();
     checkAppState();
     
-    // Also recheck auth state when token in storage changes (after login redirect)
+    // Recheck auth state when token in storage changes (after login redirect in another tab)
     const handleStorageChange = () => {
+      refreshAppParams();
+      checkAppState();
+    };
+
+    // Also recheck when URL changes (same-tab login redirect with ?access_token=...)
+    // This is critical for email/password login which redirects back with the token in the URL
+    const handlePopState = () => {
       refreshAppParams();
       checkAppState();
     };
     
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('popstate', handlePopState);
+    };
   }, []);
 
   const checkAppState = async () => {
@@ -166,8 +177,10 @@ export const AuthProvider = ({ children }) => {
     // Clear our own storage used by app-params
     try {
       localStorage.removeItem('base44_access_token');
+      localStorage.removeItem('base44_token');
       localStorage.removeItem('token');
       sessionStorage.removeItem('base44_access_token');
+      sessionStorage.removeItem('base44_token');
       sessionStorage.removeItem('token');
     } catch (e) {
       console.error('Failed to clear storage:', e);

@@ -46,12 +46,17 @@ export default function GreenShop() {
     try {
       const u = await base44.auth.me();
       setUser(u);
-      const [rws, reds, allTxs, profiles] = await Promise.all([
+      const isAdminUser = u.role === "admin";
+      const [rws, redsResult, allTxs, profiles] = await Promise.all([
         base44.entities.Reward.list(),
-        base44.entities.RewardRedemption.list("-created_date", 200),
+        // Admin usa list direto (vê tudo), usuário comum usa função backend que bypassa RLS
+        isAdminUser
+          ? base44.entities.RewardRedemption.list("-created_date", 500)
+          : base44.functions.invoke('getMyRedemptions', {}).then(r => r.data.redemptions),
         base44.entities.PointTransaction.list("-created_date", 5000),
         base44.entities.EmployeeProfile.list(),
       ]);
+      const reds = redsResult || [];
       const found = profiles.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
       setProfile(found);
       const txs = allTxs.filter(t =>

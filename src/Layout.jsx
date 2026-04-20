@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { Trophy, Users, Target, LayoutDashboard, LogOut, Menu, X, Crown, Star, ShoppingBag, Zap, Camera, Sun, Moon } from "lucide-react";
+import NotificationBell from "@/components/NotificationBell";
 
 const SECTORS = [
   "Social Media", "Audiovisual", "Tráfego", "Líder de Projeto",
@@ -149,6 +150,9 @@ export default function Layout({ children, currentPageName }) {
         </nav>
 
         <div className="p-4 border-t border-gray-800 space-y-2">
+          <div className="px-1">
+            <NotificationBell userId={user?.id} />
+          </div>
           <div className="flex items-center justify-between px-3 py-2.5">
             <div className="flex items-center gap-2 text-gray-400">
               {theme === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-500" />}
