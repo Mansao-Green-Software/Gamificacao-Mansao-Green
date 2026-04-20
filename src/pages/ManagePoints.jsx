@@ -283,11 +283,11 @@ export default function ManagePoints() {
       {/* Add points tab */}
       {tab === "add" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Form - Only admin can use manual scoring */}
-          {!isAdmin ? (
+          {/* Form - Admin, managers and supervisors can add points */}
+          {(!isAdmin && !isManager && !isDirector) ? (
             <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
               <div className="text-center py-8">
-                <p className="text-gray-400 text-sm">Apenas administradores podem adicionar pontos com critério manual.</p>
+                <p className="text-gray-400 text-sm">Você não tem permissão para adicionar pontos.</p>
               </div>
             </div>
           ) : (
