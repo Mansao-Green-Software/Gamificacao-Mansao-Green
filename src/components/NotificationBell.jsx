@@ -17,6 +17,7 @@ export default function NotificationBell({ userId }) {
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const ref = useRef(null);
   const btnRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const load = async () => {
     if (!userId) return;
@@ -34,7 +35,10 @@ export default function NotificationBell({ userId }) {
 
   useEffect(() => {
     const handleClick = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+      if (
+        ref.current && !ref.current.contains(e.target) &&
+        dropdownRef.current && !dropdownRef.current.contains(e.target)
+      ) setOpen(false);
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
@@ -64,8 +68,8 @@ export default function NotificationBell({ userId }) {
     if (!open && btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect();
       setDropdownPos({
-        top: rect.bottom + window.scrollY + 8,
-        left: Math.max(8, rect.right - 320 + window.scrollX),
+        top: rect.bottom + 8,
+        left: Math.max(8, rect.right - 320),
       });
     }
     setOpen(o => !o);
@@ -89,7 +93,8 @@ export default function NotificationBell({ userId }) {
 
       {open && createPortal(
         <div
-          style={{ position: "absolute", top: dropdownPos.top, left: dropdownPos.left, zIndex: 9999 }}
+          ref={dropdownRef}
+          style={{ position: "fixed", top: dropdownPos.top, left: dropdownPos.left, zIndex: 9999 }}
           className="w-80 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl flex flex-col max-h-[480px]">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700">
