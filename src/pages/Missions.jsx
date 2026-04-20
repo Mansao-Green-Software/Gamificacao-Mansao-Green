@@ -190,27 +190,33 @@ export default function Missions() {
             (r.created_by && p.email === r.created_by)
           );
           const effectiveSector = (r.sector !== "Supervisor" ? r.sector : null) || empProfile?.sector;
+          const missionObj = missions.find(m => m.id === r.mission_id);
           // Para gerentes, o sector da solicitação é "Gerência", mas o perfil tem o setor real
           if (empProfile?.role === "manager" || empProfile?.role === "director") {
             return allMySectors.includes(empProfile.sector);
           }
-          return allMySectors.includes(effectiveSector);
+          return allMySectors.includes(effectiveSector) || missionObj?.sector === "Todos" || allMySectors.includes(missionObj?.sector);
         }
         // Resolve sector from request or fallback to employee profile
-        // Note: some profiles have empty user_id, so also match by created_by email
+        // Note: some profiles have empty user_id, so also match by created_by email or name
         const empProfile = allProfiles.find(p => 
           (p.user_id && p.user_id === r.employee_id) || 
           p.id === r.employee_id ||
-          (r.created_by && p.email === r.created_by)
+          (r.created_by && p.email === r.created_by) ||
+          (r.employee_name && p.full_name === r.employee_name)
         );
         const effectiveSector = (r.sector !== "Supervisor" ? r.sector : null) || empProfile?.sector;
+        // Also check the mission's sector (for missions with sector "Todos" or cross-sector missions)
+        const missionObj = missions.find(m => m.id === r.mission_id);
+        const missionSector = missionObj?.sector;
         if (effectiveRole === "supervisor") {
           // Supervisor só vê colaboradores do seu setor (não outros supervisores)
           if (empProfile?.role === "supervisor" || empProfile?.role === "manager" || empProfile?.role === "admin") return false;
-          return allMySectors.includes(effectiveSector);
+          return allMySectors.includes(effectiveSector) || missionSector === "Todos";
         }
         // Gerente: aprova colaboradores E supervisores do seu setor
-        return allMySectors.includes(effectiveSector);
+        // Also show requests for missions that belong to manager's sectors or "Todos"
+        return allMySectors.includes(effectiveSector) || missionSector === "Todos" || allMySectors.includes(missionSector);
       })
     : [];
 
