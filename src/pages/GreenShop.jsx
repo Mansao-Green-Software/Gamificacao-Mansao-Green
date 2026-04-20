@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ShoppingBag, Plus, Trash2, Star, CheckCircle, Clock, Package, Tag, Camera, Edit2 } from "lucide-react";
+import { ShoppingBag, Plus, Trash2, Star, CheckCircle, Clock, Package, Tag, Camera, Edit2, Lock } from "lucide-react";
 import { motion } from "framer-motion";
+import { dateToBRT, nowBRT } from "@/utils/dateUtils";
 
 const CATEGORIES = ["Experiência", "Produto", "Benefício", "Vale-presente", "Outros"];
 
@@ -82,8 +83,16 @@ export default function GreenShop() {
     r.employee_id === user?.id ||
     (profile && (r.employee_id === profile.id || r.employee_id === profile.user_id))
   );
-  // availablePoints já é calculado pelas transações (que incluem débitos negativos de resgates)
-  const availablePoints = myPoints;
+  // Separa pontos por período (fuso BRT): disponível = meses anteriores, bloqueado = mês atual
+  const now = nowBRT();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  const lockedPoints = transactions.reduce((s, t) => {
+    const d = dateToBRT(t.created_date);
+    return (d.getMonth() === currentMonth && d.getFullYear() === currentYear) ? s + (t.points || 0) : s;
+  }, 0);
+  // Pontos disponíveis = total - ganhos do mês atual (débitos de resgate contam no total, então ficam aplicados)
+  const availablePoints = myPoints - Math.max(lockedPoints, 0);
   const spentPoints = myRedemptions.filter(r => r.status !== "cancelado").reduce((s, r) => s + (r.points_spent || 0), 0);
 
   const activeRewards = rewards.filter(r => r.is_active);
@@ -207,12 +216,22 @@ export default function GreenShop() {
       </div>
 
       {/* Points banner */}
-      <div className="bg-gradient-to-br from-teal-900/60 via-gray-800/60 to-teal-900/60 border-2 border-green-700/50 rounded-xl p-5 flex items-center justify-between">
+      <div className="bg-gradient-to-br from-teal-900/60 via-gray-800/60 to-teal-900/60 border-2 border-green-700/50 rounded-xl p-5 flex items-center justify-between flex-wrap gap-4">
         <div>
           <p className="text-white text-sm font-medium">Seus pontos disponíveis</p>
           <p className="text-4xl font-bold text-white mt-1">{availablePoints.toLocaleString()} <span className="text-green-400 text-lg">pts</span></p>
           <p className="text-gray-400 text-xs mt-1">{myPoints.toLocaleString()} ganhos · {spentPoints.toLocaleString()} gastos</p>
         </div>
+        {lockedPoints > 0 && (
+          <div className="flex items-center gap-3 bg-gray-900/60 border border-amber-700/40 rounded-xl px-4 py-3">
+            <Lock className="w-5 h-5 text-amber-400 shrink-0" />
+            <div>
+              <p className="text-amber-300 text-xs font-semibold uppercase tracking-wide">Bloqueado neste mês</p>
+              <p className="text-white font-bold text-lg leading-tight">{lockedPoints.toLocaleString()} <span className="text-amber-400 text-sm">pts</span></p>
+              <p className="text-gray-500 text-[10px]">Liberam no próximo mês</p>
+            </div>
+          </div>
+        )}
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center">
           <Star className="w-8 h-8 text-green-400" />
         </div>
