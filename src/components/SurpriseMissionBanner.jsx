@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Zap, Plus, Edit2, Check, X, Trash2, ListChecks, Clock, RotateCcw, Camera, Trophy, Star, Gift, Flame, Target } from "lucide-react";
-
+import { useIsMobile } from "@/hooks/use-mobile";
 const SECTORS = [
   "Todos", "Social Media", "Audiovisual", "Tráfego", "Líder de Projeto",
   "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates",
@@ -86,6 +86,7 @@ const decodeStyleFromMission = (mission) => {
 };
 
 export default function SurpriseMissionBanner({ isAdmin, userSector }) {
+  const isMobile = useIsMobile();
   const [missions, setMissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -333,9 +334,13 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
               <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/15 to-transparent pointer-events-none" />
               <div className="relative p-4 sm:p-5 flex flex-col sm:flex-row items-start justify-between gap-4">
                 <div className="flex items-start gap-3 w-full">
-                  <div className="w-10 h-10 rounded-xl bg-black/20 flex items-center justify-center shrink-0 mt-0.5">
-                    <MissionIcon className="w-5 h-5" style={{ color: textColor }} />
-                  </div>
+                  {
+                    !isMobile && (
+                      <div className="w-10 h-10 rounded-xl bg-black/20 flex items-center justify-center shrink-0 mt-0.5">
+                        <MissionIcon className="w-5 h-5" style={{ color: textColor }} />
+                      </div>
+                    )
+                  }
                   <div>
                     <div className="flex items-center gap-2 mb-1 flex-wrap py-1.5 sm:py-2">
                       <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider" style={{ color: textColor }}>Missão Surpresa</span>
