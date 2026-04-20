@@ -81,7 +81,9 @@ export default function GreenShop() {
   const myPoints = transactions.reduce((s, t) => s + (t.points || 0), 0);
   const myRedemptions = redemptions.filter(r =>
     r.employee_id === user?.id ||
-    (profile && (r.employee_id === profile.id || r.employee_id === profile.user_id))
+    (profile && (r.employee_id === profile.id || r.employee_id === profile.user_id)) ||
+    (r.created_by && user?.email && r.created_by === user.email) ||
+    (r.employee_name && (r.employee_name === user?.full_name || r.employee_name === profile?.full_name))
   );
   // Separa pontos por período (fuso BRT): disponível = meses anteriores, bloqueado = mês atual
   const now = nowBRT();
