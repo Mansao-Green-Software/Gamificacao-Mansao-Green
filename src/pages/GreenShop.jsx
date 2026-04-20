@@ -87,12 +87,15 @@ export default function GreenShop() {
   const now = nowBRT();
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
+  // Bloqueia apenas GANHOS (positivos) do mês atual. Débitos (resgates) não são bloqueados.
   const lockedPoints = transactions.reduce((s, t) => {
+    const pts = t.points || 0;
+    if (pts <= 0) return s;
     const d = dateToBRT(t.created_date);
-    return (d.getMonth() === currentMonth && d.getFullYear() === currentYear) ? s + (t.points || 0) : s;
+    return (d.getMonth() === currentMonth && d.getFullYear() === currentYear) ? s + pts : s;
   }, 0);
-  // Pontos disponíveis = total - ganhos do mês atual (débitos de resgate contam no total, então ficam aplicados)
-  const availablePoints = myPoints - Math.max(lockedPoints, 0);
+  // Pontos disponíveis = total - ganhos bloqueados do mês atual (débitos já estão no total)
+  const availablePoints = myPoints - lockedPoints;
   const spentPoints = myRedemptions.filter(r => r.status !== "cancelado").reduce((s, r) => s + (r.points_spent || 0), 0);
 
   const activeRewards = rewards.filter(r => r.is_active);
