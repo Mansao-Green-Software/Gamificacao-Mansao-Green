@@ -22,7 +22,7 @@ export default function NotificationBell({ userId }) {
   const load = async () => {
     if (!userId) return;
     try {
-      const all = await base44.entities.Notification.filter({ user_id: userId }, "-created_date", 50);
+      const all = await base44.entities.Notification.filter({ user_id: userId }, "-created_date", 200);
       setNotifications(all);
     } catch (e) {}
   };
@@ -67,8 +67,11 @@ export default function NotificationBell({ userId }) {
   const handleOpen = () => {
     if (!open && btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect();
+      const dropdownHeight = 480;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const openUpward = spaceBelow < dropdownHeight + 16;
       setDropdownPos({
-        top: rect.bottom + 8,
+        top: openUpward ? rect.top - dropdownHeight - 8 : rect.bottom + 8,
         left: Math.max(8, rect.right - 320),
       });
     }
