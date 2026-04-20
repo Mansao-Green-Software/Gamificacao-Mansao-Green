@@ -38,6 +38,13 @@ export const AuthProvider = ({ children }) => {
       refreshAppParams();
       const tokenToUse = appParams.token;
       
+      console.log('[AUTH DEBUG] checkAppState start', {
+        hasToken: !!tokenToUse,
+        tokenPreview: tokenToUse ? tokenToUse.substring(0, 20) + '...' : null,
+        url: window.location.href,
+        hasUrlToken: window.location.search.includes('access_token'),
+      });
+      
       // First, check app public settings (with token if available)
       // This will tell us if auth is required, user not registered, etc.
       const appClient = createAxiosClient({
@@ -51,6 +58,7 @@ export const AuthProvider = ({ children }) => {
       
       try {
         const publicSettings = await appClient.get(`/prod/public-settings/by-id/${appParams.appId}`);
+        console.log('[AUTH DEBUG] public settings OK', { hasToken: !!tokenToUse });
         setAppPublicSettings(publicSettings);
         setAuthError(null); // Clear any previous errors
         
@@ -63,7 +71,12 @@ export const AuthProvider = ({ children }) => {
         }
         setIsLoadingPublicSettings(false);
       } catch (appError) {
-        console.error('App state check failed:', appError);
+        console.error('[AUTH DEBUG] App state check failed:', {
+          status: appError.status,
+          message: appError.message,
+          data: appError.data,
+          reason: appError.data?.extra_data?.reason,
+        });
         
         // Handle app-level errors
         if (appError.status === 403 && appError.data?.extra_data?.reason) {
@@ -121,12 +134,18 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
+      console.log('[AUTH DEBUG] auth.me success', { email: currentUser?.email, role: currentUser?.role });
       setUser(currentUser);
       setIsAuthenticated(true);
       setAuthError(null);
       setIsLoadingAuth(false);
     } catch (error) {
-      console.error('User auth check failed:', error);
+      console.error('[AUTH DEBUG] User auth check failed:', {
+        status: error.status,
+        message: error.message,
+        data: error.data,
+        reason: error.data?.extra_data?.reason,
+      });
       setIsLoadingAuth(false);
       setIsAuthenticated(false);
       
