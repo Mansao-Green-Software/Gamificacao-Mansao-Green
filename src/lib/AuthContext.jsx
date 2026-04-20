@@ -14,6 +14,9 @@ export const AuthProvider = ({ children }) => {
   const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
 
   useEffect(() => {
+    // Ensure we pick up any access_token present in the URL (e.g. after email/password login redirect)
+    // before running the initial auth check. This fixes cases where the token arrives after module init.
+    refreshAppParams();
     checkAppState();
     
     // Also recheck auth state when token in storage changes (after login redirect)
