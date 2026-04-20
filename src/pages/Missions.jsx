@@ -138,6 +138,11 @@ export default function Missions() {
 
   const myId = profile?.user_id || profile?.id || user?.id;
 
+  // Missões com limite customizado de solicitações simultâneas (título exato → limite)
+  const MULTI_REQUEST_LIMITS = {
+    "Criativo que gera +1000 leads": 5,
+  };
+
   // Verifica se já existe solicitação (pendente ou aprovada) para a missão no período
   const isRequestBlockedByFrequency = (mission) => {
     if (!mission.frequency) return false;
@@ -145,6 +150,13 @@ export default function Missions() {
     const relevantRequests = myRequests.filter(r =>
       r.mission_id === mission.id && (r.status === "pendente" || r.status === "aprovado")
     );
+
+    // Se a missão tem limite customizado, verifica por contagem e não por período
+    const customLimit = MULTI_REQUEST_LIMITS[mission.title];
+    if (customLimit !== undefined) {
+      return relevantRequests.length >= customLimit;
+    }
+
     return relevantRequests.some(r => {
       const d = new Date(r.created_date);
       if (mission.frequency === "Diária") {
@@ -473,7 +485,9 @@ export default function Missions() {
               const pending = req?.status === "pendente";
               const rejected = req?.status === "rejeitado";
               const hasSub = !!mission.sub_sector;
+              const customLimit = MULTI_REQUEST_LIMITS[mission.title];
               const blockedByFrequency = isRequestBlockedByFrequency(mission);
+              const pendingOrApprovedCount = myRequests.filter(r => r.mission_id === mission.id && (r.status === "pendente" || r.status === "aprovado")).length;
               const blockedByMonthlyLimit = user?.email === MONTHLY_LIMIT_EMAIL && (() => {
                 const now = new Date();
                 return myRequests.filter(r => {
@@ -508,7 +522,8 @@ export default function Missions() {
                         )}
                         {blockedByFrequency && !pending && (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full shrink-0">
-                            <Clock className="w-3 h-3" /> Já solicitado {freqLabel}
+                            <Clock className="w-3 h-3" />
+                            {customLimit !== undefined ? `Limite de ${customLimit}x atingido` : `Já solicitado ${freqLabel}`}
                           </span>
                         )}
                       </div>
@@ -546,7 +561,7 @@ export default function Missions() {
                           "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-black active:scale-[0.98]"
                         }`}
                       >
-                        {pending ? <><Clock className="w-3.5 h-3.5" /> Aguardando</> : blockedByMonthlyLimit ? <><Clock className="w-3.5 h-3.5" /> Limite mensal atingido</> : blockedByFrequency ? <><Clock className="w-3.5 h-3.5" /> Já solicitado {freqLabel}</> : (approved || rejected) ? <><RotateCcw className="w-3.5 h-3.5" /> Solicitar de novo</> : submitting === mission.id ? "... " : "Solicitar"}
+                        {pending ? <><Clock className="w-3.5 h-3.5" /> Aguardando</> : blockedByMonthlyLimit ? <><Clock className="w-3.5 h-3.5" /> Limite mensal atingido</> : blockedByFrequency ? <><Clock className="w-3.5 h-3.5" /> {customLimit !== undefined ? `Limite de ${customLimit}x atingido` : `Já solicitado ${freqLabel}`}</> : (approved || rejected) ? (customLimit !== undefined ? <><Plus className="w-3.5 h-3.5" /> Solicitar ({pendingOrApprovedCount}/{customLimit})</> : <><RotateCcw className="w-3.5 h-3.5" /> Solicitar de novo</>) : submitting === mission.id ? "... " : (customLimit !== undefined && pendingOrApprovedCount > 0 ? <><Plus className="w-3.5 h-3.5" /> Solicitar ({pendingOrApprovedCount}/{customLimit})</> : "Solicitar")}
                       </button>
                     {isManager && (
                       <button onClick={() => handleDelete(mission.id)} className="p-2.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 rounded-xl transition-all shadow-sm">
