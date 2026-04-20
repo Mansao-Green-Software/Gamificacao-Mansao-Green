@@ -145,8 +145,8 @@ export default function RankingGeral() {
 
   const periodTxs = filterByPeriod(transactions, selectedPeriod);
 
-  // Excluir transações negativas (resgates/punições) do ranking de pontos
-  const rankingTxs = periodTxs.filter(t => (t.points || 0) > 0);
+  // Excluir apenas resgates da Green Shop do ranking (punições continuam contando)
+  const rankingTxs = periodTxs.filter(t => !t.description?.startsWith("Resgate:"));
 
   const getSectorPoints = () => {
     // Supervisores que não participam do ranking do setor ficam no setor "Supervisor"
