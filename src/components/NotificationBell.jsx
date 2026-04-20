@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Bell, X, Check, CheckCheck, ShoppingBag, Star, Target, Info } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Bell, X, CheckCheck, ShoppingBag, Star, Target, Info } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { formatBRT } from "@/utils/dateUtils";
 
@@ -13,7 +14,9 @@ const TYPE_CONFIG = {
 export default function NotificationBell({ userId }) {
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const ref = useRef(null);
+  const btnRef = useRef(null);
 
   const load = async () => {
     if (!userId) return;
@@ -57,10 +60,23 @@ export default function NotificationBell({ userId }) {
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
+  const handleOpen = () => {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + window.scrollY + 8,
+        left: Math.max(8, rect.right - 320 + window.scrollX),
+      });
+    }
+    setOpen(o => !o);
+    if (!open) load();
+  };
+
   return (
-    <div className="relative" ref={ref}>
+    <div ref={ref}>
       <button
-        onClick={() => { setOpen(o => !o); if (!open) load(); }}
+        ref={btnRef}
+        onClick={handleOpen}
         className="relative p-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-all"
       >
         <Bell className="w-5 h-5" />
@@ -71,8 +87,10 @@ export default function NotificationBell({ userId }) {
         )}
       </button>
 
-      {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-[200] flex flex-col max-h-[480px]">
+      {open && createPortal(
+        <div
+          style={{ position: "absolute", top: dropdownPos.top, left: dropdownPos.left, zIndex: 9999 }}
+          className="w-80 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl flex flex-col max-h-[480px]">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700">
             <p className="text-white font-bold text-sm">Notificações</p>
@@ -126,7 +144,8 @@ export default function NotificationBell({ userId }) {
               })
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
