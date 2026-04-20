@@ -220,7 +220,22 @@ export default function Missions() {
       })
     : [];
 
-  const pendingCount = pendingRequests.length;
+  // Agrupa solicitações pendentes por missão+colaborador (para missões com multi-request)
+  const groupedPendingRequests = (() => {
+    const groups = {};
+    pendingRequests.forEach(r => {
+      const key = `${r.employee_id}__${r.mission_id}`;
+      if (!groups[key]) {
+        groups[key] = { ...r, _ids: [r.id], _qty: 1 };
+      } else {
+        groups[key]._ids.push(r.id);
+        groups[key]._qty += 1;
+      }
+    });
+    return Object.values(groups);
+  })();
+
+  const pendingCount = groupedPendingRequests.length;
 
   const openRequestModal = (mission) => {
     setRequestModal(mission);
@@ -290,18 +305,27 @@ export default function Missions() {
     );
     const empName = empProfile?.full_name || request.employee_name;
     const empId = empProfile?.user_id || request.employee_id;
-    await base44.entities.MissionRequest.update(request.id, { status: "aprovado", employee_name: empName, approved_by_name: profile?.full_name || user.full_name });
-    await base44.functions.invoke('addPointTransaction', {
-      employee_id: empId,
-      employee_name: empName,
-      sector: request.sector,
-      points: request.mission_points,
-      type: "mission",
-      mission_id: request.mission_id,
-      mission_title: request.mission_title,
-      description: `Missão aprovada: ${request.mission_title}`,
-      awarded_by_name: profile?.full_name || user.full_name,
-    });
+    const approverName = profile?.full_name || user.full_name;
+    const ids = request._ids || [request.id];
+    const qty = request._qty || 1;
+    // Aprovar todos os registros do grupo
+    await Promise.all(ids.map(id =>
+      base44.entities.MissionRequest.update(id, { status: "aprovado", employee_name: empName, approved_by_name: approverName })
+    ));
+    // Criar uma transação de pontos por cada solicitação aprovada
+    await Promise.all(ids.map(() =>
+      base44.functions.invoke('addPointTransaction', {
+        employee_id: empId,
+        employee_name: empName,
+        sector: request.sector,
+        points: request.mission_points,
+        type: "mission",
+        mission_id: request.mission_id,
+        mission_title: request.mission_title,
+        description: `Missão aprovada: ${request.mission_title}`,
+        awarded_by_name: approverName,
+      })
+    ));
     setApproving(null);
     const freshReqs = await base44.entities.MissionRequest.list("-created_date", 2000);
     setRequests(freshReqs);
@@ -309,8 +333,11 @@ export default function Missions() {
 
   const handleReject = async () => {
     if (!rejectModal) return;
-    await base44.entities.MissionRequest.update(rejectModal.id, { status: "rejeitado", notes: rejectNote });
-    setRequests(prev => prev.map(r => r.id === rejectModal.id ? { ...r, status: "rejeitado", notes: rejectNote } : r));
+    const ids = rejectModal._ids || [rejectModal.id];
+    await Promise.all(ids.map(id =>
+      base44.entities.MissionRequest.update(id, { status: "rejeitado", notes: rejectNote })
+    ));
+    setRequests(prev => prev.map(r => ids.includes(r.id) ? { ...r, status: "rejeitado", notes: rejectNote } : r));
     setRejectModal(null);
     setRejectNote("");
   };
@@ -777,7 +804,14 @@ export default function Missions() {
               const feiraFCManagerIds = new Set(
                 allProfiles.filter(p => p.sector === "Feira FC" && (p.role === "manager" || p.role === "director")).map(p => p.user_id || p.id)
               );
-              const gerentePending = requests.filter(r => r.status === "pendente" && r.sector === "Gerência" && !feiraFCManagerIds.has(r.employee_id));
+              const gerentePendingRaw = requests.filter(r => r.status === "pendente" && r.sector === "Gerência" && !feiraFCManagerIds.has(r.employee_id));
+              const gerenteGrouped = {};
+              gerentePendingRaw.forEach(r => {
+                const key = `${r.employee_id}__${r.mission_id}`;
+                if (!gerenteGrouped[key]) gerenteGrouped[key] = { ...r, _ids: [r.id], _qty: 1 };
+                else { gerenteGrouped[key]._ids.push(r.id); gerenteGrouped[key]._qty += 1; }
+              });
+              const gerentePending = Object.values(gerenteGrouped);
               
               const peopleInGerencia = allProfiles.filter(p => p.sector === "Gerência");
 
@@ -808,11 +842,14 @@ export default function Missions() {
                           <div key={r.id} className="p-4 bg-gray-900/50 rounded-xl space-y-3 border border-gray-700/50">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
-                                <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
+                                  {r._qty > 1 && <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-900/50 text-amber-300 rounded-full">×{r._qty}</span>}
+                                </div>
                                 <p className="text-gray-400 text-xs mt-0.5">{r.employee_name}</p>
                                 <p className="text-gray-500 text-xs">{r.sector} · {formatBRT(r.created_date, "date")}</p>
                               </div>
-                              <span className="text-green-400 font-bold text-sm shrink-0">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
+                              <span className="text-green-400 font-bold text-sm shrink-0">{r.mission_points > 0 ? "+" : ""}{r._qty > 1 ? (r.mission_points * r._qty).toLocaleString() : r.mission_points} pts</span>
                             </div>
                             {r.justification && (
                               <p className="flex items-start gap-1.5 text-gray-300 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
@@ -923,7 +960,7 @@ export default function Missions() {
                 return allMySectors.includes(p.sector);
               });
 
-              const filteredPending = pendingRequests.filter(r => !selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter);
+              const filteredPending = groupedPendingRequests.filter(r => !selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter);
 
               return (
                 <div className="space-y-4">
@@ -951,11 +988,14 @@ export default function Missions() {
                         <div key={r.id} className="p-4 bg-gray-900/50 rounded-xl space-y-3 border border-gray-700/50">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
-                              <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
+                                {r._qty > 1 && <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-900/50 text-amber-300 rounded-full">×{r._qty}</span>}
+                              </div>
                               <p className="text-gray-400 text-xs mt-0.5">{r.employee_name}</p>
                               <p className="text-gray-500 text-xs">{r.sector} · {formatBRT(r.created_date, "date")}</p>
                             </div>
-                            <span className="text-green-400 font-bold text-sm shrink-0">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
+                            <span className="text-green-400 font-bold text-sm shrink-0">{r.mission_points > 0 ? "+" : ""}{r._qty > 1 ? (r.mission_points * r._qty).toLocaleString() : r.mission_points} pts</span>
                           </div>
                           {r.justification && (
                             <p className="flex items-start gap-1.5 text-gray-300 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
