@@ -161,10 +161,8 @@ export default function RankingGeral() {
     const globalEmployees = new Set();
 
     rankingTxs.forEach(t => {
-      if (!t.sector && !profiles[t.employee_id]?.sector) return;
-      // Usa o setor do perfil como fonte de verdade para evitar mistura de colaboradores homônimos
-      const empSector = profiles[t.employee_id]?.sector || t.sector;
-      const sectorKey = excludedFromSector.has(t.employee_id) ? "Supervisor" : empSector;
+      if (!t.sector) return;
+      const sectorKey = excludedFromSector.has(t.employee_id) ? "Supervisor" : t.sector;
       pts[sectorKey] = (pts[sectorKey] || 0) + (t.points || 0);
       if (!employees[sectorKey]) employees[sectorKey] = new Set();
       employees[sectorKey].add(t.employee_id);
@@ -224,31 +222,19 @@ export default function RankingGeral() {
       allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
     );
 
-    // Filtra transações pelo setor do PERFIL do colaborador, não pelo setor da transação
-    // Isso evita misturar colaboradores homônimos de setores diferentes
-    const baseTxs = rankingTxs.filter(t => {
-      if (excludedSupervisorIds.has(t.employee_id)) return false;
-      if (sector && sector !== "geral") {
-        const empProfile = profiles[t.employee_id];
-        const empSector = empProfile?.sector || t.sector;
-        return empSector === sector;
-      }
-      return true;
-    });
+    const baseTxs = sector && sector !== "geral"
+      ? rankingTxs.filter(t => t.sector === sector && !excludedSupervisorIds.has(t.employee_id))
+      : rankingTxs.filter(t => !excludedSupervisorIds.has(t.employee_id));
     const pts = {};
     const names = {};
+    const sectors = {};
     baseTxs.forEach(t => {
       pts[t.employee_id] = (pts[t.employee_id] || 0) + (t.points || 0);
       names[t.employee_id] = t.employee_name;
+      sectors[t.employee_id] = t.sector;
     });
     return Object.entries(pts)
-      .map(([id, points]) => ({
-        id,
-        name: profiles[id]?.full_name || names[id],
-        points,
-        sector: profiles[id]?.sector,
-        photo_url: profiles[id]?.photo_url
-      }))
+      .map(([id, points]) => ({ id, name: profiles[id]?.full_name || names[id], points, sector: sectors[id], photo_url: profiles[id]?.photo_url }))
       .sort((a, b) => b.points - a.points);
   };
 
