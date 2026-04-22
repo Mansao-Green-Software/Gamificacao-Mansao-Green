@@ -223,14 +223,7 @@ export default function RankingGeral() {
     );
 
     const baseTxs = sector && sector !== "geral"
-      ? rankingTxs.filter(t => {
-          if (excludedSupervisorIds.has(t.employee_id)) return false;
-          // Se o perfil do colaborador existe e tem setor definido, usar o setor do perfil
-          // para evitar que transações com setor errado (dados históricos) misturem colaboradores
-          const profileSector = profiles[t.employee_id]?.sector;
-          if (profileSector) return profileSector === sector;
-          return t.sector === sector;
-        })
+      ? rankingTxs.filter(t => t.sector === sector && !excludedSupervisorIds.has(t.employee_id))
       : rankingTxs.filter(t => !excludedSupervisorIds.has(t.employee_id));
     const pts = {};
     const names = {};
@@ -238,7 +231,7 @@ export default function RankingGeral() {
     baseTxs.forEach(t => {
       pts[t.employee_id] = (pts[t.employee_id] || 0) + (t.points || 0);
       names[t.employee_id] = t.employee_name;
-      sectors[t.employee_id] = profiles[t.employee_id]?.sector || t.sector;
+      sectors[t.employee_id] = t.sector;
     });
     return Object.entries(pts)
       .map(([id, points]) => ({ id, name: profiles[id]?.full_name || names[id], points, sector: sectors[id], photo_url: profiles[id]?.photo_url }))
