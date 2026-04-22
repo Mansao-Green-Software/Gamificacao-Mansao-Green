@@ -150,10 +150,12 @@ export default function RankingGeral() {
   const rankingTxs = periodTxs.filter(t => !t.description?.startsWith("Resgate:"));
 
   const getSectorPoints = () => {
+    const HARDCODED_SUPERVISOR_IDS = new Set(["69e1447ef3da9c7a8a6e5bc5"]);
     // Supervisores que não participam do ranking do setor ficam no setor "Supervisor"
-    const excludedFromSector = new Set(
-      allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
-    );
+    const excludedFromSector = new Set([
+      ...allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id),
+      ...HARDCODED_SUPERVISOR_IDS,
+    ]);
     const pts = {};
     const employees = {};
     
@@ -201,10 +203,14 @@ export default function RankingGeral() {
 
 
   const getEmployeeRanking = (sector) => {
+    // IDs de perfis que devem competir no ranking de Supervisor (independente do role salvo)
+    const HARDCODED_SUPERVISOR_IDS = new Set(["69e1447ef3da9c7a8a6e5bc5"]);
+
     // Excluir supervisores que optaram por não participar do ranking do setor
-    const excludedSupervisorIds = new Set(
-      allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
-    );
+    const excludedSupervisorIds = new Set([
+      ...allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id),
+      ...HARDCODED_SUPERVISOR_IDS,
+    ]);
 
     // Setor virtual "Supervisor": agrupa todos os colaboradores com role supervisor excluídos do setor
     if (sector === "Supervisor") {
