@@ -228,9 +228,10 @@ export default function RankingGeral() {
     rankingTxs.forEach(t => {
       if (excludedSupervisorIds.has(t.employee_id)) return;
 
-      // Determina o setor real pelo perfil; fallback para o setor da transação
+      // Para "Gerência", usa o setor da transação diretamente (gerentes têm setores variados no perfil)
+      // Para outros setores, usa o setor do perfil como fonte de verdade
       const empProfile = profiles[t.employee_id];
-      const empSector = empProfile?.sector || t.sector;
+      const empSector = sector === "Gerência" ? t.sector : (empProfile?.sector || t.sector);
 
       if (sector && sector !== "geral" && empSector !== sector) return;
 
