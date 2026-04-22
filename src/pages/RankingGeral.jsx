@@ -200,12 +200,14 @@ export default function RankingGeral() {
 
 
   const getEmployeeRanking = (sector) => {
-    // Setor virtual "Supervisor": agrupa todos os colaboradores com role supervisor
+    // Excluir supervisores que optaram por não participar do ranking do setor
+    const excludedSupervisorIds = new Set(
+      allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
+    );
+
+    // Setor virtual "Supervisor": agrupa todos os colaboradores com role supervisor excluídos do setor
     if (sector === "Supervisor") {
-      const supervisorIds = new Set(
-        allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
-      );
-      const filtered = rankingTxs.filter(t => supervisorIds.has(t.employee_id));
+      const filtered = rankingTxs.filter(t => excludedSupervisorIds.has(t.employee_id));
       const pts = {};
       const names = {};
       filtered.forEach(t => {
@@ -217,24 +219,26 @@ export default function RankingGeral() {
         .sort((a, b) => b.points - a.points);
     }
 
-    // Excluir supervisores que optaram por não participar do ranking do setor
-    const excludedSupervisorIds = new Set(
-      allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
-    );
-
-    const baseTxs = sector && sector !== "geral"
-      ? rankingTxs.filter(t => t.sector === sector && !excludedSupervisorIds.has(t.employee_id))
-      : rankingTxs.filter(t => !excludedSupervisorIds.has(t.employee_id));
+    // Para ranking por setor: usar o setor do PERFIL do employee como fonte de verdade,
+    // ignorando o setor gravado na transação (que pode estar incorreto).
     const pts = {};
     const names = {};
-    const sectors = {};
-    baseTxs.forEach(t => {
+
+    rankingTxs.forEach(t => {
+      if (excludedSupervisorIds.has(t.employee_id)) return;
+
+      // Determina o setor real pelo perfil; fallback para o setor da transação
+      const empProfile = profiles[t.employee_id];
+      const empSector = empProfile?.sector || t.sector;
+
+      if (sector && sector !== "geral" && empSector !== sector) return;
+
       pts[t.employee_id] = (pts[t.employee_id] || 0) + (t.points || 0);
       names[t.employee_id] = t.employee_name;
-      sectors[t.employee_id] = t.sector;
     });
+
     return Object.entries(pts)
-      .map(([id, points]) => ({ id, name: profiles[id]?.full_name || names[id], points, sector: sectors[id], photo_url: profiles[id]?.photo_url }))
+      .map(([id, points]) => ({ id, name: profiles[id]?.full_name || names[id], points, sector: profiles[id]?.sector, photo_url: profiles[id]?.photo_url }))
       .sort((a, b) => b.points - a.points);
   };
 
