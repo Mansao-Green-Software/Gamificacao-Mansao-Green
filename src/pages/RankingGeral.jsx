@@ -113,6 +113,7 @@ export default function RankingGeral() {
     profs.forEach(p => {
       profileMap[p.id] = p;
       if (p.user_id) profileMap[p.user_id] = p;
+      if (p.email) profileMap[p.email] = p;
     });
     setProfiles(profileMap);
   };
