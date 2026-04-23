@@ -826,9 +826,9 @@ export default function Missions() {
                         className="bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-green-500"
                       >
                         <option value="">Filtrar por pessoa (Todos)</option>
-                        {peopleInGerencia.map(p => (
-                          <option key={p.id} value={p.user_id || p.id}>{p.full_name}</option>
-                        ))}
+                         {[...peopleInGerencia].sort((a, b) => a.full_name.localeCompare(b.full_name, "pt-BR")).map(p => (
+                           <option key={p.id} value={p.user_id || p.id}>{p.full_name}</option>
+                         ))}
                       </select>
                     </div>
                   )}
@@ -974,9 +974,9 @@ export default function Missions() {
                         className="bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-green-500"
                       >
                        <option value="">Filtrar por pessoa (Todos)</option>
-                        {peopleInAuthority.map(p => (
-                          <option key={p.id} value={p.user_id || p.id}>{p.full_name} · {p.sector}</option>
-                        ))}
+                         {[...peopleInAuthority].sort((a, b) => a.full_name.localeCompare(b.full_name, "pt-BR")).map(p => (
+                           <option key={p.id} value={p.user_id || p.id}>{p.full_name} · {p.sector}</option>
+                         ))}
                       </select>
                     </div>
                   )}
