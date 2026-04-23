@@ -450,7 +450,7 @@ export default function SistemaPontuacao() {
                                   ) : (
                                     <div>
                                       <div className="flex items-center gap-2 flex-wrap min-w-0">
-                                        <p className="text-white text-sm font-medium break-words leading-tight">{mission.title}</p>
+                                        <p className="text-white text-sm font-medium break-words leading-tight">{selectedSector === "Affiliates" ? mission.title.charAt(0).toUpperCase() + mission.title.slice(1).toLowerCase() : mission.title}</p>
                                         {mission.sector === "Todos" && (
                                           <span className="text-[10px] px-1.5 py-0.5 bg-gray-700 text-gray-400 rounded-md font-bold uppercase tracking-wider">Todos</span>
                                         )}
