@@ -845,6 +845,7 @@ export default function Missions() {
                                 <div className="flex items-center gap-2 flex-wrap">
                                   <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
                                   {r._qty > 1 && <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-900/50 text-amber-300 rounded-full">×{r._qty}</span>}
+                                  {(() => { const m = missions.find(x => x.id === r.mission_id); return m?.frequency ? <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${m.frequency === "Diária" ? "bg-blue-900/30 border-blue-800/50 text-blue-300" : m.frequency === "Semanal" ? "bg-purple-900/30 border-purple-800/50 text-purple-300" : "bg-amber-900/30 border-amber-800/50 text-amber-300"}`}>{m.frequency}</span> : null; })()}
                                 </div>
                                 <p className="text-gray-400 text-xs mt-0.5">{r.employee_name}</p>
                                 <p className="text-gray-500 text-xs">{r.sector} · {formatBRT(r.created_date, "date")}</p>
@@ -991,6 +992,7 @@ export default function Missions() {
                               <div className="flex items-center gap-2 flex-wrap">
                                 <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
                                 {r._qty > 1 && <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-900/50 text-amber-300 rounded-full">×{r._qty}</span>}
+                                {(() => { const m = missions.find(x => x.id === r.mission_id); return m?.frequency ? <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${m.frequency === "Diária" ? "bg-blue-900/30 border-blue-800/50 text-blue-300" : m.frequency === "Semanal" ? "bg-purple-900/30 border-purple-800/50 text-purple-300" : "bg-amber-900/30 border-amber-800/50 text-amber-300"}`}>{m.frequency}</span> : null; })()}
                               </div>
                               <p className="text-gray-400 text-xs mt-0.5">{r.employee_name}</p>
                               <p className="text-gray-500 text-xs">{r.sector} · {formatBRT(r.created_date, "date")}</p>
