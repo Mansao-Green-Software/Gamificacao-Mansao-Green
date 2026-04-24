@@ -372,13 +372,27 @@ export default function Dashboard() {
                 const empNames = {};
                 const empPhotos = {};
                 const empSectors = {};
-                transactions.forEach(t => {
-                  empPoints[t.employee_id] = (empPoints[t.employee_id] || 0) + t.points;
-                  empNames[t.employee_id] = t.employee_name;
-                  empSectors[t.employee_id] = t.sector;
-                  const emp = employees.find(e => e.user_id === t.employee_id || e.id === t.employee_id);
-                  if (emp?.photo_url) empPhotos[t.employee_id] = emp.photo_url;
+
+                // Build a map: any ID (user_id or profile id) -> canonical user_id
+                const idToCanonical = {};
+                employees.forEach(p => {
+                  const canonical = p.user_id || p.id;
+                  if (p.user_id) idToCanonical[p.user_id] = canonical;
+                  if (p.id) idToCanonical[p.id] = canonical;
                 });
+
+                transactions
+                  .filter(t => !t.description?.startsWith("Resgate:"))
+                  .forEach(t => {
+                    const canonical = idToCanonical[t.employee_id] || t.employee_id;
+                    empPoints[canonical] = (empPoints[canonical] || 0) + (t.points || 0);
+                    empNames[canonical] = t.employee_name;
+                    empSectors[canonical] = t.sector;
+                    const emp = employees.find(e => e.user_id === t.employee_id || e.id === t.employee_id);
+                    if (emp?.photo_url) empPhotos[canonical] = emp.photo_url;
+                    if (emp?.full_name) empNames[canonical] = emp.full_name;
+                    if (emp?.sector) empSectors[canonical] = emp.sector;
+                  });
                 const topEmployees = Object.entries(empPoints)
                   .map(([id, points]) => ({ id, name: empNames[id], points, photo: empPhotos[id], sector: empSectors[id] }))
                   .sort((a, b) => b.points - a.points)
