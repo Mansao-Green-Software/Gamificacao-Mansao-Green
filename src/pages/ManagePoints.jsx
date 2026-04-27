@@ -460,26 +460,64 @@ export default function ManagePoints() {
           </div>
           )}
 
-          {/* Employee list with points */}
+          {/* Employee info + recent history */}
           <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
-            <h3 className="text-white font-bold mb-4">Colaboradores e Pontos</h3>
-            <div className="space-y-2 max-h-80 overflow-y-auto">
-              {employees.length === 0 ? (
-                <p className="text-gray-500 text-sm text-center py-8">Nenhum colaborador cadastrado no seu setor.</p>
-              ) : (
-                employees.map(emp => (
-                  <div key={emp.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
-                    <div>
-                      <p className="text-white text-sm font-medium">{emp.full_name}</p>
-                      <p className="text-gray-500 text-xs">{emp.sector}</p>
-                    </div>
-                    <span className="text-green-400 font-bold text-sm">
-                      {getEmployeeTotalPoints(emp.user_id || emp.id).toLocaleString()} pts
-                    </span>
+            {selectedEmployee ? (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-white font-bold">{selectedEmployee.full_name}</h3>
+                    <p className="text-gray-400 text-xs">{selectedEmployee.sector}</p>
                   </div>
-                ))
-              )}
-            </div>
+                  <div className="text-right">
+                    <p className="text-green-400 font-bold text-lg">{getEmployeeTotalPoints(selectedEmployee.user_id || selectedEmployee.id).toLocaleString()} pts</p>
+                    <p className="text-gray-500 text-xs">total acumulado</p>
+                  </div>
+                </div>
+                <h4 className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-3">Histórico Recente</h4>
+                <div className="space-y-2 max-h-72 overflow-y-auto">
+                  {transactions.filter(t => t.employee_id === (selectedEmployee.user_id || selectedEmployee.id)).length === 0 ? (
+                    <p className="text-gray-500 text-sm text-center py-6">Nenhuma pontuação registrada.</p>
+                  ) : (
+                    transactions
+                      .filter(t => t.employee_id === (selectedEmployee.user_id || selectedEmployee.id))
+                      .slice(0, 20)
+                      .map(tx => (
+                        <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl gap-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white text-sm truncate">{tx.description || tx.mission_title || "Pontuação manual"}</p>
+                            <p className="text-gray-500 text-xs">por {tx.awarded_by_name || "Sistema"} · {formatBRT(tx.created_date)}</p>
+                          </div>
+                          <span className={`font-bold text-sm shrink-0 ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>
+                            {tx.points >= 0 ? "+" : ""}{tx.points}
+                          </span>
+                        </div>
+                      ))
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <h3 className="text-white font-bold mb-4">Colaboradores e Pontos</h3>
+                <div className="space-y-2 max-h-80 overflow-y-auto">
+                  {employees.length === 0 ? (
+                    <p className="text-gray-500 text-sm text-center py-8">Nenhum colaborador cadastrado no seu setor.</p>
+                  ) : (
+                    employees.map(emp => (
+                      <div key={emp.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
+                        <div>
+                          <p className="text-white text-sm font-medium">{emp.full_name}</p>
+                          <p className="text-gray-500 text-xs">{emp.sector}</p>
+                        </div>
+                        <span className="text-green-400 font-bold text-sm">
+                          {getEmployeeTotalPoints(emp.user_id || emp.id).toLocaleString()} pts
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
