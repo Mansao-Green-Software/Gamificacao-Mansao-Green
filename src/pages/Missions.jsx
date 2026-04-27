@@ -256,6 +256,10 @@ export default function Missions() {
 
   const handleSubmitRequest = async () => {
     if (!requestModal) return;
+    if (!justification.trim()) {
+      alert("Por favor, preencha a justificativa antes de enviar.");
+      return;
+    }
 
     // Usuário com limite de 1 solicitação por mês (por missão)
     if (user?.email === MONTHLY_LIMIT_EMAIL) {
@@ -687,13 +691,13 @@ export default function Missions() {
                 );
               })()}
               <div>
-                <label className="text-gray-400 text-xs mb-1.5 block">Justificativa (opcional)</label>
+                <label className="text-gray-400 text-xs mb-1.5 block">Justificativa <span className="text-red-400">*</span></label>
                 <textarea
                   value={justification}
                   onChange={e => setJustification(e.target.value)}
                   placeholder="Descreva o que foi feito..."
                   rows={3}
-                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 resize-none"
+                  className={`w-full bg-gray-900 border text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 resize-none ${!justification.trim() ? "border-gray-600" : "border-green-500"}`}
                 />
               </div>
               <div>
