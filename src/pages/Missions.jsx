@@ -331,8 +331,9 @@ export default function Missions() {
       })
     ));
     setApproving(null);
-    const freshReqs = await base44.entities.MissionRequest.list("-created_date", 2000);
-    setRequests(freshReqs);
+    // Atualiza localmente os registros aprovados sem precisar de re-fetch
+    const approvedIds = new Set(ids);
+    setRequests(prev => prev.map(r => approvedIds.has(r.id) ? { ...r, status: "aprovado", approved_by_name: approverName, employee_name: empName } : r));
   };
 
   const handleReject = async () => {
