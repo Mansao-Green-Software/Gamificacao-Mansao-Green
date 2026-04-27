@@ -67,8 +67,16 @@ export default function ManagePoints() {
       if (isAdmin && !mySector) {
         filtered = emps;
       } else if (isDirector) {
-        // Diretor vê apenas gerentes (exceto ele mesmo)
-        filtered = emps.filter(e => e.role === "manager" && (e.user_id || e.id) !== u.id);
+        // Diretor vê gerentes + colaboradores do seu setor (exceto ele mesmo)
+        const directorSector = myProfile?.sector;
+        const directorExtraSectors = myProfile?.extra_sectors || [];
+        const allDirectorSectors = directorSector ? [directorSector, ...directorExtraSectors] : [];
+        filtered = emps.filter(e => {
+          const empId = e.user_id || e.id;
+          if (empId === u.id || e.email === u.email) return false;
+          if (e.role === "manager") return true;
+          return allDirectorSectors.includes(e.sector) && e.role !== "admin" && e.role !== "director";
+        });
       } else {
         filtered = emps.filter(e => {
           // Nenhum usuário (exceto admin) pode dar ponto para si mesmo
@@ -81,7 +89,8 @@ export default function ManagePoints() {
       setEmployees(filtered);
       const filteredTxs = (isAdmin && !mySector) ? txs : isDirector ? txs.filter(t => t.sector === "Gerência") : txs.filter(t => allMySectors.includes(t.sector));
       setTransactions(filteredTxs);
-      const filteredMissions = (isAdmin && !mySector) ? ms : isDirector ? ms.filter(m => m.sector === "Gerência" || m.sector === "Todos") : ms.filter(m => allMySectors.includes(m.sector) || m.sector === "Todos" || m.sector === "Supervisor");
+      const directorAllSectors = isDirector ? [myProfile?.sector, ...(myProfile?.extra_sectors || [])].filter(Boolean) : [];
+      const filteredMissions = (isAdmin && !mySector) ? ms : isDirector ? ms.filter(m => m.sector === "Gerência" || m.sector === "Todos" || directorAllSectors.includes(m.sector)) : ms.filter(m => allMySectors.includes(m.sector) || m.sector === "Todos" || m.sector === "Supervisor");
       setMissions(filteredMissions);
       if (isAdmin || isDirector) setAllTransactions(allTxs);
       } catch (e) {
