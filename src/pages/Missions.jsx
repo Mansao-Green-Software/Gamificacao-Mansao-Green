@@ -51,7 +51,7 @@ export default function Missions() {
     const [ms, profs, reqs, subs] = await Promise.all([
       base44.entities.Mission.filter({ is_active: true }),
       base44.entities.EmployeeProfile.list(null, 1000),
-      base44.entities.MissionRequest.list("-created_date", 1000),
+      base44.entities.MissionRequest.list("-created_date", 5000),
       base44.entities.SubSector.list(),
     ]);
     setMissions(ms);
@@ -72,7 +72,7 @@ export default function Missions() {
         const [ms, profs, reqs, subs] = await Promise.all([
           base44.entities.Mission.filter({ is_active: true }),
           base44.entities.EmployeeProfile.list(null, 1000),
-          base44.entities.MissionRequest.list("-created_date", 2000),
+          base44.entities.MissionRequest.list("-created_date", 5000),
           base44.entities.SubSector.list(),
         ]);
         setMissions(ms);
@@ -1062,7 +1062,7 @@ export default function Missions() {
                 return allMySectors.includes(effectiveSector);
               }
               // Gerente: vê colaboradores e supervisores do seu setor
-              return allMySectors.includes(effectiveSector);
+              return allMySectors.includes(effectiveSector) || allMySectors.includes(r.sector);
             }).filter(r => !selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter);
             if (history.length === 0) return null;
             return (
