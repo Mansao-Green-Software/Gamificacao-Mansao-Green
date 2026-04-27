@@ -667,10 +667,22 @@ export default function ManagePoints() {
               <p className="text-gray-500 text-sm text-center py-8">Nenhuma pontuação encontrada.</p>
             ) : (
               <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                {filtered.map(tx => (
+                {filtered.map(tx => {
+                  const mission = missions.find(m => m.id === tx.mission_id);
+                  const freq = mission?.frequency;
+                  return (
                   <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium truncate">{tx.employee_name}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-white text-sm font-medium truncate">{tx.employee_name}</p>
+                        {freq && (
+                          <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
+                            freq === "Diária" ? "bg-blue-900/60 text-blue-300" :
+                            freq === "Semanal" ? "bg-purple-900/60 text-purple-300" :
+                            "bg-amber-900/60 text-amber-300"
+                          }`}>{freq}</span>
+                        )}
+                      </div>
                       <p className="text-gray-500 text-xs truncate">{tx.description || tx.mission_title || "—"}</p>
                       <p className="text-gray-600 text-xs">por {tx.awarded_by_name} · {formatBRT(tx.created_date)}</p>
                     </div>
@@ -686,7 +698,8 @@ export default function ManagePoints() {
                       )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             );
           })()}
