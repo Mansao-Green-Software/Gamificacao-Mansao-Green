@@ -17,6 +17,7 @@ export default function ManagePoints() {
   const [historyEmployeeFilter, setHistoryEmployeeFilter] = useState("");
   const [historyAllSectorFilter, setHistoryAllSectorFilter] = useState("Todos");
   const [historyAllEmployeeFilter, setHistoryAllEmployeeFilter] = useState("");
+  const [historyDateFilter, setHistoryDateFilter] = useState("");
   const [form, setForm] = useState({ employee_id: "", points: "", description: "", mission_id: "" });
   const [missionSearch, setMissionSearch] = useState("");
   const [missionDropdownOpen, setMissionDropdownOpen] = useState(false);
@@ -553,19 +554,37 @@ export default function ManagePoints() {
                   <option key={id} value={id}>{name}</option>
                 ))}
               </select>
+              <input
+                type="month"
+                value={historyDateFilter}
+                onChange={e => setHistoryDateFilter(e.target.value)}
+                className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-green-500"
+                title="Filtrar por mês"
+              />
+              {historyDateFilter && (
+                <button onClick={() => setHistoryDateFilter("")} className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-xl text-sm transition-colors">
+                  Limpar
+                </button>
+              )}
             </div>
           </div>
           {allTransactions.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">Nenhuma pontuação registrada ainda.</p>
           ) : (() => {
-            const filtered = allTransactions.filter(t =>
-              (historyFilter === "Todos" || t.sector === historyFilter) &&
-              (!historyAllEmployeeFilter || t.employee_id === historyAllEmployeeFilter)
-            );
+            const filtered = allTransactions.filter(t => {
+              if (historyFilter !== "Todos" && t.sector !== historyFilter) return false;
+              if (historyAllEmployeeFilter && t.employee_id !== historyAllEmployeeFilter) return false;
+              if (historyDateFilter) {
+                const d = new Date(t.created_date);
+                const [year, month] = historyDateFilter.split("-").map(Number);
+                if (d.getFullYear() !== year || d.getMonth() + 1 !== month) return false;
+              }
+              return true;
+            });
             return filtered.length === 0 ? (
               <p className="text-gray-500 text-sm text-center py-8">Nenhuma pontuação encontrada.</p>
             ) : (
-              <div className="space-y-2 max-h-[600px] overflow-y-auto">
+              <div className="space-y-2 max-h-[800px] overflow-y-auto">
                 {filtered.map(tx => (
                   <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
                     <div className="flex-1 min-w-0">
