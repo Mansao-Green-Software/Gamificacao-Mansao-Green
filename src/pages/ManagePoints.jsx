@@ -50,9 +50,9 @@ export default function ManagePoints() {
       const isDirector = u.role === "director";
       const [emps, txs, ms, allTxs, subs] = await Promise.all([
         base44.entities.EmployeeProfile.list(null, 1000),
-        base44.entities.PointTransaction.list("-created_date", 500),
+        base44.entities.PointTransaction.list("-created_date", 5000),
         base44.entities.Mission.filter({ is_active: true }),
-        (isAdmin || isDirector) ? base44.entities.PointTransaction.list("-created_date", 1000) : Promise.resolve([]),
+        (isAdmin || isDirector) ? base44.entities.PointTransaction.list("-created_date", 5000) : Promise.resolve([]),
         base44.entities.SubSector.list(),
       ]);
       setSubSectors(subs);
