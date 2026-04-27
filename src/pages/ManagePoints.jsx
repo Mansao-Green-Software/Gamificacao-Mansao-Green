@@ -13,9 +13,9 @@ export default function ManagePoints() {
   const [transactions, setTransactions] = useState([]);
   const [tab, setTab] = useState("add");
   const [allTransactions, setAllTransactions] = useState([]);
-  const [historySectorFilter, setHistorySectorFilter] = useState("");
   const [historyFilter, setHistoryFilter] = useState("Todos");
   const [historyEmployeeFilter, setHistoryEmployeeFilter] = useState("");
+  const [historySectorFilter, setHistorySectorFilter] = useState("");
   const [historyAllSectorFilter, setHistoryAllSectorFilter] = useState("Todos");
   const [historyAllEmployeeFilter, setHistoryAllEmployeeFilter] = useState("");
   const [historyDateFilter, setHistoryDateFilter] = useState("");
@@ -639,7 +639,12 @@ export default function ManagePoints() {
                 className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-green-500"
               >
                 <option value="">Todos os colaboradores</option>
-                {[...new Map(transactions.filter(t => !historySectorFilter || t.sector === historySectorFilter).map(t => [t.employee_id, t.employee_name])).entries()].map(([id, name]) => (
+                {[...new Map(transactions.filter(t => {
+                  if (!historySectorFilter) return true;
+                  const empProfile = employees.find(e => (e.user_id || e.id) === t.employee_id);
+                  const empSector = empProfile?.sector || t.sector;
+                  return t.sector === historySectorFilter || empSector === historySectorFilter;
+                }).map(t => [t.employee_id, t.employee_name])).entries()].map(([id, name]) => (
                   <option key={id} value={id}>{name}</option>
                 ))}
               </select>
@@ -648,10 +653,16 @@ export default function ManagePoints() {
           {transactions.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">Nenhuma pontuação registrada ainda.</p>
           ) : (() => {
-            const filtered = transactions.filter(t =>
-              (!historyEmployeeFilter || t.employee_id === historyEmployeeFilter) &&
-              (!historySectorFilter || t.sector === historySectorFilter)
-            );
+            const filtered = transactions.filter(t => {
+              if (historyEmployeeFilter && t.employee_id !== historyEmployeeFilter) return false;
+              if (historySectorFilter) {
+                // Verifica setor da transação OU setor atual do perfil do colaborador
+                const empProfile = employees.find(e => (e.user_id || e.id) === t.employee_id);
+                const empSector = empProfile?.sector || t.sector;
+                if (t.sector !== historySectorFilter && empSector !== historySectorFilter) return false;
+              }
+              return true;
+            });
             return filtered.length === 0 ? (
               <p className="text-gray-500 text-sm text-center py-8">Nenhuma pontuação encontrada.</p>
             ) : (
