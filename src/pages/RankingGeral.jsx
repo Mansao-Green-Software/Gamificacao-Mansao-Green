@@ -228,10 +228,11 @@ export default function RankingGeral() {
     rankingTxs.forEach(t => {
       if (excludedSupervisorIds.has(t.employee_id)) return;
 
-      // Para "Gerência", usa o setor da transação diretamente (gerentes têm setores variados no perfil)
-      // Para outros setores, usa o setor do perfil como fonte de verdade
       const empProfile = profiles[t.employee_id];
-      const empSector = sector === "Gerência" ? t.sector : (empProfile?.sector || t.sector);
+      const isManager = empProfile?.role === "manager" || empProfile?.role === "admin" || empProfile?.role === "director";
+
+      // Gerentes sempre aparecem em "Gerência", independente do setor da transação
+      const empSector = isManager ? "Gerência" : (empProfile?.sector || t.sector);
 
       if (sector && sector !== "geral" && empSector !== sector) return;
 
