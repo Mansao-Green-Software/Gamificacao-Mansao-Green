@@ -13,6 +13,7 @@ export default function ManagePoints() {
   const [transactions, setTransactions] = useState([]);
   const [tab, setTab] = useState("add");
   const [allTransactions, setAllTransactions] = useState([]);
+  const [historySectorFilter, setHistorySectorFilter] = useState("");
   const [historyFilter, setHistoryFilter] = useState("Todos");
   const [historyEmployeeFilter, setHistoryEmployeeFilter] = useState("");
   const [historyAllSectorFilter, setHistoryAllSectorFilter] = useState("Todos");
@@ -621,22 +622,35 @@ export default function ManagePoints() {
               <History className="w-4 h-4 text-green-400" />
               Histórico de Pontuações
             </h3>
-            <select
-              value={historyEmployeeFilter}
-              onChange={e => setHistoryEmployeeFilter(e.target.value)}
-              className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-green-500"
-            >
-              <option value="">Todos os colaboradores</option>
-              {[...new Map(transactions.map(t => [t.employee_id, t.employee_name])).entries()].map(([id, name]) => (
-                <option key={id} value={id}>{name}</option>
-              ))}
-            </select>
+            <div className="flex gap-2 flex-wrap">
+              <select
+                value={historySectorFilter}
+                onChange={e => { setHistorySectorFilter(e.target.value); setHistoryEmployeeFilter(""); }}
+                className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-green-500"
+              >
+                <option value="">Todos os setores</option>
+                {[...new Set(transactions.map(t => t.sector).filter(Boolean))].sort().map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+              <select
+                value={historyEmployeeFilter}
+                onChange={e => setHistoryEmployeeFilter(e.target.value)}
+                className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-green-500"
+              >
+                <option value="">Todos os colaboradores</option>
+                {[...new Map(transactions.filter(t => !historySectorFilter || t.sector === historySectorFilter).map(t => [t.employee_id, t.employee_name])).entries()].map(([id, name]) => (
+                  <option key={id} value={id}>{name}</option>
+                ))}
+              </select>
+            </div>
           </div>
           {transactions.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">Nenhuma pontuação registrada ainda.</p>
           ) : (() => {
             const filtered = transactions.filter(t =>
-              (!historyEmployeeFilter || t.employee_id === historyEmployeeFilter)
+              (!historyEmployeeFilter || t.employee_id === historyEmployeeFilter) &&
+              (!historySectorFilter || t.sector === historySectorFilter)
             );
             return filtered.length === 0 ? (
               <p className="text-gray-500 text-sm text-center py-8">Nenhuma pontuação encontrada.</p>
