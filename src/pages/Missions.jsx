@@ -252,7 +252,7 @@ export default function Missions() {
     setUploadingAttachment(false);
   };
 
-  const MONTHLY_LIMIT_EMAIL = "financeiro@gruporoyalty.com";
+  const MONTHLY_LIMIT_EMAIL = null; // restrição mensal removida
 
   const handleSubmitRequest = async () => {
     if (!requestModal) return;
