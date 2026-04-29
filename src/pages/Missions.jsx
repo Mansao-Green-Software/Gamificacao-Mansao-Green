@@ -1070,7 +1070,17 @@ export default function Missions() {
               }
               // Gerente: vê colaboradores e supervisores do seu setor
               return allMySectors.includes(effectiveSector) || allMySectors.includes(r.sector) || allMySectors.includes(emp?.sector);
-            }).filter(r => !selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter);
+            }).filter(r => {
+              if (!selectedEmployeeFilter) return true;
+              if (r.employee_id === selectedEmployeeFilter) return true;
+              // Fallback: match por perfil (para casos onde user_id está vazio)
+              const empProfile = allProfiles.find(p => (p.user_id || p.id) === selectedEmployeeFilter);
+              if (!empProfile) return false;
+              return r.employee_id === empProfile.user_id ||
+                r.employee_id === empProfile.id ||
+                (empProfile.email && r.created_by === empProfile.email) ||
+                r.employee_name === empProfile.full_name;
+            });
             if (history.length === 0) return null;
             return (
               <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
