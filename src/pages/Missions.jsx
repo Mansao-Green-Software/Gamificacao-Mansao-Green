@@ -1052,7 +1052,8 @@ export default function Missions() {
               const emp = allProfiles.find(p => 
                 (p.user_id && p.user_id === r.employee_id) || 
                 p.id === r.employee_id ||
-                (r.created_by && p.email === r.created_by)
+                (r.created_by && p.email === r.created_by) ||
+                (r.employee_name && p.full_name === r.employee_name)
               );
               const effectiveSector = (r.sector !== "Supervisor" ? r.sector : null) || emp?.sector;
               if (isDirector) {
