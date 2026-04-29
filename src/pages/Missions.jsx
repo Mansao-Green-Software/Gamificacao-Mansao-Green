@@ -572,7 +572,7 @@ export default function Missions() {
                           </span>
                         )}
                       </div>
-                      {mission.description && <p className="text-gray-400 text-xs leading-relaxed line-clamp-2 transition-colors">{mission.description}</p>}
+                      {mission.description && <p className="text-gray-400 text-xs leading-relaxed transition-colors">{mission.description}</p>}
                     </div>
                     <div className="flex flex-col items-end shrink-0 pl-3">
                       <div className="relative">
