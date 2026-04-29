@@ -1063,11 +1063,12 @@ export default function Missions() {
                 return allMySectors.includes(effectiveSector);
               }
               if (effectiveRole === "supervisor") {
-                if (emp?.role === "supervisor" || emp?.role === "manager" || emp?.role === "admin") return false;
-                return allMySectors.includes(effectiveSector);
+                if (emp?.role === "manager" || emp?.role === "admin") return false;
+                // Supervisores veem colaboradores E outros supervisores do seu setor
+                return allMySectors.includes(effectiveSector) || allMySectors.includes(emp?.sector);
               }
               // Gerente: vê colaboradores e supervisores do seu setor
-              return allMySectors.includes(effectiveSector) || allMySectors.includes(r.sector);
+              return allMySectors.includes(effectiveSector) || allMySectors.includes(r.sector) || allMySectors.includes(emp?.sector);
             }).filter(r => !selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter);
             if (history.length === 0) return null;
             return (
