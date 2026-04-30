@@ -553,6 +553,7 @@ export default function Missions() {
               const rejected = req?.status === "rejeitado";
               const hasSub = !!mission.sub_sector;
               const customLimit = MULTI_REQUEST_LIMITS[mission.title];
+              const hasCustomLimit = customLimit !== undefined;
               const blockedByFrequency = isRequestBlockedByFrequency(mission);
               const pendingOrApprovedCount = myRequests.filter(r => r.mission_id === mission.id && (r.status === "pendente" || r.status === "aprovado")).length;
               const blockedByMonthlyLimit = user?.email === MONTHLY_LIMIT_EMAIL && (() => {
@@ -562,11 +563,11 @@ export default function Missions() {
                   return r.mission_id === mission.id && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && r.status !== "rejeitado";
                 }).length >= 1;
               })();
-              const isBlocked = pending || blockedByFrequency || blockedByMonthlyLimit;
+              const isBlocked = (!hasCustomLimit && pending) || blockedByFrequency || blockedByMonthlyLimit;
               const freqLabel = mission.frequency === "Diária" ? "hoje" : mission.frequency === "Semanal" ? "esta semana" : "este mês";
 
               return (
-                <div key={mission.id} className={`group relative bg-gray-900 backdrop-blur-sm border rounded-2xl p-6 flex flex-col gap-4 overflow-hidden transition-all duration-300  hover:-translate-y-1 ${pending ? "border-yellow-700" : ""} ${rejected ? "border-red-700/50" : ""} ${approved ? "border-green-700" : "border-gray-800"}`}>
+                <div key={mission.id} className={`group relative bg-gray-900 backdrop-blur-sm border rounded-2xl p-6 flex flex-col gap-4 overflow-hidden transition-all duration-300  hover:-translate-y-1 ${(pending && !hasCustomLimit) ? "border-yellow-700" : ""} ${rejected ? "border-red-700/50" : ""} ${approved ? "border-green-700" : "border-gray-800"}`}>
                   
                   <div className="flex items-start justify-between gap-4 z-10">
                     <div className="flex-1 min-w-0">
@@ -622,13 +623,23 @@ export default function Missions() {
                         onClick={() => !isBlocked && openRequestModal(mission)}
                         disabled={isBlocked}
                         className={`flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm ${
-                          pending ? "bg-amber-900/20 text-amber-500/80 border border-amber-900/30 cursor-not-allowed" :
+                          (pending && !hasCustomLimit) ? "bg-amber-900/20 text-amber-500/80 border border-amber-900/30 cursor-not-allowed" :
                           blockedByFrequency || blockedByMonthlyLimit ? "bg-purple-900/20 text-purple-400/80 border border-purple-900/30 cursor-not-allowed" :
-                          (approved || rejected) ? "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 hover:border-gray-600 shadow-none" :
+                          (approved && !hasCustomLimit) ? "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 hover:border-gray-600 shadow-none" :
+                          rejected ? "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 hover:border-gray-600 shadow-none" :
                           "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-black active:scale-[0.98]"
                         }`}
                       >
-                        {pending ? <><Clock className="w-3.5 h-3.5" /> Aguardando</> : blockedByMonthlyLimit ? <><Clock className="w-3.5 h-3.5" /> Limite mensal atingido</> : blockedByFrequency ? <><Clock className="w-3.5 h-3.5" /> {customLimit !== undefined ? `Limite de ${customLimit}x atingido` : `Já solicitado ${freqLabel}`}</> : (approved || rejected) ? (customLimit !== undefined ? <><Plus className="w-3.5 h-3.5" /> Solicitar ({pendingOrApprovedCount}/{customLimit})</> : <><RotateCcw className="w-3.5 h-3.5" /> Solicitar de novo</>) : submitting === mission.id ? "... " : (customLimit !== undefined && pendingOrApprovedCount > 0 ? <><Plus className="w-3.5 h-3.5" /> Solicitar ({pendingOrApprovedCount}/{customLimit})</> : "Solicitar")}
+                        {(() => {
+                          if (pending && !hasCustomLimit) return <><Clock className="w-3.5 h-3.5" /> Aguardando</>;
+                          if (blockedByMonthlyLimit) return <><Clock className="w-3.5 h-3.5" /> Limite mensal atingido</>;
+                          if (blockedByFrequency) return <><Clock className="w-3.5 h-3.5" /> {customLimit !== undefined ? `Limite de ${customLimit}x atingido` : `Já solicitado ${freqLabel}`}</>;
+                          if (approved && !hasCustomLimit) return <><RotateCcw className="w-3.5 h-3.5" /> Solicitar de novo</>;
+                          if (rejected) return <><RotateCcw className="w-3.5 h-3.5" /> Solicitar de novo</>;
+                          if (submitting === mission.id) return "...";
+                          if (customLimit !== undefined && pendingOrApprovedCount > 0) return <><Plus className="w-3.5 h-3.5" /> {`Solicitar (${pendingOrApprovedCount}/${customLimit})`}</>;
+                          return "Solicitar";
+                        })()}
                       </button>
                     {isManager && (
                       <button onClick={() => handleDelete(mission.id)} className="p-2.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 rounded-xl transition-all shadow-sm">
