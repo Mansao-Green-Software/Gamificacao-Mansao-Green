@@ -90,18 +90,21 @@ export default function GreenShop() {
     (r.created_by && user?.email && r.created_by === user.email) ||
     (r.employee_name && (r.employee_name === user?.full_name || r.employee_name === profile?.full_name))
   );
-  // Separa pontos por período (fuso BRT): disponível = meses anteriores, bloqueado = mês atual
+  // Pontos de um mês só ficam disponíveis após o dia 4 do mês seguinte
   const now = nowBRT();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-  // Bloqueia apenas GANHOS (positivos) do mês atual. Débitos (resgates) não são bloqueados.
+  // Um mês está "bloqueado" se ainda não chegou o dia 5 do mês posterior
+  const isMonthLocked = (month, year) => {
+    const releaseDate = new Date(year, month + 1, 5); // dia 5 do mês seguinte (após dia 4)
+    return now < releaseDate;
+  };
+  // Bloqueia GANHOS (positivos) de meses ainda não liberados
   const lockedPoints = transactions.reduce((s, t) => {
     const pts = t.points || 0;
     if (pts <= 0) return s;
     const d = dateToBRT(t.created_date);
-    return (d.getMonth() === currentMonth && d.getFullYear() === currentYear) ? s + pts : s;
+    return isMonthLocked(d.getMonth(), d.getFullYear()) ? s + pts : s;
   }, 0);
-  // Pontos disponíveis = total - ganhos bloqueados do mês atual (débitos já estão no total)
+  // Pontos disponíveis = total - ganhos bloqueados (débitos já estão no total)
   const availablePoints = myPoints - lockedPoints;
   const spentPoints = myRedemptions.filter(r => r.status !== "cancelado").reduce((s, r) => s + (r.points_spent || 0), 0);
 
@@ -276,7 +279,7 @@ export default function GreenShop() {
              <div className="text-right flex flex-col items-end gap-1">
                <span className="text-gray-500 text-[10px] md:text-[12px] font-medium flex items-center gap-1.5">
                  <Clock className="w-3 h-3 text-amber-500/40" />
-                 Liberam no próximo mês
+                 Liberam após o dia 04 do próximo mês
                </span>
                
              </div>
