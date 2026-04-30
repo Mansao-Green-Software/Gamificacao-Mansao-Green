@@ -90,6 +90,27 @@ export default function Missions() {
     init();
   }, []);
 
+  // Verifica se uma solicitação ainda está dentro do prazo de aprovação
+  // Regra: solicitações do mês anterior podem ser aprovadas até o dia 04 do mês posterior
+  const isRequestExpired = (request) => {
+    const now = new Date();
+    const created = new Date(request.created_date);
+    const createdMonth = created.getMonth();
+    const createdYear = created.getFullYear();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    // Mesma competência (mesmo mês/ano) — nunca expirado
+    if (createdYear === currentYear && createdMonth === currentMonth) return false;
+    // Mês anterior: pode aprovar até dia 04 do mês atual
+    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+    if (createdYear === prevYear && createdMonth === prevMonth) {
+      return now.getDate() > 4;
+    }
+    // Qualquer mês mais antigo: sempre expirado
+    return true;
+  };
+
   const effectiveRole = profile?.role || user?.role;
   const isGerenteViewer = user?.email === "igaming@gruporoyalty.com";
   const isAdmin = effectiveRole === "admin";
@@ -871,11 +892,16 @@ export default function Missions() {
                                 ))}
                               </div>
                             )}
+                            {isRequestExpired(r) && (
+                              <p className="text-xs text-orange-400 bg-orange-900/20 border border-orange-700/30 rounded-lg px-3 py-1.5">
+                                ⚠️ Prazo expirado — solicitações do mês anterior só podem ser aprovadas até o dia 04.
+                              </p>
+                            )}
                             <div className="flex gap-2 pt-1">
                               <button
                                 onClick={() => handleApprove(r)}
-                                disabled={approving === r.id}
-                                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50"
+                                disabled={approving === r.id || isRequestExpired(r)}
+                                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 <CheckCircle className="w-3.5 h-3.5" />
                                 {approving === r.id ? "Aprovando..." : "Aprovar"}
@@ -1018,11 +1044,16 @@ export default function Missions() {
                               ))}
                             </div>
                           )}
+                          {isRequestExpired(r) && (
+                            <p className="text-xs text-orange-400 bg-orange-900/20 border border-orange-700/30 rounded-lg px-3 py-1.5">
+                              ⚠️ Prazo expirado — solicitações do mês anterior só podem ser aprovadas até o dia 04.
+                            </p>
+                          )}
                           <div className="flex gap-2 pt-1">
                             <button
                               onClick={() => handleApprove(r)}
-                              disabled={approving === r.id}
-                              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50"
+                              disabled={approving === r.id || isRequestExpired(r)}
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <CheckCircle className="w-3.5 h-3.5" />
                               {approving === r.id ? "Aprovando..." : "Aprovar"}
