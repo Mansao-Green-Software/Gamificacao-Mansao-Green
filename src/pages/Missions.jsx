@@ -1044,16 +1044,17 @@ export default function Missions() {
                               ))}
                             </div>
                           )}
-                          {isRequestExpired(r) && (
-                            <p className="text-xs text-orange-400 bg-orange-900/20 border border-orange-700/30 rounded-lg px-3 py-1.5">
-                              ⚠️ Prazo expirado — solicitações do mês anterior só podem ser aprovadas até o dia 04.
-                            </p>
-                          )}
+                          {isRequestExpired(r) ? (
+                            <div className="flex items-center gap-2 px-3 py-2 bg-orange-900/20 border border-orange-700/30 rounded-xl">
+                              <XCircle className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                              <p className="text-orange-400 text-xs font-medium">Prazo encerrado — solicitação expirada (prazo até dia 04)</p>
+                            </div>
+                          ) : (
                           <div className="flex gap-2 pt-1">
                             <button
                               onClick={() => handleApprove(r)}
-                              disabled={approving === r.id || isRequestExpired(r)}
-                              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              disabled={approving === r.id}
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50"
                             >
                               <CheckCircle className="w-3.5 h-3.5" />
                               {approving === r.id ? "Aprovando..." : "Aprovar"}
@@ -1066,6 +1067,7 @@ export default function Missions() {
                               Rejeitar
                             </button>
                           </div>
+                          )}
                         </div>
                       ))}
                     </div>
