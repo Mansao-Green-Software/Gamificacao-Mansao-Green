@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
   }
 
   const body = await req.json();
-  let { employee_id, employee_name, sector, points, type, description, mission_id, mission_title, awarded_by_name } = body;
+  let { employee_id, employee_name, sector, points, type, description, mission_id, mission_title, awarded_by_name, transaction_date } = body;
 
   if (!employee_id || points === undefined || points === null) {
     return Response.json({ error: 'employee_id e points são obrigatórios' }, { status: 400 });
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     mission_id,
     mission_title,
     awarded_by_name,
-    transaction_date: new Date().toISOString(),
+    transaction_date: transaction_date || new Date().toISOString(),
   });
 
   return Response.json(tx);
