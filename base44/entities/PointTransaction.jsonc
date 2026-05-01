@@ -33,6 +33,10 @@
     },
     "awarded_by_name": {
       "type": "string"
+    },
+    "transaction_date": {
+      "type": "string",
+      "description": "Data real da transa\u00e7\u00e3o (ISO string). Usar este campo para filtros de per\u00edodo quando dispon\u00edvel."
     }
   },
   "required": [

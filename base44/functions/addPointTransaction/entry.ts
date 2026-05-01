@@ -52,6 +52,7 @@ Deno.serve(async (req) => {
     mission_id,
     mission_title,
     awarded_by_name,
+    transaction_date: new Date().toISOString(),
   });
 
   return Response.json(tx);

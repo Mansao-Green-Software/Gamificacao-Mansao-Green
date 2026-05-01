@@ -29,11 +29,11 @@ Deno.serve(async (req) => {
       return Response.json({ message: 'Nenhuma transação encontrada para hoje.', count: 0 });
     }
 
-    // Atualiza a created_date para 30/04/2026 03:00 UTC (= 00:00 BRT)
+    // Atualiza o campo transaction_date para 30/04/2026
     const results = await Promise.all(
       todayTxs.map(t =>
         base44.asServiceRole.entities.PointTransaction.update(t.id, {
-          created_date: targetDate
+          transaction_date: '2026-04-30T03:00:00.000Z'
         })
       )
     );

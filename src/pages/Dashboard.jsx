@@ -175,7 +175,7 @@ export default function Dashboard() {
     if (!monthFilter) return txs;
     const [year, month] = monthFilter.split("-").map(Number);
     return txs.filter(t => {
-      const d = new Date(t.created_date);
+      const d = new Date(t.transaction_date || t.created_date);
       return d.getFullYear() === year && d.getMonth() + 1 === month;
     });
   };

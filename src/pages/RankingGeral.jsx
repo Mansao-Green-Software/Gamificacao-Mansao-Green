@@ -77,11 +77,13 @@ const PERIODS = [
   { key: "anual", label: "Anual" },
 ];
 
+const getTxDate = (t) => new Date(t.transaction_date || t.created_date);
+
 function filterByPeriod(txs, period) {
   const now = new Date();
   const year = now.getFullYear();
   return txs.filter(t => {
-    const d = new Date(t.created_date);
+    const d = getTxDate(t);
     if (period === "mensal") return d.getMonth() === now.getMonth() && d.getFullYear() === year;
     if (period === "trimestral") return [3, 4, 5].includes(d.getMonth()) && d.getFullYear() === year;
     if (period === "anual") return d.getFullYear() === year;
