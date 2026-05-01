@@ -187,9 +187,26 @@ export default function Dashboard() {
     (myProfile3 && (t.employee_id === myProfile3.id || t.employee_id === myProfile3.user_id)) ||
     t.employee_name === (myProfile3?.full_name || user?.full_name)
   );
+
+  // Pontos e ranking calculados a partir das transações filtradas
+  const myFilteredPoints = myTxs.reduce((s, t) => s + (t.points || 0), 0);
+
+  const mySector = profile?.sector;
+  const myFilteredRank = (() => {
+    if (!mySector) return null;
+    const sectorTxs = filteredTransactions.filter(t => t.sector === mySector);
+    const empPoints = {};
+    sectorTxs.forEach(t => { empPoints[t.employee_id] = (empPoints[t.employee_id] || 0) + t.points; });
+    const sorted = Object.entries(empPoints).sort((a, b) => b[1] - a[1]);
+    const rank = sorted.findIndex(([id]) =>
+      id === user?.id ||
+      (myProfile3 && (id === myProfile3.id || id === myProfile3.user_id))
+    ) + 1;
+    return rank || null;
+  })();
+
   const isAdmin = user?.role === "admin";
   const isManager = user?.role === "manager" || isAdmin;
-  const mySector = profile?.sector;
 
   // Recalculate sector ranking for selected month
   const computeSectorRanking = (txs) => {
@@ -357,7 +374,7 @@ export default function Dashboard() {
 
               <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Meus Pontos</span>
             </div>
-            <p className="text-3xl font-bold text-white">{myPoints.toLocaleString()}</p>
+            <p className="text-3xl font-bold text-white">{myFilteredPoints.toLocaleString()}</p>
           </div>
 
           <div className="bg-gray-800/40 border-l-4 border-amber-500 rounded-xl p-5">
@@ -365,7 +382,7 @@ export default function Dashboard() {
 
               <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Meu Ranking</span>
             </div>
-            <p className="text-3xl font-bold text-white">{myRank ? `#${myRank}` : "-"}</p>
+            <p className="text-3xl font-bold text-white">{myFilteredRank ? `#${myFilteredRank}` : "-"}</p>
             {mySector && <p className="text-xs text-gray-500 mt-1">no {mySector}</p>}
           </div>
 
