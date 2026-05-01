@@ -65,6 +65,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [monthFilter, setMonthFilter] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
 
   const loadData = async (u) => {
     const [txs, emps] = await Promise.all([
@@ -166,7 +170,19 @@ export default function Dashboard() {
   }, []);
 
   const myProfile3 = employees.find(p => (p.user_id && p.user_id === user?.id) || p.email === user?.email);
-  const myTxs = transactions.filter(t =>
+
+  const filterByMonth = (txs) => {
+    if (!monthFilter) return txs;
+    const [year, month] = monthFilter.split("-").map(Number);
+    return txs.filter(t => {
+      const d = new Date(t.created_date);
+      return d.getFullYear() === year && d.getMonth() + 1 === month;
+    });
+  };
+
+  const filteredTransactions = filterByMonth(transactions);
+
+  const myTxs = filteredTransactions.filter(t =>
     t.employee_id === user?.id ||
     (myProfile3 && (t.employee_id === myProfile3.id || t.employee_id === myProfile3.user_id)) ||
     t.employee_name === (myProfile3?.full_name || user?.full_name)
@@ -174,6 +190,38 @@ export default function Dashboard() {
   const isAdmin = user?.role === "admin";
   const isManager = user?.role === "manager" || isAdmin;
   const mySector = profile?.sector;
+
+  // Recalculate sector ranking for selected month
+  const computeSectorRanking = (txs) => {
+    const excludedFromSector = new Set(
+      employees.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
+    );
+    const pts = {};
+    const employeesData = {};
+    let globalTotalPoints = 0;
+    const globalEmployees = new Set();
+    txs.filter(t => !t.description?.startsWith("Resgate:")).forEach(t => {
+      if (!t.sector) return;
+      const sectorKey = excludedFromSector.has(t.employee_id) ? "Supervisor" : t.sector;
+      pts[sectorKey] = (pts[sectorKey] || 0) + (t.points || 0);
+      if (!employeesData[sectorKey]) employeesData[sectorKey] = new Set();
+      employeesData[sectorKey].add(t.employee_id);
+      globalTotalPoints += (t.points || 0);
+      globalEmployees.add(t.employee_id);
+    });
+    const C = globalTotalPoints / Math.max(1, globalEmployees.size);
+    let totalSectors = 0, totalEmps = 0;
+    for (const s of Object.keys(employeesData)) { totalSectors++; totalEmps += employeesData[s].size; }
+    const m = totalSectors > 0 ? (totalEmps / totalSectors) : 1;
+    return [...SECTORS, "Supervisor"].map(s => {
+      const v = employeesData[s]?.size || 0;
+      if (v === 0) return { sector: s, points: 0 };
+      const R = pts[s] / v;
+      return { sector: s, points: Math.round((v * R + m * C) / (v + m)) };
+    }).sort((a, b) => b.points - a.points);
+  };
+
+  const filteredSectorRanking = computeSectorRanking(filteredTransactions);
 
   if (loading) {
     return (
@@ -198,14 +246,22 @@ export default function Dashboard() {
             <h1 className="text-3xl font-black flex items-center gap-2 shimmer-green">Olá, {user?.full_name?.split(" ")[0]} </h1>
             <p className="text-gray-200/70 text-sm mt-1">Bem-vindo ao Gamificação Mansão Green</p>
           </div>
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="flex items-center gap-2 px-3 py-2 bg-gray-900 hover:bg-gray-600 text-green-400 border border-green-400 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 shrink-0"
-          >
-            <RotateCcw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-            <span className="hidden sm:inline">{refreshing ? "Atualizando..." : "Atualizar"}</span>
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <input
+              type="month"
+              value={monthFilter}
+              onChange={e => setMonthFilter(e.target.value)}
+              className="bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+            />
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex items-center gap-2 px-3 py-2 bg-gray-900 hover:bg-gray-600 text-green-400 border border-green-400 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+            >
+              <RotateCcw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+              <span className="hidden sm:inline">{refreshing ? "Atualizando..." : "Atualizar"}</span>
+            </button>
+          </div>
         </div>
         <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-full sm:w-fit">
           {[
@@ -334,7 +390,7 @@ export default function Dashboard() {
               <Link to={createPageUrl("RankingGeral")} className="text-green-400 text-sm hover:underline">Ver tudo</Link>
             </div>
             <div className="space-y-3">
-              {sectorRanking.slice(0, 5).map((item, idx) => {
+              {filteredSectorRanking.slice(0, 5).map((item, idx) => {
                 const isMe = item.sector === mySector;
                 return (
                   <div key={item.sector} className={`flex items-center gap-4 p-6 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
@@ -347,7 +403,7 @@ export default function Dashboard() {
                       <div className="h-2.5 rounded-sm bg-gray-700 overflow-hidden">
                         <div
                           className={`h-full rounded-sm bg-gradient-to-tr ${SECTOR_COLORS[item.sector] || "from-green-500 to-teal-500"}`}
-                          style={{ width: sectorRanking[0].points > 0 ? `${(item.points / sectorRanking[0].points) * 100}%` : "0%" }}
+                          style={{ width: filteredSectorRanking[0].points > 0 ? `${(item.points / filteredSectorRanking[0].points) * 100}%` : "0%" }}
                         />
                       </div>
                     </div>
@@ -381,7 +437,7 @@ export default function Dashboard() {
                   if (p.id) idToCanonical[p.id] = canonical;
                 });
 
-                transactions
+                filteredTransactions
                   .filter(t => !t.description?.startsWith("Resgate:"))
                   .forEach(t => {
                     const canonical = idToCanonical[t.employee_id] || t.employee_id;
