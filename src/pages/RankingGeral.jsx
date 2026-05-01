@@ -289,29 +289,21 @@ export default function RankingGeral() {
           </h1>
           <p className="text-gray-400 text-xs mt-1">Performance por setor</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2 px-3 py-3 sm:py-3 bg-gray-900 border border-green-500/30 hover:bg-gray-600 text-green-300 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-2 bg-gray-900 border border-green-500/30 hover:bg-gray-600 text-green-300 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
           >
             <RotateCcw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             {refreshing ? "Atualizando..." : "Atualizar"}
           </button>
-          {selectedPeriod === "mensal" && (
-          <input
-            type="month"
-            value={monthFilter}
-            onChange={e => setMonthFilter(e.target.value)}
-            className="bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-green-500"
-          />
-        )}
-        <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1">
+          <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1">
             {PERIODS.map(p => (
               <button
                 key={p.key}
                 onClick={() => setSelectedPeriod(p.key)}
-                className={`relative px-2 sm:px-4 py-0 sm:py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center justify-center ${selectedPeriod === p.key ? "text-gray-900" : "text-gray-400 hover:text-white"}`}
+                className={`relative px-2 sm:px-4 py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center justify-center ${selectedPeriod === p.key ? "text-gray-900" : "text-gray-400 hover:text-white"}`}
               >
                 {selectedPeriod === p.key && (
                   <motion.div
@@ -325,6 +317,14 @@ export default function RankingGeral() {
               </button>
             ))}
           </div>
+          {selectedPeriod === "mensal" && (
+            <input
+              type="month"
+              value={monthFilter}
+              onChange={e => setMonthFilter(e.target.value)}
+              className="bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+            />
+          )}
         </div>
       </div>
 
