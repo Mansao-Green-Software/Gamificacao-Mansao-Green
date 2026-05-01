@@ -79,12 +79,18 @@ const PERIODS = [
 
 const getTxDate = (t) => new Date(t.transaction_date || t.created_date);
 
-function filterByPeriod(txs, period) {
+function filterByPeriod(txs, period, monthFilter) {
   const now = new Date();
   const year = now.getFullYear();
   return txs.filter(t => {
     const d = getTxDate(t);
-    if (period === "mensal") return d.getMonth() === now.getMonth() && d.getFullYear() === year;
+    if (period === "mensal") {
+      if (monthFilter) {
+        const [y, m] = monthFilter.split("-").map(Number);
+        return d.getFullYear() === y && d.getMonth() + 1 === m;
+      }
+      return d.getMonth() === now.getMonth() && d.getFullYear() === year;
+    }
     if (period === "trimestral") return [3, 4, 5].includes(d.getMonth()) && d.getFullYear() === year;
     if (period === "anual") return d.getFullYear() === year;
     return true;
@@ -95,6 +101,10 @@ export default function RankingGeral() {
   const [user, setUser] = useState(null);
   const [selectedSector, setSelectedSector] = useState("geral");
   const [selectedPeriod, setSelectedPeriod] = useState("mensal");
+  const [monthFilter, setMonthFilter] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -146,7 +156,7 @@ export default function RankingGeral() {
   const effectiveRole = myProfile?.role || user?.role;
   const isAdminOrManager = effectiveRole === "admin" || effectiveRole === "manager" || effectiveRole === "supervisor";
 
-  const periodTxs = filterByPeriod(transactions, selectedPeriod);
+  const periodTxs = filterByPeriod(transactions, selectedPeriod, monthFilter);
 
   // Excluir apenas resgates da Green Shop do ranking (punições continuam contando)
   const rankingTxs = periodTxs.filter(t => !t.description?.startsWith("Resgate:"));
@@ -288,7 +298,15 @@ export default function RankingGeral() {
             <RotateCcw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             {refreshing ? "Atualizando..." : "Atualizar"}
           </button>
-          <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1">
+          {selectedPeriod === "mensal" && (
+          <input
+            type="month"
+            value={monthFilter}
+            onChange={e => setMonthFilter(e.target.value)}
+            className="bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+          />
+        )}
+        <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1">
             {PERIODS.map(p => (
               <button
                 key={p.key}
