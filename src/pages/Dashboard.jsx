@@ -264,12 +264,20 @@ export default function Dashboard() {
             <p className="text-gray-200/70 text-sm mt-1">Bem-vindo ao Gamificação Mansão Green</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <input
-              type="month"
+            <select
               value={monthFilter}
               onChange={e => setMonthFilter(e.target.value)}
               className="bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-green-500"
-            />
+            >
+              {Array.from({ length: 12 }, (_, i) => {
+                const d = new Date();
+                d.setDate(1);
+                d.setMonth(d.getMonth() - i);
+                const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+                const label = d.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+                return <option key={value} value={value}>{label.charAt(0).toUpperCase() + label.slice(1)}</option>;
+              })}
+            </select>
             <button
               onClick={handleRefresh}
               disabled={refreshing}
