@@ -213,6 +213,14 @@ export default function RankingGeral() {
 
 
   const getEmployeeRanking = (sector) => {
+    // Mapa de ID canônico: unifica user_id, id do perfil e employee_id da transação
+    const idToCanonical = {};
+    allProfiles.forEach(p => {
+      const canonical = p.user_id || p.id;
+      if (p.user_id) idToCanonical[p.user_id] = canonical;
+      if (p.id) idToCanonical[p.id] = canonical;
+    });
+
     // Excluir supervisores que optaram por não participar do ranking do setor
     const excludedSupervisorIds = new Set(
       allProfiles.filter(p => p.role === "supervisor" && p.include_in_sector_ranking === false).map(p => p.user_id || p.id)
@@ -223,37 +231,50 @@ export default function RankingGeral() {
       const filtered = rankingTxs.filter(t => excludedSupervisorIds.has(t.employee_id));
       const pts = {};
       const names = {};
+      const empProfiles = {};
+
       filtered.forEach(t => {
-        pts[t.employee_id] = (pts[t.employee_id] || 0) + (t.points || 0);
-        names[t.employee_id] = t.employee_name;
+        const canonical = idToCanonical[t.employee_id] || t.employee_id;
+        pts[canonical] = (pts[canonical] || 0) + (t.points || 0);
+        names[canonical] = t.employee_name;
+        const prof = profiles[t.employee_id];
+        if (prof) empProfiles[canonical] = prof;
       });
+
       return Object.entries(pts)
-        .map(([id, points]) => ({ id, name: profiles[id]?.full_name || names[id], points, photo_url: profiles[id]?.photo_url }))
+        .map(([id, points]) => ({ id, name: empProfiles[id]?.full_name || names[id], points, photo_url: empProfiles[id]?.photo_url }))
         .sort((a, b) => b.points - a.points);
     }
 
-    // Para ranking por setor: usar o setor do PERFIL do employee como fonte de verdade,
-    // ignorando o setor gravado na transação (que pode estar incorreto).
+    // Para ranking por setor: usar ID canônico e setor do PERFIL
     const pts = {};
     const names = {};
+    const empProfiles = {};
 
     rankingTxs.forEach(t => {
       if (excludedSupervisorIds.has(t.employee_id)) return;
 
-      const empProfile = profiles[t.employee_id];
-      const isManager = empProfile?.role === "manager" || empProfile?.role === "admin" || empProfile?.role === "director";
+      const canonical = idToCanonical[t.employee_id] || t.employee_id;
+      const empProfile = profiles[t.employee_id] || allProfiles.find(p => p.user_id === t.employee_id || p.id === t.employee_id);
+      
+      if (!empProfile) {
+        pts[canonical] = (pts[canonical] || 0) + (t.points || 0);
+        names[canonical] = t.employee_name;
+        return;
+      }
 
-      // Gerentes sempre aparecem em "Gerência", independente do setor da transação
-      const empSector = isManager ? "Gerência" : (empProfile?.sector || t.sector);
+      const isManager = empProfile.role === "manager" || empProfile.role === "admin" || empProfile.role === "director";
+      const empSector = isManager ? "Gerência" : empProfile.sector;
 
       if (sector && sector !== "geral" && empSector !== sector) return;
 
-      pts[t.employee_id] = (pts[t.employee_id] || 0) + (t.points || 0);
-      names[t.employee_id] = t.employee_name;
+      pts[canonical] = (pts[canonical] || 0) + (t.points || 0);
+      names[canonical] = t.employee_name;
+      empProfiles[canonical] = empProfile;
     });
 
     return Object.entries(pts)
-      .map(([id, points]) => ({ id, name: profiles[id]?.full_name || names[id], points, sector: profiles[id]?.sector, photo_url: profiles[id]?.photo_url }))
+      .map(([id, points]) => ({ id, name: empProfiles[id]?.full_name || names[id], points, sector: empProfiles[id]?.sector, photo_url: empProfiles[id]?.photo_url }))
       .sort((a, b) => b.points - a.points);
   };
 
