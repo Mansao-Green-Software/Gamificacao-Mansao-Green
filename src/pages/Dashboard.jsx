@@ -65,6 +65,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [periodMode, setPeriodMode] = useState("mensal"); // "mensal" | "trimestral" | "anual"
   const [monthFilter, setMonthFilter] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -171,16 +172,28 @@ export default function Dashboard() {
 
   const myProfile3 = employees.find(p => (p.user_id && p.user_id === user?.id) || p.email === user?.email);
 
-  const filterByMonth = (txs) => {
-    if (!monthFilter) return txs;
-    const [year, month] = monthFilter.split("-").map(Number);
+  const filterByPeriod = (txs) => {
+    const now = new Date();
+    const year = now.getFullYear();
     return txs.filter(t => {
       const d = new Date(t.transaction_date || t.created_date);
-      return d.getFullYear() === year && d.getMonth() + 1 === month;
+      if (periodMode === "mensal") {
+        if (!monthFilter) return true;
+        const [y, m] = monthFilter.split("-").map(Number);
+        return d.getFullYear() === y && d.getMonth() + 1 === m;
+      }
+      if (periodMode === "trimestral") {
+        // Abril, Maio, Junho
+        return [4, 5, 6].includes(d.getMonth() + 1) && d.getFullYear() === year;
+      }
+      if (periodMode === "anual") {
+        return d.getFullYear() === year;
+      }
+      return true;
     });
   };
 
-  const filteredTransactions = filterByMonth(transactions);
+  const filteredTransactions = filterByPeriod(transactions);
 
   const myTxs = filteredTransactions.filter(t =>
     t.employee_id === user?.id ||
@@ -238,7 +251,7 @@ export default function Dashboard() {
     }).sort((a, b) => b.points - a.points);
   };
 
-  const filteredSectorRanking = computeSectorRanking(filteredTransactions);
+  const filteredSectorRanking = employees.length > 0 ? computeSectorRanking(filteredTransactions) : sectorRanking;
 
   if (loading) {
     return (
@@ -263,7 +276,23 @@ export default function Dashboard() {
             <h1 className="text-3xl font-black flex items-center gap-2 shimmer-green">Olá, {user?.full_name?.split(" ")[0]} </h1>
             <p className="text-gray-200/70 text-sm mt-1">Bem-vindo ao Gamificação Mansão Green</p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+            <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1">
+              {[
+                { id: "mensal", label: "Mensal" },
+                { id: "trimestral", label: "Abr-Jun" },
+                { id: "anual", label: "Anual" },
+              ].map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => setPeriodMode(p.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${periodMode === p.id ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            {periodMode === "mensal" && (
             <select
               value={monthFilter}
               onChange={e => setMonthFilter(e.target.value)}
@@ -278,6 +307,7 @@ export default function Dashboard() {
                 return <option key={value} value={value}>{label.charAt(0).toUpperCase() + label.slice(1)}</option>;
               })}
             </select>
+            )}
             <button
               onClick={handleRefresh}
               disabled={refreshing}
