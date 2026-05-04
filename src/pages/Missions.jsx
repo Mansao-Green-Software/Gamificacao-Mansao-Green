@@ -15,7 +15,7 @@ const CATEGORIES = [
   { key: "Participação em Ações", Icon: FaBullseye, iconColor: "text-white/80", bg: "bg-gradient-to-br from-cyan-900/80 via-cyan-800/40 to-cyan-900/80", border: "border-cyan-500/30", text: "text-cyan-300" },
 ];
 
-const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "Feira FC", "Todos"];
+const SECTORS = ["Social Media", "Audiovisual", "Tráfego", "Líder de Projeto", "Tipster", "Suporte", "Contingência", "Comercial", "Financeiro", "Affiliates", "Administrativo", "Gerência", "Saúde e Bem Estar", "Serviços Gerais", "Feira FC", "TI", "IA/Automação", "Todos"];
 
 export default function Missions() {
   const [user, setUser] = useState(null);
