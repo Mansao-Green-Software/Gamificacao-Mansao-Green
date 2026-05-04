@@ -173,7 +173,7 @@ export default function RankingGeral() {
     let globalTotalPoints = 0;
     const globalEmployees = new Set();
 
-    rankingTxs.forEach(t => {
+    filteredRankingTxs.forEach(t => {
       if (!t.sector) return;
       const sectorKey = excludedFromSector.has(t.employee_id) ? "Supervisor" : t.sector;
       pts[sectorKey] = (pts[sectorKey] || 0) + (t.points || 0);
@@ -228,7 +228,7 @@ export default function RankingGeral() {
 
     // Setor virtual "Supervisor": agrupa todos os colaboradores com role supervisor excluídos do setor
     if (sector === "Supervisor") {
-      const filtered = rankingTxs.filter(t => excludedSupervisorIds.has(t.employee_id));
+      const filtered = filteredRankingTxs.filter(t => excludedSupervisorIds.has(t.employee_id));
       const pts = {};
       const names = {};
       const empProfiles = {};
@@ -251,7 +251,7 @@ export default function RankingGeral() {
     const names = {};
     const empProfiles = {};
 
-    rankingTxs.forEach(t => {
+    filteredRankingTxs.forEach(t => {
       if (excludedSupervisorIds.has(t.employee_id)) return;
 
       const canonical = idToCanonical[t.employee_id] || t.employee_id;
@@ -277,6 +277,14 @@ export default function RankingGeral() {
       .map(([id, points]) => ({ id, name: empProfiles[id]?.full_name || names[id], points, sector: empProfiles[id]?.sector, photo_url: empProfiles[id]?.photo_url }))
       .sort((a, b) => b.points - a.points);
   };
+
+  // Colaboradores excluídos dos rankings
+  const excludedNames = new Set(["italo gomes", "kevinathy"]);
+  
+  // Filtrar transações para remover colaboradores excluídos
+  const filteredRankingTxs = rankingTxs.filter(t => 
+    !excludedNames.has((t.employee_name || "").toLowerCase())
+  );
 
   const sectorRanking = getSectorPoints();
   const maxSectorPts = sectorRanking[0]?.points || 1;
