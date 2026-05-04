@@ -29,6 +29,8 @@ export default function ManagePoints() {
   const [subSectors, setSubSectors] = useState([]);
   const [selectedSubSector, setSelectedSubSector] = useState("");
   const [syncingSheet, setSyncingSheet] = useState(false);
+  const [editingTxId, setEditingTxId] = useState(null);
+  const [editingTxDate, setEditingTxDate] = useState("");
 
   const handleSyncToSheet = async () => {
     setSyncingSheet(true);
@@ -219,6 +221,18 @@ export default function ManagePoints() {
       await base44.entities.PointTransaction.delete(id);
     } catch (e) {
       // já deletado ou não encontrado — ignora
+    }
+  };
+
+  const handleEditTxDate = async (id, newDate) => {
+    try {
+      await base44.entities.PointTransaction.update(id, { transaction_date: newDate });
+      setTransactions(prev => prev.map(t => t.id === id ? { ...t, transaction_date: newDate } : t));
+      setAllTransactions(prev => prev.map(t => t.id === id ? { ...t, transaction_date: newDate } : t));
+      setEditingTxId(null);
+      setEditingTxDate("");
+    } catch (e) {
+      alert("Erro ao atualizar data: " + e.message);
     }
   };
 
@@ -485,15 +499,25 @@ export default function ManagePoints() {
                       .filter(t => t.employee_id === (selectedEmployee.user_id || selectedEmployee.id))
                       .slice(0, 20)
                       .map(tx => (
-                        <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl gap-3">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white text-sm truncate">{tx.description || tx.mission_title || "Pontuação manual"}</p>
-                            <p className="text-gray-500 text-xs">por {tx.awarded_by_name || "Sistema"} · {formatBRT(tx.created_date)}</p>
-                          </div>
-                          <span className={`font-bold text-sm shrink-0 ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>
-                            {tx.points >= 0 ? "+" : ""}{tx.points}
-                          </span>
-                        </div>
+                        <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl gap-3 group">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-white text-sm truncate">{tx.description || tx.mission_title || "Pontuação manual"}</p>
+                                  <p className="text-gray-500 text-xs">por {tx.awarded_by_name || "Sistema"} · {formatBRT(tx.created_date)}</p>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <span className={`font-bold text-sm ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>
+                                    {tx.points >= 0 ? "+" : ""}{tx.points}
+                                  </span>
+                                  {isAdmin && (
+                                    <button 
+                                      onClick={() => { setEditingTxId(tx.id); setEditingTxDate(tx.transaction_date ? tx.transaction_date.split("T")[0] : ""); }}
+                                      className="p-1.5 text-blue-400 hover:bg-blue-900/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                    >
+                                      <span className="text-xs font-bold">📅</span>
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
                       ))
                   )}
                 </div>
@@ -587,7 +611,7 @@ export default function ManagePoints() {
             ) : (
               <div className="space-y-2 max-h-[800px] overflow-y-auto">
                 {filtered.map(tx => (
-                  <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
+                  <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl group">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-white text-sm font-medium truncate">{tx.employee_name}</p>
@@ -601,9 +625,17 @@ export default function ManagePoints() {
                         {tx.points >= 0 ? "+" : ""}{tx.points}
                       </span>
                       {isAdmin && (
-                        <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex gap-1.5">
+                          <button 
+                            onClick={() => { setEditingTxId(tx.id); setEditingTxDate(tx.transaction_date ? tx.transaction_date.split("T")[0] : ""); }}
+                            className="p-1.5 text-blue-400 hover:bg-blue-900/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                          >
+                            <span className="text-xs font-bold">📅</span>
+                          </button>
+                          <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -689,13 +721,21 @@ export default function ManagePoints() {
                     <div className="flex items-center gap-3 ml-3">
                       <div className="text-right">
                         <span className="text-green-400 font-bold text-sm">{tx.points >= 0 ? "+" : ""}{tx.points}</span>
-                        <p className="text-gray-600 text-xs capitalize">{tx.type}</p>
-                      </div>
-                      {isAdmin && (
-                        <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
+                          <p className="text-gray-600 text-xs capitalize">{tx.type}</p>
+                        </div>
+                        {isAdmin && (
+                          <div className="flex gap-1.5">
+                            <button 
+                              onClick={() => { setEditingTxId(tx.id); setEditingTxDate(tx.transaction_date ? tx.transaction_date.split("T")[0] : ""); }}
+                              className="p-1.5 text-blue-400 hover:bg-blue-900/20 rounded-lg transition-colors"
+                            >
+                              <span className="text-xs font-bold">📅</span>
+                            </button>
+                            <button onClick={() => handleDeleteTx(tx.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
                     </div>
                   </div>
                   );
@@ -703,6 +743,43 @@ export default function ManagePoints() {
               </div>
             );
           })()}
+        </div>
+      )}
+
+      {/* Edit Date Modal */}
+      {editingTxId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setEditingTxId(null)}>
+          <div
+            className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-sm"
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 className="text-white font-bold mb-4">Alterar Data da Pontuação</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="text-gray-400 text-xs mb-1.5 block">Nova Data</label>
+                <input
+                  type="date"
+                  value={editingTxDate}
+                  onChange={e => setEditingTxDate(e.target.value)}
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => editingTxDate && handleEditTxDate(editingTxId, `${editingTxDate}T00:00:00Z`)}
+                  className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium text-sm transition-colors"
+                >
+                  Salvar
+                </button>
+                <button
+                  onClick={() => setEditingTxId(null)}
+                  className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
