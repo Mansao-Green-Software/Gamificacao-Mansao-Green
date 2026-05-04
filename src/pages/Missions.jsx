@@ -242,20 +242,8 @@ export default function Missions() {
       })
     : [];
 
-  // Agrupa solicitações pendentes por missão+colaborador (para missões com multi-request)
-  const groupedPendingRequests = (() => {
-    const groups = {};
-    pendingRequests.forEach(r => {
-      const key = `${r.employee_id}__${r.mission_id}`;
-      if (!groups[key]) {
-        groups[key] = { ...r, _ids: [r.id], _qty: 1 };
-      } else {
-        groups[key]._ids.push(r.id);
-        groups[key]._qty += 1;
-      }
-    });
-    return Object.values(groups);
-  })();
+  // Cada solicitação aparece individualmente (sem agrupamento)
+  const groupedPendingRequests = pendingRequests.map(r => ({ ...r, _ids: [r.id], _qty: 1 }));
 
   const pendingCount = groupedPendingRequests.length;
 
