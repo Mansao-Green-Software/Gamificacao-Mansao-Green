@@ -422,8 +422,14 @@ export default function Missions() {
         {[
           { id: "missoes", label: "Missões", onClick: () => { setTab("missoes"); setSelectedEmployeeFilter(""); } },
           { id: "minhas", label: "Minhas Sol.", onClick: () => { setTab("minhas"); setSelectedEmployeeFilter(""); } },
-          ...(isGerenteViewer ? [{ id: "gerencia", label: "Gerência", badge: requests.filter(r => r.status === "pendente" && r.sector === "Gerência").length, onClick: () => setTab("gerencia") }] : []),
-          ...(isIAViewer ? [{ id: "ia_automacao", label: "IA/Automação", badge: requests.filter(r => r.status === "pendente" && r.sector === "IA/Automação").length, onClick: () => setTab("ia_automacao") }] : []),
+          ...(isGerenteViewer ? [
+            { id: "gerencia", label: "Gerência", badge: requests.filter(r => r.status === "pendente" && r.sector === "Gerência" && !isRequestExpired(r)).length, onClick: () => setTab("gerencia") },
+            { id: "gerencia_expiradas", label: "Exp. Gerência", badge: 0, onClick: () => setTab("gerencia_expiradas") },
+          ] : []),
+          ...(isIAViewer ? [
+            { id: "ia_automacao", label: "IA/Automação", badge: requests.filter(r => r.status === "pendente" && r.sector === "IA/Automação" && !isRequestExpired(r)).length, onClick: () => setTab("ia_automacao") },
+            { id: "ia_expiradas", label: "Exp. IA/Auto", badge: 0, onClick: () => setTab("ia_expiradas") },
+          ] : []),
           ...(isManager ? [
             { id: "solicitacoes", label: "Solicitações", badge: pendingCount, onClick: () => setTab("solicitacoes") },
             { id: "expiradas", label: "Expiradas", badge: 0, onClick: () => setTab("expiradas") }
@@ -838,7 +844,7 @@ export default function Missions() {
               const feiraFCManagerIds = new Set(
                 allProfiles.filter(p => p.sector === "Feira FC" && (p.role === "manager" || p.role === "director")).map(p => p.user_id || p.id)
               );
-              const gerentePendingRaw = requests.filter(r => r.status === "pendente" && r.sector === "Gerência" && !feiraFCManagerIds.has(r.employee_id));
+              const gerentePendingRaw = requests.filter(r => r.status === "pendente" && r.sector === "Gerência" && !feiraFCManagerIds.has(r.employee_id) && !isRequestExpired(r));
               const gerenteGrouped = {};
               gerentePendingRaw.forEach(r => {
                 const key = `${r.employee_id}__${r.mission_id}`;
@@ -900,39 +906,34 @@ export default function Missions() {
                                 ))}
                               </div>
                             )}
-                            {isRequestExpired(r) && (
-                              <p className="text-xs text-orange-400 bg-orange-900/20 border border-orange-700/30 rounded-lg px-3 py-1.5">
-                                ⚠️ Prazo expirado — solicitações do mês anterior só podem ser aprovadas até o dia 04.
-                              </p>
-                            )}
                             <div className="flex gap-2 pt-1">
-                              <button
-                                onClick={() => handleApprove(r)}
-                                disabled={approving === r.id || isRequestExpired(r)}
-                                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                <CheckCircle className="w-3.5 h-3.5" />
-                                {approving === r.id ? "Aprovando..." : "Aprovar"}
-                              </button>
-                              <button
-                                onClick={() => { setRejectModal(r); setRejectNote(""); }}
-                                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-semibold transition-colors border border-red-700/40"
-                              >
-                                <XCircle className="w-3.5 h-3.5" />
-                                Rejeitar
-                              </button>
+                            <button
+                            onClick={() => handleApprove(r)}
+                            disabled={approving === r.id}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            {approving === r.id ? "Aprovando..." : "Aprovar"}
+                            </button>
+                            <button
+                            onClick={() => { setRejectModal(r); setRejectNote(""); }}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-semibold transition-colors border border-red-700/40"
+                            >
+                            <XCircle className="w-3.5 h-3.5" />
+                            Rejeitar
+                            </button>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })()}
-                </div>
-              );
-            })()}
-          </div>
-          {(() => {
-            const feiraFCManagerIds2 = new Set(
+                            </div>
+                            ))}
+                            </div>
+                            );
+                            })()}
+                            </div>
+                            );
+                            })()}
+                            </div>
+                            {(() => {
+                            const feiraFCManagerIds2 = new Set(
               allProfiles.filter(p => p.sector === "Feira FC" && (p.role === "manager" || p.role === "director")).map(p => p.user_id || p.id)
             );
             const gerenteHistory = requests.filter(r => r.status !== "pendente" && r.sector === "Gerência" && !feiraFCManagerIds2.has(r.employee_id) && (!selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter));
@@ -990,7 +991,7 @@ export default function Missions() {
               Solicitações de IA/Automação — Pendentes
             </h3>
             {(() => {
-              const iaPendingRaw = requests.filter(r => r.status === "pendente" && r.sector === "IA/Automação");
+              const iaPendingRaw = requests.filter(r => r.status === "pendente" && r.sector === "IA/Automação" && !isRequestExpired(r));
               const iaGrouped = {};
               iaPendingRaw.forEach(r => {
                 const key = `${r.employee_id}__${r.mission_id}`;
@@ -1050,27 +1051,22 @@ export default function Missions() {
                                 ))}
                               </div>
                             )}
-                            {isRequestExpired(r) && (
-                              <p className="text-xs text-orange-400 bg-orange-900/20 border border-orange-700/30 rounded-lg px-3 py-1.5">
-                                ⚠️ Prazo expirado — solicitações do mês anterior só podem ser aprovadas até o dia 04.
-                              </p>
-                            )}
                             <div className="flex gap-2 pt-1">
-                              <button
-                                onClick={() => handleApprove(r)}
-                                disabled={approving === r.id || isRequestExpired(r)}
-                                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                <CheckCircle className="w-3.5 h-3.5" />
-                                {approving === r.id ? "Aprovando..." : "Aprovar"}
-                              </button>
-                              <button
-                                onClick={() => { setRejectModal(r); setRejectNote(""); }}
-                                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-semibold transition-colors border border-red-700/40"
-                              >
-                                <XCircle className="w-3.5 h-3.5" />
-                                Rejeitar
-                              </button>
+                            <button
+                            onClick={() => handleApprove(r)}
+                            disabled={approving === r.id}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            {approving === r.id ? "Aprovando..." : "Aprovar"}
+                            </button>
+                            <button
+                            onClick={() => { setRejectModal(r); setRejectNote(""); }}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-semibold transition-colors border border-red-700/40"
+                            >
+                            <XCircle className="w-3.5 h-3.5" />
+                            Rejeitar
+                            </button>
                             </div>
                           </div>
                         ))}
@@ -1304,6 +1300,93 @@ export default function Missions() {
           })()}
         </div>
       )}
+      {/* TAB: Expiradas Gerência (igaming viewer) */}
+      {tab === "gerencia_expiradas" && isGerenteViewer && (() => {
+        const feiraFCIds = new Set(allProfiles.filter(p => p.sector === "Feira FC" && (p.role === "manager" || p.role === "director")).map(p => p.user_id || p.id));
+        const expired = requests.filter(r => r.status === "pendente" && r.sector === "Gerência" && !feiraFCIds.has(r.employee_id) && isRequestExpired(r));
+        return (
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+            <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+              <XCircle className="w-4 h-4 text-orange-400" />
+              Expiradas — Gerência
+              {expired.length > 0 && <span className="px-2 py-0.5 bg-orange-900/50 text-orange-300 text-xs rounded-full">{expired.length}</span>}
+            </h3>
+            {expired.length === 0 ? <p className="text-gray-500 text-sm text-center py-8">Nenhuma solicitação expirada.</p> : (
+              <div className="space-y-3">
+                {expired.map(r => (
+                  <div key={r.id} className="p-4 bg-orange-900/10 rounded-xl space-y-3 border border-orange-700/30">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-semibold text-sm">{r.mission_title}</p>
+                        <p className="text-gray-400 text-xs mt-0.5">{r.employee_name}</p>
+                        <p className="text-gray-500 text-xs">{r.sector} · {formatBRT(r.created_date, "date")}</p>
+                      </div>
+                      <span className="text-orange-400 font-bold text-sm shrink-0">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
+                    </div>
+                    {r.justification && <p className="flex items-start gap-1.5 text-gray-300 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700"><FaComment className="text-gray-500 shrink-0 mt-0.5" /> {r.justification}</p>}
+                    <div className="flex items-center gap-2 px-3 py-2 bg-orange-900/20 border border-orange-700/30 rounded-xl">
+                      <XCircle className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                      <p className="text-orange-400 text-xs font-medium">Prazo encerrado — aprovação disponível até o dia 04</p>
+                    </div>
+                    <div className="flex gap-2 pt-1">
+                      <button onClick={() => handleApprove(r)} disabled={approving === r.id} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-gray-700 hover:bg-green-600 text-gray-300 hover:text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50">
+                        <CheckCircle className="w-3.5 h-3.5" />{approving === r.id ? "Aprovando..." : "Aprovar mesmo assim"}
+                      </button>
+                      <button onClick={() => { setRejectModal(r); setRejectNote(""); }} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-semibold transition-colors border border-red-700/40">
+                        <XCircle className="w-3.5 h-3.5" />Rejeitar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* TAB: Expiradas IA/Automação (igaming viewer) */}
+      {tab === "ia_expiradas" && isIAViewer && (() => {
+        const expired = requests.filter(r => r.status === "pendente" && r.sector === "IA/Automação" && isRequestExpired(r));
+        return (
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+            <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+              <XCircle className="w-4 h-4 text-orange-400" />
+              Expiradas — IA/Automação
+              {expired.length > 0 && <span className="px-2 py-0.5 bg-orange-900/50 text-orange-300 text-xs rounded-full">{expired.length}</span>}
+            </h3>
+            {expired.length === 0 ? <p className="text-gray-500 text-sm text-center py-8">Nenhuma solicitação expirada.</p> : (
+              <div className="space-y-3">
+                {expired.map(r => (
+                  <div key={r.id} className="p-4 bg-orange-900/10 rounded-xl space-y-3 border border-orange-700/30">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-semibold text-sm">{r.mission_title}</p>
+                        <p className="text-gray-400 text-xs mt-0.5">{r.employee_name}</p>
+                        <p className="text-gray-500 text-xs">{r.sector} · {formatBRT(r.created_date, "date")}</p>
+                      </div>
+                      <span className="text-orange-400 font-bold text-sm shrink-0">{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
+                    </div>
+                    {r.justification && <p className="flex items-start gap-1.5 text-gray-300 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700"><FaComment className="text-gray-500 shrink-0 mt-0.5" /> {r.justification}</p>}
+                    <div className="flex items-center gap-2 px-3 py-2 bg-orange-900/20 border border-orange-700/30 rounded-xl">
+                      <XCircle className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                      <p className="text-orange-400 text-xs font-medium">Prazo encerrado — aprovação disponível até o dia 04</p>
+                    </div>
+                    <div className="flex gap-2 pt-1">
+                      <button onClick={() => handleApprove(r)} disabled={approving === r.id} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-gray-700 hover:bg-green-600 text-gray-300 hover:text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50">
+                        <CheckCircle className="w-3.5 h-3.5" />{approving === r.id ? "Aprovando..." : "Aprovar mesmo assim"}
+                      </button>
+                      <button onClick={() => { setRejectModal(r); setRejectNote(""); }} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-semibold transition-colors border border-red-700/40">
+                        <XCircle className="w-3.5 h-3.5" />Rejeitar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* TAB: Expiradas (manager) */}
       {tab === "expiradas" && isManager && (
         <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
