@@ -244,7 +244,9 @@ export default function Missions() {
     : [];
 
   // Cada solicitação aparece individualmente (sem agrupamento)
-  const groupedPendingRequests = pendingRequests.map(r => ({ ...r, _ids: [r.id], _qty: 1 }));
+  const allGroupedPendingRequests = pendingRequests.map(r => ({ ...r, _ids: [r.id], _qty: 1 }));
+  const groupedPendingRequests = allGroupedPendingRequests.filter(r => !isRequestExpired(r));
+  const expiredRequests = allGroupedPendingRequests.filter(r => isRequestExpired(r));
 
   const pendingCount = groupedPendingRequests.length;
 
@@ -422,7 +424,10 @@ export default function Missions() {
           { id: "minhas", label: "Minhas Sol.", onClick: () => { setTab("minhas"); setSelectedEmployeeFilter(""); } },
           ...(isGerenteViewer ? [{ id: "gerencia", label: "Gerência", badge: requests.filter(r => r.status === "pendente" && r.sector === "Gerência").length, onClick: () => setTab("gerencia") }] : []),
           ...(isIAViewer ? [{ id: "ia_automacao", label: "IA/Automação", badge: requests.filter(r => r.status === "pendente" && r.sector === "IA/Automação").length, onClick: () => setTab("ia_automacao") }] : []),
-          ...(isManager ? [{ id: "solicitacoes", label: "Solicitações", badge: pendingCount, onClick: () => setTab("solicitacoes") }] : [])
+          ...(isManager ? [
+            { id: "solicitacoes", label: "Solicitações", badge: pendingCount, onClick: () => setTab("solicitacoes") },
+            { id: "expiradas", label: "Expiradas", badge: 0, onClick: () => setTab("expiradas") }
+          ] : [])
         ].map(t => (
           <button
             key={t.id}
@@ -1192,12 +1197,6 @@ export default function Missions() {
                               ))}
                             </div>
                           )}
-                          {isRequestExpired(r) ? (
-                            <div className="flex items-center gap-2 px-3 py-2 bg-orange-900/20 border border-orange-700/30 rounded-xl">
-                              <XCircle className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-                              <p className="text-orange-400 text-xs font-medium">Prazo encerrado — solicitação expirada (prazo até dia 04)</p>
-                            </div>
-                          ) : (
                           <div className="flex gap-2 pt-1">
                             <button
                               onClick={() => handleApprove(r)}
@@ -1215,7 +1214,6 @@ export default function Missions() {
                               Rejeitar
                             </button>
                           </div>
-                          )}
                         </div>
                       ))}
                     </div>
@@ -1304,6 +1302,74 @@ export default function Missions() {
               </div>
             );
           })()}
+        </div>
+      )}
+      {/* TAB: Expiradas (manager) */}
+      {tab === "expiradas" && isManager && (
+        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+          <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+            <XCircle className="w-4 h-4 text-orange-400" />
+            Solicitações Expiradas
+            {expiredRequests.length > 0 && <span className="px-2 py-0.5 bg-orange-900/50 text-orange-300 text-xs rounded-full">{expiredRequests.length}</span>}
+          </h3>
+          <p className="text-gray-500 text-xs mb-4">Solicitações pendentes cujo prazo de aprovação expirou (mês anterior após o dia 04).</p>
+          {expiredRequests.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-8">Nenhuma solicitação expirada.</p>
+          ) : (
+            <div className="space-y-3">
+              {expiredRequests.map(r => (
+                <div key={r.id} className="p-4 bg-orange-900/10 rounded-xl space-y-3 border border-orange-700/30">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
+                        {r._qty > 1 && <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-900/50 text-amber-300 rounded-full">×{r._qty}</span>}
+                        {(() => { const m = missions.find(x => x.id === r.mission_id); return m?.frequency ? <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${m.frequency === "Diária" ? "bg-blue-900/30 border-blue-800/50 text-blue-300" : m.frequency === "Semanal" ? "bg-purple-900/30 border-purple-800/50 text-purple-300" : "bg-amber-900/30 border-amber-800/50 text-amber-300"}`}>{m.frequency}</span> : null; })()}
+                      </div>
+                      <p className="text-gray-400 text-xs mt-0.5">{r.employee_name}</p>
+                      <p className="text-gray-500 text-xs">{r.sector} · {formatBRT(r.created_date, "date")}</p>
+                    </div>
+                    <span className="text-orange-400 font-bold text-sm shrink-0">{r.mission_points > 0 ? "+" : ""}{r._qty > 1 ? (r.mission_points * r._qty).toLocaleString() : r.mission_points} pts</span>
+                  </div>
+                  {r.justification && (
+                    <p className="flex items-start gap-1.5 text-gray-300 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
+                      <FaComment className="text-gray-500 shrink-0 mt-0.5" /> {r.justification}
+                    </p>
+                  )}
+                  {r.attachments?.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {r.attachments.map((url, idx) => (
+                        <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-orange-500 transition-colors">
+                          <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 px-3 py-2 bg-orange-900/20 border border-orange-700/30 rounded-xl">
+                    <XCircle className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                    <p className="text-orange-400 text-xs font-medium">Prazo encerrado — solicitação expirada (prazo até dia 04 do mês seguinte)</p>
+                  </div>
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => handleApprove(r)}
+                      disabled={approving === r.id}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-gray-700 hover:bg-green-600 text-gray-300 hover:text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50"
+                    >
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      {approving === r.id ? "Aprovando..." : "Aprovar mesmo assim"}
+                    </button>
+                    <button
+                      onClick={() => { setRejectModal(r); setRejectNote(""); }}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-semibold transition-colors border border-red-700/40"
+                    >
+                      <XCircle className="w-3.5 h-3.5" />
+                      Rejeitar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
