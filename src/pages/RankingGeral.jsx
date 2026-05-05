@@ -506,7 +506,7 @@ export default function RankingGeral() {
       {selectedEmployee && (
         <EmployeeHistoryModal
           employee={selectedEmployee}
-          transactions={transactions.filter(t => t.employee_id === selectedEmployee.id)}
+          transactions={filteredRankingTxs.filter(t => t.employee_id === selectedEmployee.id)}
           onClose={() => setSelectedEmployee(null)}
         />
       )}
