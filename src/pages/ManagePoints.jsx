@@ -31,6 +31,7 @@ export default function ManagePoints() {
   const [syncingSheet, setSyncingSheet] = useState(false);
   const [editingTxId, setEditingTxId] = useState(null);
   const [editingTxDate, setEditingTxDate] = useState("");
+  const [effectiveUserRole, setEffectiveUserRole] = useState(null);
 
   const handleSyncToSheet = async () => {
     setSyncingSheet(true);
@@ -62,15 +63,20 @@ export default function ManagePoints() {
       setSubSectors(subs);
       const myProfile = emps.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
       const mySector = myProfile?.sector;
+      // Usa o role do perfil se disponível (caso o user auth tenha role diferente)
+      const effectiveRole = myProfile?.role || u.role;
+      setEffectiveUserRole(effectiveRole);
+      const isAdminEff = effectiveRole === "admin";
+      const isDirectorEff = effectiveRole === "director";
 
       const isGerencia = mySector === "Gerência";
       const myExtraSectors = myProfile?.extra_sectors || [];
       const allMySectors = mySector ? [mySector, ...myExtraSectors] : [];
 
       let filtered;
-      if (isAdmin && !mySector) {
+      if (isAdminEff && !mySector) {
         filtered = emps;
-      } else if (isDirector) {
+      } else if (isDirectorEff) {
         // Diretor vê gerentes + colaboradores do seu setor (exceto ele mesmo)
         const directorSector = myProfile?.sector;
         const directorExtraSectors = myProfile?.extra_sectors || [];
@@ -91,12 +97,12 @@ export default function ManagePoints() {
         });
       }
       setEmployees(filtered);
-      const filteredTxs = (isAdmin && !mySector) ? txs : isDirector ? txs.filter(t => t.sector === "Gerência") : txs.filter(t => allMySectors.includes(t.sector));
+      const filteredTxs = (isAdminEff && !mySector) ? txs : isDirectorEff ? txs.filter(t => t.sector === "Gerência") : txs.filter(t => allMySectors.includes(t.sector));
       setTransactions(filteredTxs);
-      const directorAllSectors = isDirector ? [myProfile?.sector, ...(myProfile?.extra_sectors || [])].filter(Boolean) : [];
-      const filteredMissions = (isAdmin && !mySector) ? ms : isDirector ? ms.filter(m => m.sector === "Gerência" || m.sector === "Todos" || directorAllSectors.includes(m.sector)) : ms.filter(m => allMySectors.includes(m.sector) || m.sector === "Todos" || m.sector === "Supervisor");
+      const directorAllSectors = isDirectorEff ? [myProfile?.sector, ...(myProfile?.extra_sectors || [])].filter(Boolean) : [];
+      const filteredMissions = (isAdminEff && !mySector) ? ms : isDirectorEff ? ms.filter(m => m.sector === "Gerência" || m.sector === "Todos" || directorAllSectors.includes(m.sector)) : ms.filter(m => allMySectors.includes(m.sector) || m.sector === "Todos" || m.sector === "Supervisor");
       setMissions(filteredMissions);
-      if (isAdmin || isDirector) setAllTransactions(allTxs);
+      if (isAdminEff || isDirectorEff) setAllTransactions(allTxs);
       } catch (e) {
         console.error("ManagePoints load error:", e);
       } finally {
@@ -106,9 +112,10 @@ export default function ManagePoints() {
     load();
   }, []);
 
-  const isAdmin = user?.role === "admin";
-  const isDirector = user?.role === "director";
-  const isManager = user?.role === "manager" || user?.role === "supervisor";
+  const resolvedRole = effectiveUserRole || user?.role;
+  const isAdmin = resolvedRole === "admin";
+  const isDirector = resolvedRole === "director";
+  const isManager = resolvedRole === "manager" || resolvedRole === "supervisor";
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -246,7 +253,7 @@ export default function ManagePoints() {
     </div>
   );
 
-  if (user?.role !== "admin" && user?.role !== "manager" && user?.role !== "supervisor" && user?.role !== "director") {
+  if (resolvedRole !== "admin" && resolvedRole !== "manager" && resolvedRole !== "supervisor" && resolvedRole !== "director") {
     return (
       <div className="text-center py-16 text-gray-500">
         <p>Acesso restrito a gerentes.</p>
