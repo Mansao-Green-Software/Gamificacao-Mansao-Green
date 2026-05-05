@@ -101,7 +101,7 @@ export default function GreenShop() {
   const lockedPoints = transactions.reduce((s, t) => {
     const pts = t.points || 0;
     if (pts <= 0) return s;
-    const d = dateToBRT(t.created_date);
+    const d = dateToBRT(t.transaction_date || t.created_date);
     return isMonthLocked(d.getMonth(), d.getFullYear()) ? s + pts : s;
   }, 0);
   // Pontos disponíveis = total - ganhos bloqueados (débitos já estão no total)
