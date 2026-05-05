@@ -113,6 +113,7 @@ export default function Missions() {
 
   const effectiveRole = profile?.role || user?.role;
   const isGerenteViewer = user?.email === "igaming@gruporoyalty.com";
+  const isIAViewer = user?.email === "igaming@gruporoyalty.com";
   const isAdmin = effectiveRole === "admin";
   const isDirector = effectiveRole === "director";
   const isManager = effectiveRole === "manager" || effectiveRole === "supervisor" || isAdmin || isDirector;
@@ -420,6 +421,7 @@ export default function Missions() {
           { id: "missoes", label: "Missões", onClick: () => { setTab("missoes"); setSelectedEmployeeFilter(""); } },
           { id: "minhas", label: "Minhas Sol.", onClick: () => { setTab("minhas"); setSelectedEmployeeFilter(""); } },
           ...(isGerenteViewer ? [{ id: "gerencia", label: "Gerência", badge: requests.filter(r => r.status === "pendente" && r.sector === "Gerência").length, onClick: () => setTab("gerencia") }] : []),
+          ...(isIAViewer ? [{ id: "ia_automacao", label: "IA/Automação", badge: requests.filter(r => r.status === "pendente" && r.sector === "IA/Automação").length, onClick: () => setTab("ia_automacao") }] : []),
           ...(isManager ? [{ id: "solicitacoes", label: "Solicitações", badge: pendingCount, onClick: () => setTab("solicitacoes") }] : [])
         ].map(t => (
           <button
@@ -948,6 +950,151 @@ export default function Missions() {
                           {r.status === "aprovado" && r.approved_by_name && (
                             <p className="text-xs text-gray-500">por {r.approved_by_name}</p>
                           )}
+                          {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
+                        </div>
+                      </div>
+                      {r.justification && (
+                        <p className="flex items-center gap-1.5 text-gray-300 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
+                          <FaComment className="text-gray-500 shrink-0" /> {r.justification}
+                        </p>
+                      )}
+                      {r.attachments?.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {r.attachments.map((url, idx) => (
+                            <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
+                              <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
+      {/* TAB: IA/Automação (igaming viewer) */}
+      {tab === "ia_automacao" && isIAViewer && (
+        <div className="space-y-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+            <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-amber-400" />
+              Solicitações de IA/Automação — Pendentes
+            </h3>
+            {(() => {
+              const iaPendingRaw = requests.filter(r => r.status === "pendente" && r.sector === "IA/Automação");
+              const iaGrouped = {};
+              iaPendingRaw.forEach(r => {
+                const key = `${r.employee_id}__${r.mission_id}`;
+                if (!iaGrouped[key]) iaGrouped[key] = { ...r, _ids: [r.id], _qty: 1 };
+                else { iaGrouped[key]._ids.push(r.id); iaGrouped[key]._qty += 1; }
+              });
+              const iaPending = Object.values(iaGrouped);
+              const peopleInIA = allProfiles.filter(p => p.sector === "IA/Automação");
+
+              return (
+                <div className="space-y-4">
+                  {peopleInIA.length > 0 && (
+                    <div className="flex items-center gap-2 mb-4">
+                      <Search className="w-4 h-4 text-gray-500" />
+                      <select
+                        value={selectedEmployeeFilter}
+                        onChange={e => setSelectedEmployeeFilter(e.target.value)}
+                        className="bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-green-500"
+                      >
+                        <option value="">Filtrar por pessoa (Todos)</option>
+                        {[...peopleInIA].sort((a, b) => a.full_name.localeCompare(b.full_name, "pt-BR")).map(p => (
+                          <option key={p.id} value={p.user_id || p.id}>{p.full_name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  {(() => {
+                    const filtered = iaPending.filter(r => !selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter);
+                    if (filtered.length === 0) return <p className="text-gray-500 text-sm py-4 italic">Nenhuma solicitação pendente.</p>;
+                    return (
+                      <div className="space-y-3">
+                        {filtered.map(r => (
+                          <div key={r.id} className="p-4 bg-gray-900/50 rounded-xl space-y-3 border border-gray-700/50">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
+                                  {r._qty > 1 && <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-900/50 text-amber-300 rounded-full">×{r._qty}</span>}
+                                  {(() => { const m = missions.find(x => x.id === r.mission_id); return m?.frequency ? <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${m.frequency === "Diária" ? "bg-blue-900/30 border-blue-800/50 text-blue-300" : m.frequency === "Semanal" ? "bg-purple-900/30 border-purple-800/50 text-purple-300" : "bg-amber-900/30 border-amber-800/50 text-amber-300"}`}>{m.frequency}</span> : null; })()}
+                                </div>
+                                <p className="text-gray-400 text-xs mt-0.5">{r.employee_name}</p>
+                                <p className="text-gray-500 text-xs">{r.sector} · {formatBRT(r.created_date, "date")}</p>
+                              </div>
+                              <span className="text-green-400 font-bold text-sm shrink-0">{r.mission_points > 0 ? "+" : ""}{r._qty > 1 ? (r.mission_points * r._qty).toLocaleString() : r.mission_points} pts</span>
+                            </div>
+                            {r.justification && (
+                              <p className="flex items-start gap-1.5 text-gray-300 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
+                                <FaComment className="text-gray-500 shrink-0 mt-0.5" /> {r.justification}
+                              </p>
+                            )}
+                            {r.attachments?.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {r.attachments.map((url, idx) => (
+                                  <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
+                                    <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+                            {isRequestExpired(r) && (
+                              <p className="text-xs text-orange-400 bg-orange-900/20 border border-orange-700/30 rounded-lg px-3 py-1.5">
+                                ⚠️ Prazo expirado — solicitações do mês anterior só podem ser aprovadas até o dia 04.
+                              </p>
+                            )}
+                            <div className="flex gap-2 pt-1">
+                              <button
+                                onClick={() => handleApprove(r)}
+                                disabled={approving === r.id || isRequestExpired(r)}
+                                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5" />
+                                {approving === r.id ? "Aprovando..." : "Aprovar"}
+                              </button>
+                              <button
+                                onClick={() => { setRejectModal(r); setRejectNote(""); }}
+                                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-semibold transition-colors border border-red-700/40"
+                              >
+                                <XCircle className="w-3.5 h-3.5" />
+                                Rejeitar
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              );
+            })()}
+          </div>
+          {(() => {
+            const iaHistory = requests.filter(r => r.status !== "pendente" && r.sector === "IA/Automação" && (!selectedEmployeeFilter || r.employee_id === selectedEmployeeFilter));
+            if (iaHistory.length === 0) return null;
+            return (
+              <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+                <h3 className="text-white font-bold mb-4">Histórico de IA/Automação</h3>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {iaHistory.map(r => (
+                    <div key={r.id} className="p-3 bg-gray-900/50 rounded-xl space-y-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm font-medium">{r.mission_title}</p>
+                          <p className="text-gray-500 text-xs">{r.employee_name} · {formatBRT(r.created_date, "date")}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
+                            {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
+                          </span>
+                          {r.status === "aprovado" && r.approved_by_name && <p className="text-xs text-gray-500">por {r.approved_by_name}</p>}
                           {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
                         </div>
                       </div>
