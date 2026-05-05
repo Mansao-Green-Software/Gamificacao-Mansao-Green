@@ -1132,15 +1132,6 @@ export default function Missions() {
                     <XCircle className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                     <p className="text-orange-400 text-xs font-medium">Prazo encerrado — solicitação expirada (prazo até dia 04 do mês seguinte)</p>
                   </div>
-                  <div className="flex gap-2 pt-1">
-                    <button
-                      onClick={() => openRejectModal(r)}
-                      className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-semibold transition-colors border border-red-700/40"
-                    >
-                      <XCircle className="w-3.5 h-3.5" />
-                      Rejeitar
-                    </button>
-                  </div>
                 </div>
               ))}
             </div>
