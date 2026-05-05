@@ -4,8 +4,7 @@ import { formatBRT } from "@/utils/dateUtils";
 export default function EmployeeHistoryModal({ employee, transactions, onClose }) {
   if (!employee) return null;
 
-  const empTxs = transactions
-    .filter(t => t.employee_id === employee.id)
+  const empTxs = [...transactions]
     .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
   const total = empTxs
