@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams, refreshAppParams } from '@/lib/app-params';
-import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
+import axios from 'axios';
 
 const AuthContext = createContext();
 
@@ -58,17 +58,12 @@ export const AuthProvider = ({ children }) => {
       
       // First, check app public settings (with token if available)
       // This will tell us if auth is required, user not registered, etc.
-      const appClient = createAxiosClient({
-        baseURL: `/api/apps/public`,
-        headers: {
-          'X-App-Id': appParams.appId
-        },
-        token: tokenToUse, // Include token if available
-        interceptResponses: true
-      });
+      const headers = { 'X-App-Id': appParams.appId };
+      if (tokenToUse) headers['Authorization'] = `Bearer ${tokenToUse}`;
       
       try {
-        const publicSettings = await appClient.get(`/prod/public-settings/by-id/${appParams.appId}`);
+        const response = await axios.get(`/api/apps/public/prod/public-settings/by-id/${appParams.appId}`, { headers });
+        const publicSettings = response.data;
         console.log('[AUTH DEBUG] public settings OK', { hasToken: !!tokenToUse });
         setAppPublicSettings(publicSettings);
         setAuthError(null); // Clear any previous errors
@@ -82,49 +77,32 @@ export const AuthProvider = ({ children }) => {
         }
         setIsLoadingPublicSettings(false);
       } catch (appError) {
-        console.error('[AUTH DEBUG] App state check failed:', {
-          status: appError.status,
-          message: appError.message,
-          data: appError.data,
-          reason: appError.data?.extra_data?.reason,
-        });
+        const status = appError.response?.status || appError.status;
+        const data = appError.response?.data || appError.data;
+        const reason = data?.extra_data?.reason;
+
+        console.error('[AUTH DEBUG] App state check failed:', { status, message: appError.message, reason });
         
         // Handle app-level errors
-        if (appError.status === 403 && appError.data?.extra_data?.reason) {
-          const reason = appError.data.extra_data.reason;
+        if (status === 403 && reason) {
           if (reason === 'auth_required') {
-            setAuthError({
-              type: 'auth_required',
-              message: 'Authentication required'
-            });
+            setAuthError({ type: 'auth_required', message: 'Authentication required' });
           } else if (reason === 'user_not_registered') {
-            setAuthError({
-              type: 'user_not_registered',
-              message: 'User not registered for this app'
-            });
+            setAuthError({ type: 'user_not_registered', message: 'User not registered for this app' });
           } else {
-            setAuthError({
-              type: reason,
-              message: appError.message
-            });
+            setAuthError({ type: reason, message: appError.message });
           }
-        } else if (appError.status === 401 || appError.status === 403) {
-          // Token expired, invalid, or auth check failed - try to validate user with token
+        } else if (status === 401 || status === 403) {
           if (tokenToUse) {
-            // Try to validate the user with the token we have
             await checkUserAuth();
           } else {
-            setAuthError({
-              type: 'auth_required',
-              message: 'Authentication required'
-            });
+            setAuthError({ type: 'auth_required', message: 'Authentication required' });
             setIsLoadingPublicSettings(false);
             setIsLoadingAuth(false);
           }
           setIsLoadingPublicSettings(false);
           return;
         } else {
-          // Don't set generic unknown error - just fail silently
           setAuthError(null);
         }
         setIsLoadingPublicSettings(false);
