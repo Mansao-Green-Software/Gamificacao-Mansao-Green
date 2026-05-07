@@ -622,7 +622,8 @@ export default function Missions() {
                                   return r.mission_id === mission.id && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && r.status !== "rejeitado";
                                 }).length >= 1;
                               })();
-                              const isBlocked = (!hasCustomLimit && pending) || blockedByFrequency || blockedByMonthlyLimit;
+                              const allowMultiplePending = mission.title === "Novo commit";
+              const isBlocked = (!hasCustomLimit && pending && !allowMultiplePending) || blockedByFrequency || blockedByMonthlyLimit;
                               const freqLabel = mission.frequency === "Diária" ? "hoje" : mission.frequency === "Semanal" ? "esta semana" : "este mês";
 
                               return (
