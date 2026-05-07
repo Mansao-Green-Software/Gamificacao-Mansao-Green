@@ -361,7 +361,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Saldo Atual</span>
               </div>
-              <p className="text-3xl font-bold text-white mb-5">{myPoints.toLocaleString()} <span className="text-sm font-normal text-gray-500">pts</span></p>
+              <p className="text-3xl font-bold text-white mb-5">{myFilteredPoints.toLocaleString()} <span className="text-sm font-normal text-gray-500">pts</span></p>
             </div>
           </div>
 
