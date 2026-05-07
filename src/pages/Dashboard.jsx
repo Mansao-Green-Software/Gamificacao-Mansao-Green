@@ -196,9 +196,10 @@ export default function Dashboard() {
   const filteredTransactions = filterByPeriod(transactions);
 
   const myTxs = filteredTransactions.filter(t =>
-    t.employee_id === user?.id ||
+    (t.employee_id === user?.id ||
     (myProfile3 && (t.employee_id === myProfile3.id || t.employee_id === myProfile3.user_id)) ||
-    t.employee_name === (myProfile3?.full_name || user?.full_name)
+    t.employee_name === (myProfile3?.full_name || user?.full_name)) &&
+    !t.description?.startsWith("Resgate:")
   );
 
   // Pontos e ranking calculados a partir das transações filtradas
