@@ -1,0 +1,9 @@
+{
+  "name": "Mans\u00e3o Green Gamified",
+  "site": {
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "serveCommand": "npm run dev",
+    "outputDirectory": "./dist"
+  }
+}
