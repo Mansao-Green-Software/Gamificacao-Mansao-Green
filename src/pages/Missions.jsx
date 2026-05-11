@@ -243,7 +243,12 @@ export default function Missions() {
     (profile?.id && r.employee_id === profile.id)
   );
   const myRequestMap = {};
-  myRequests.forEach(r => { if (!myRequestMap[r.mission_id]) myRequestMap[r.mission_id] = r; });
+  // Ignorar solicitações expiradas no mapa (para não bloquear novas solicitações)
+  myRequests.forEach(r => {
+    if (!myRequestMap[r.mission_id] && !(r.status === "pendente" && isRequestExpired(r))) {
+      myRequestMap[r.mission_id] = r;
+    }
+  });
 
   const myId = profile?.user_id || profile?.id || user?.id;
 
@@ -256,7 +261,7 @@ export default function Missions() {
     if (!mission.frequency) return false;
     const now = new Date();
     const relevantRequests = myRequests.filter(r =>
-      r.mission_id === mission.id && (r.status === "pendente" || r.status === "aprovado")
+      r.mission_id === mission.id && (r.status === "pendente" || r.status === "aprovado") && !(r.status === "pendente" && isRequestExpired(r))
     );
     const customLimit = MULTI_REQUEST_LIMITS[mission.title];
     if (customLimit !== undefined) {
@@ -614,7 +619,8 @@ export default function Missions() {
                               const customLimit = MULTI_REQUEST_LIMITS[mission.title];
                               const hasCustomLimit = customLimit !== undefined;
                               const blockedByFrequency = isRequestBlockedByFrequency(mission);
-                              const pendingOrApprovedCount = myRequests.filter(r => r.mission_id === mission.id && (r.status === "pendente" || r.status === "aprovado")).length;
+                              // Não contar solicitações expiradas no total
+                              const pendingOrApprovedCount = myRequests.filter(r => r.mission_id === mission.id && (r.status === "pendente" || r.status === "aprovado") && !(r.status === "pendente" && isRequestExpired(r))).length;
                               const blockedByMonthlyLimit = user?.email === MONTHLY_LIMIT_EMAIL && (() => {
                                 const now = new Date();
                                 return myRequests.filter(r => {
