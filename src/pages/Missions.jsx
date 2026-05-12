@@ -316,7 +316,9 @@ export default function Missions() {
           if (empProfile?.role === "supervisor" || empProfile?.role === "manager" || empProfile?.role === "admin") return false;
           return allMySectors.includes(effectiveSector) || missionSector === "Todos";
         }
-        return allMySectors.includes(effectiveSector) || missionSector === "Todos" || allMySectors.includes(missionSector);
+        // Para manager: filtrar apenas por setor do colaborador, não pelo setor da missão
+        // Missões "Todos" são visíveis mas só para colaboradores do setor do gerente
+        return allMySectors.includes(effectiveSector);
       })
     : [];
 
