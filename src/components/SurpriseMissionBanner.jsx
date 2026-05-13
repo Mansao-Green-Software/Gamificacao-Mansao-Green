@@ -130,6 +130,8 @@ export default function SurpriseMissionBanner({ isAdmin, userSector, user, profi
     if (user === undefined) return;
     loadedRef.current = true;
     const init = async () => {
+      // Small delay to stagger API calls away from Dashboard's initial burst
+      await new Promise(r => setTimeout(r, 2000));
       const fetches = [base44.entities.SurpriseMission.filter({ is_active: true })];
       if (user) fetches.push(base44.entities.MissionRequest.filter({ employee_id: user.id }, "-created_date", 100));
       const [list, reqs = []] = await Promise.all(fetches);

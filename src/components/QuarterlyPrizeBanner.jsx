@@ -14,10 +14,13 @@ export default function QuarterlyPrizeBanner({ isAdmin }) {
   useEffect(() => {
     if (loadedRef.current) return;
     loadedRef.current = true;
-    base44.entities.QuarterlyPrize.filter({ is_active: true }).then((list) => {
-      if (list.length > 0) setPrize(list[0]);
-      setLoading(false);
-    });
+    // Delay to stagger away from Dashboard's initial API burst
+    setTimeout(() => {
+      base44.entities.QuarterlyPrize.filter({ is_active: true }).then((list) => {
+        if (list.length > 0) setPrize(list[0]);
+        setLoading(false);
+      });
+    }, 800);
   }, []);
 
   const openEdit = () => {

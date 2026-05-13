@@ -28,9 +28,11 @@ export default function NotificationBell({ userId }) {
   };
 
   useEffect(() => {
-    load();
-    const interval = setInterval(load, 60000);
-    return () => clearInterval(interval);
+    if (!userId) return;
+    // Delay initial load by 3s to avoid hammering API at the same time as Dashboard
+    const initialTimer = setTimeout(load, 3000);
+    const interval = setInterval(load, 300000); // poll every 5 minutes
+    return () => { clearTimeout(initialTimer); clearInterval(interval); };
   }, [userId]);
 
   useEffect(() => {
