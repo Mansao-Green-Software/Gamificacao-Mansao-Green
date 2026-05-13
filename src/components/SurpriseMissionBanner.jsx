@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Zap, Plus, Edit2, Check, X, Trash2, ListChecks, Clock, RotateCcw, Camera, Trophy, Star, Gift, Flame, Target } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -115,6 +115,7 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
   const [attachments, setAttachments] = useState([]);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const loadedRef = useRef(false);
 
   const handleAttachmentUpload = async (file) => {
     if (!file) return;
@@ -125,6 +126,8 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
   };
 
   useEffect(() => {
+    if (loadedRef.current) return;
+    loadedRef.current = true;
     const init = async () => {
       const u = await base44.auth.me().catch(() => null);
       setUser(u);

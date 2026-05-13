@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Trophy, Star, Gift, Plus, Edit2, Check, X, Camera } from "lucide-react";
 
@@ -9,8 +9,11 @@ export default function QuarterlyPrizeBanner({ isAdmin }) {
   const [form, setForm] = useState({ title: "", description: "", quarter: "", image_url: "" });
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const loadedRef = useRef(false);
 
   useEffect(() => {
+    if (loadedRef.current) return;
+    loadedRef.current = true;
     base44.entities.QuarterlyPrize.filter({ is_active: true }).then((list) => {
       if (list.length > 0) setPrize(list[0]);
       setLoading(false);
