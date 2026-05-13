@@ -17,6 +17,7 @@ export default function Layout({ children, currentPageName }) {
   const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem("app_logo_url") || "");
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem("app_theme") || "dark");
+  const profileLoadedRef = useRef(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -36,12 +37,12 @@ export default function Layout({ children, currentPageName }) {
   };
 
   useEffect(() => {
-    if (user) {
-      base44.entities.EmployeeProfile.list().then(all => {
-        const found = all.find(p => (p.user_id && p.user_id === user.id) || p.email === user.email);
-        if (found) setProfile(found);
-      }).catch(() => {});
-    }
+    if (!user || profileLoadedRef.current) return;
+    profileLoadedRef.current = true;
+    base44.entities.EmployeeProfile.filter({ user_id: user.id }).then(all => {
+      const found = all.find(p => (p.user_id && p.user_id === user.id) || p.email === user.email);
+      if (found) setProfile(found);
+    }).catch(() => {});
   }, [user]);
 
   const isAdmin = user?.role === "admin";

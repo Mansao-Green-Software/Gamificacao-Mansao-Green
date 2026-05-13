@@ -85,7 +85,7 @@ const decodeStyleFromMission = (mission) => {
   };
 };
 
-export default function SurpriseMissionBanner({ isAdmin, userSector }) {
+export default function SurpriseMissionBanner({ isAdmin, userSector, user, profile }) {
   const isMobile = useIsMobile();
   const [missions, setMissions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -106,8 +106,6 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
   const [editingId, setEditingId] = useState(null);
   const [expandedRules, setExpandedRules] = useState({});
   const toggleRules = (id) => setExpandedRules(p => ({ ...p, [id]: !p[id] }));
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
   const [myRequests, setMyRequests] = useState([]);
   const [requestModal, setRequestModal] = useState(null);
   const [justification, setJustification] = useState("");
@@ -129,27 +127,22 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
     if (loadedRef.current) return;
     loadedRef.current = true;
     const init = async () => {
-      const u = await base44.auth.me().catch(() => null);
-      setUser(u);
-      const [list, profs, reqs] = await Promise.all([
+      const [list, reqs] = await Promise.all([
         base44.entities.SurpriseMission.filter({ is_active: true }),
-        base44.entities.EmployeeProfile.list(null, 500),
-        u ? base44.entities.MissionRequest.list("-created_date", 200) : Promise.resolve([]),
+        user ? base44.entities.MissionRequest.list("-created_date", 200) : Promise.resolve([]),
       ]);
       const enrichedMissions = list.map(m => {
         const decoded = decodeStyleFromMission(m);
         return { ...m, ...decoded };
       });
       setMissions(enrichedMissions);
-      if (u) {
-        const p = profs.find(p => p.user_id === u.id || p.email === u.email);
-        setProfile(p || null);
-        setMyRequests(reqs.filter(r => r.employee_id === u.id || (p && (r.employee_id === p.user_id || r.employee_id === p.id))));
+      if (user) {
+        setMyRequests(reqs.filter(r => r.employee_id === user.id || (profile && (r.employee_id === profile.user_id || r.employee_id === profile.id))));
       }
       setLoading(false);
     };
     init();
-  }, []);
+  }, [user]);
   const getReqStatus = (missionId) => {
     const missionRequests = myRequests.filter(r => r.mission_id === missionId);
     if (missionRequests.some(r => r.status === "pendente")) return "pendente";
