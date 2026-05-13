@@ -130,7 +130,7 @@ export default function SurpriseMissionBanner({ isAdmin, userSector }) {
       setUser(u);
       const [list, profs, reqs] = await Promise.all([
         base44.entities.SurpriseMission.filter({ is_active: true }),
-        base44.entities.EmployeeProfile.list(),
+        base44.entities.EmployeeProfile.list(null, 500),
         u ? base44.entities.MissionRequest.list("-created_date", 200) : Promise.resolve([]),
       ]);
       const enrichedMissions = list.map(m => {
