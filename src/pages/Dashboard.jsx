@@ -364,9 +364,9 @@ export default function Dashboard() {
           </div>
 
           {/* Histórico */}
-          <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-6">
-            <h2 className="text-white font-bold mb-4 flex items-center gap-2">
-              <History className="w-5 h-5 text-green-400" />
+          <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-4 sm:p-6">
+            <h2 className="text-white font-bold mb-3 flex items-center gap-2 text-sm">
+              <History className="w-4 h-4 text-green-400" />
               Histórico de Pontuações
             </h2>
             {myTxs.length === 0 ? (
@@ -500,9 +500,9 @@ export default function Dashboard() {
                 return topEmployees.map((emp, idx) => {
                   const isMe = emp.id === user?.id || emp.id === myProfile3?.user_id;
                   return (
-                    <div key={emp.id} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
-                      <span className="w-7 flex items-center justify-center shrink-0">{getMedal(idx)}</span>
-                      <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0 border border-gray-700">
+                    <div key={emp.id} className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
+                      <span className="w-6 sm:w-7 flex items-center justify-center shrink-0">{getMedal(idx)}</span>
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0 border border-gray-700">
                         {emp.photo ? (
                           <img src={emp.photo} alt={emp.name} className="w-full h-full object-cover" />
                         ) : (
@@ -513,11 +513,11 @@ export default function Dashboard() {
                         <div className="flex justify-between items-center mb-1">
                           <div className="min-w-0 flex flex-col">
                             <p className="text-white text-xs font-bold truncate">{emp.name}</p>
-                            {emp.sector && <p className="text-gray-500 text-[10px] uppercase tracking-wider truncate">{emp.sector}</p>}
+                            {emp.sector && <p className="text-gray-500 text-[9px] uppercase tracking-wider truncate">{emp.sector}</p>}
                           </div>
-                          <span className="text-green-400 font-bold text-xs shrink-0 ml-2">{emp.points.toLocaleString()} pts</span>
+                          <span className="text-green-400 font-bold text-xs shrink-0 ml-1">{emp.points.toLocaleString()} pts</span>
                         </div>
-                        <div className="h-2 rounded-sm bg-gray-700 overflow-hidden">
+                        <div className="h-1.5 rounded-sm bg-gray-700 overflow-hidden">
                           <div
                             className={`h-full rounded-sm bg-gradient-to-tr ${SECTOR_COLORS[emp.sector] || "from-green-500 to-teal-500"}`}
                             style={{ width: `${(emp.points / maxPoints) * 100}%` }}
@@ -534,19 +534,19 @@ export default function Dashboard() {
 
         {/* Recent transactions */}
         {myTxs.length > 0 && (
-          <div className="bg-gray-800/40 border border-gray-700 rounded-xl p-6">
-            <h2 className="text-white font-bold mb-4 flex items-center gap-2">
-              <Target className="w-5 h-5 text-green-400" />
-              Últimas Pontuações Recebidas
+          <div className="bg-gray-800/40 border border-gray-700 rounded-xl p-4 sm:p-6">
+            <h2 className="text-white font-bold mb-3 flex items-center gap-2 text-sm">
+              <Target className="w-4 h-4 text-green-400" />
+              Últimas Pontuações
             </h2>
             <div className="space-y-2">
               {myTxs.slice(0, 5).map(tx => (
-                <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl">
-                  <div>
-                    <p className="text-white text-sm font-medium">{tx.mission_title || tx.description || "Pontuação manual"}</p>
-                    <p className="text-gray-500 text-xs">por {tx.awarded_by_name || "Admin"} · {formatBRT(tx.created_date)}</p>
+                <div key={tx.id} className="flex items-center justify-between gap-2 p-2.5 bg-gray-900/50 rounded-xl">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-white text-xs font-medium truncate">{tx.mission_title || tx.description || "Pontuação manual"}</p>
+                    <p className="text-gray-500 text-[10px]">por {tx.awarded_by_name || "Admin"} · {formatBRT(tx.created_date)}</p>
                   </div>
-                  <span className={`font-bold ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>{tx.points >= 0 ? "+" : ""}{tx.points}</span>
+                  <span className={`font-bold text-sm shrink-0 ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>{tx.points >= 0 ? "+" : ""}{tx.points}</span>
                 </div>
               ))}
             </div>
