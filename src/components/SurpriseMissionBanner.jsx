@@ -124,19 +124,18 @@ export default function SurpriseMissionBanner({ isAdmin, userSector, user, profi
   };
 
   useEffect(() => {
+    // Wait until user is resolved (could be null for non-logged-in, but Dashboard always passes it)
     if (loadedRef.current) return;
+    // Only run once user prop has been provided (not undefined)
+    if (user === undefined) return;
     loadedRef.current = true;
     const init = async () => {
-      const [list, reqs] = await Promise.all([
-        base44.entities.SurpriseMission.filter({ is_active: true }),
-        user ? base44.entities.MissionRequest.list("-created_date", 200) : Promise.resolve([]),
-      ]);
-      const enrichedMissions = list.map(m => {
-        const decoded = decodeStyleFromMission(m);
-        return { ...m, ...decoded };
-      });
+      const fetches = [base44.entities.SurpriseMission.filter({ is_active: true })];
+      if (user) fetches.push(base44.entities.MissionRequest.filter({ employee_id: user.id }, "-created_date", 100));
+      const [list, reqs = []] = await Promise.all(fetches);
+      const enrichedMissions = list.map(m => ({ ...m, ...decodeStyleFromMission(m) }));
       setMissions(enrichedMissions);
-      if (user) {
+      if (user && reqs) {
         setMyRequests(reqs.filter(r => r.employee_id === user.id || (profile && (r.employee_id === profile.user_id || r.employee_id === profile.id))));
       }
       setLoading(false);
