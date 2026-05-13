@@ -287,9 +287,9 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* Period filters row */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1">
+        {/* Period filters + tabs row */}
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 shrink-0">
             {[
               { id: "mensal", label: "Mensal" },
               { id: "trimestral", label: "Abr-Jun" },
@@ -298,7 +298,7 @@ export default function Dashboard() {
               <button
                 key={p.id}
                 onClick={() => setPeriodMode(p.id)}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${periodMode === p.id ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
+                className={`px-2 py-1.5 rounded-lg text-xs font-bold transition-colors ${periodMode === p.id ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
               >
                 {p.label}
               </button>
@@ -308,21 +308,21 @@ export default function Dashboard() {
             <select
               value={monthFilter}
               onChange={e => setMonthFilter(e.target.value)}
-              className="flex-1 min-w-0 bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-green-500"
+              className="flex-1 min-w-0 bg-gray-900 border border-gray-700 text-white rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:border-green-500"
             >
               {Array.from({ length: 12 }, (_, i) => {
                 const d = new Date();
                 d.setDate(1);
                 d.setMonth(d.getMonth() - i);
                 const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-                const label = d.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+                const label = d.toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
                 return <option key={value} value={value}>{label.charAt(0).toUpperCase() + label.slice(1)}</option>;
               })}
             </select>
           )}
         </div>
 
-        <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-full sm:w-fit">
+        <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-full">
           {[
             { id: "overview", label: "Visão Geral" },
             { id: "mypoints", label: "Meus Pontos" }
@@ -330,7 +330,7 @@ export default function Dashboard() {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`relative flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition-colors outline-none flex items-center justify-center gap-1.5 ${activeTab === t.id ? "text-gray-900" : "text-gray-400 hover:text-white"}`}
+              className={`relative flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors outline-none flex items-center justify-center gap-1.5 ${activeTab === t.id ? "text-gray-900" : "text-gray-400 hover:text-white"}`}
             >
               {activeTab === t.id && (
                 <motion.div
@@ -404,19 +404,18 @@ export default function Dashboard() {
       {activeTab === "overview" && <>
 
         {/* My stats */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-4">
-          <div className="bg-gray-800/40 border-l-4 border-green-600 rounded-xl p-3 sm:p-5">
-            <span className="text-gray-500 text-[10px] sm:text-[12px] font-bold uppercase tracking-widest block mb-1 sm:mb-2">Pontos</span>
-            <p className="text-xl sm:text-3xl font-bold text-white">{myFilteredPoints.toLocaleString()}</p>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-gray-800/40 border-l-4 border-green-600 rounded-xl p-2.5 sm:p-5">
+            <span className="text-gray-500 text-[9px] sm:text-[12px] font-bold uppercase tracking-widest block mb-0.5 sm:mb-2">Pontos</span>
+            <p className="text-lg sm:text-3xl font-bold text-white leading-tight">{myFilteredPoints.toLocaleString()}</p>
           </div>
-          <div className="bg-gray-800/40 border-l-4 border-amber-500 rounded-xl p-3 sm:p-5">
-            <span className="text-gray-500 text-[10px] sm:text-[12px] font-bold uppercase tracking-widest block mb-1 sm:mb-2">Ranking</span>
-            <p className="text-xl sm:text-3xl font-bold text-white">{myFilteredRank ? `#${myFilteredRank}` : "-"}</p>
-            {mySector && <p className="text-[10px] text-gray-500 mt-0.5 truncate hidden sm:block">no {mySector}</p>}
+          <div className="bg-gray-800/40 border-l-4 border-amber-500 rounded-xl p-2.5 sm:p-5">
+            <span className="text-gray-500 text-[9px] sm:text-[12px] font-bold uppercase tracking-widest block mb-0.5 sm:mb-2">Ranking</span>
+            <p className="text-lg sm:text-3xl font-bold text-white leading-tight">{myFilteredRank ? `#${myFilteredRank}` : "-"}</p>
           </div>
-          <div className="bg-gray-800/40 border-l-4 border-blue-500 rounded-xl p-3 sm:p-5">
-            <span className="text-gray-500 text-[10px] sm:text-[12px] font-bold uppercase tracking-widest block mb-1 sm:mb-2">Setor</span>
-            <p className="text-sm sm:text-lg font-bold text-white truncate">{mySector || "—"}</p>
+          <div className="bg-gray-800/40 border-l-4 border-blue-500 rounded-xl p-2.5 sm:p-5">
+            <span className="text-gray-500 text-[9px] sm:text-[12px] font-bold uppercase tracking-widest block mb-0.5 sm:mb-2">Setor</span>
+            <p className="text-xs sm:text-lg font-bold text-white truncate leading-tight">{mySector || "—"}</p>
           </div>
         </div>
 
