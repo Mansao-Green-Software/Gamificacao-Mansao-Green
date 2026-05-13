@@ -153,11 +153,11 @@ export default function SurpriseMissionBanner({ isAdmin, userSector, user, profi
   const handleSubmitRequest = async () => {
     if (!requestModal || !user) return;
     setSubmitting(true);
-    const effectiveRole = profile?.role || user.role;
+    const effectiveRole = profile?.role || user?.role;
     const sector = effectiveRole === "manager" || effectiveRole === "admin" ? "Gerência" : effectiveRole === "supervisor" ? "Supervisor" : (profile?.sector || userSector || "Todos");
     const req = await base44.entities.MissionRequest.create({
-      employee_id: profile?.user_id || profile?.id || user.id,
-      employee_name: profile?.full_name || user.full_name,
+      employee_id: profile?.user_id || profile?.id || user?.id,
+      employee_name: profile?.full_name || user?.full_name,
       sector,
       mission_id: requestModal.id,
       mission_title: requestModal.title,

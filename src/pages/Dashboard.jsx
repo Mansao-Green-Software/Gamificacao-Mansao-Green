@@ -271,7 +271,7 @@ export default function Dashboard() {
       <QuarterlyPrizeBanner isAdmin={isAdmin} />
 
       {/* Surprise Mission Banner */}
-      <SurpriseMissionBanner isAdmin={isAdmin} userSector={mySector} />
+      <SurpriseMissionBanner isAdmin={isAdmin} userSector={mySector} user={user} profile={profile} />
 
       {/* Header */}
       <div className="space-y-3">
