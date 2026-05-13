@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { motion } from "framer-motion";
 import { Trophy, Star, Target, TrendingUp, Medal, History, TrendingDown, RotateCcw, Crown } from "lucide-react";
 import { formatBRT } from "@/utils/dateUtils";
@@ -55,6 +56,7 @@ const getMedal = (idx) => {
 };
 
 export default function Dashboard() {
+  const { user: authUser } = useAuth();
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -157,13 +159,15 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    if (!authUser) return;
     if (loadedRef.current) return;
     loadedRef.current = true;
     const load = async () => {
       try {
-        const u = await base44.auth.me();
-        setUser(u);
-        await loadData(u);
+        setUser(authUser);
+        // Small delay to let auth settle and avoid thundering herd with other components
+        await new Promise(r => setTimeout(r, 300));
+        await loadData(authUser);
       } catch (e) {
         console.error("Dashboard load error:", e);
       } finally {
@@ -171,7 +175,7 @@ export default function Dashboard() {
       }
     };
     load();
-  }, []);
+  }, [authUser]);
 
   const myProfile3 = employees.find(p => (p.user_id && p.user_id === user?.id) || p.email === user?.email);
 
