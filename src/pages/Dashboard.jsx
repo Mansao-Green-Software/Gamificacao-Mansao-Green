@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
 import { Trophy, Star, Target, TrendingUp, Medal, History, TrendingDown, RotateCcw, Crown } from "lucide-react";
@@ -64,6 +64,7 @@ export default function Dashboard() {
   const [sectorRanking, setSectorRanking] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const loadedRef = useRef(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [periodMode, setPeriodMode] = useState("mensal"); // "mensal" | "trimestral" | "anual"
   const [monthFilter, setMonthFilter] = useState(() => {
@@ -156,6 +157,8 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    if (loadedRef.current) return;
+    loadedRef.current = true;
     const load = async () => {
       try {
         const u = await base44.auth.me();
