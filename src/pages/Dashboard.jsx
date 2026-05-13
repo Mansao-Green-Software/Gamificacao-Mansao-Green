@@ -272,32 +272,43 @@ export default function Dashboard() {
 
       {/* Header */}
       <div className="space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-black flex items-center gap-2 shimmer-green">Olá, {user?.full_name?.split(" ")[0]} </h1>
-            <p className="text-gray-200/70 text-sm mt-1">Bem-vindo ao Gamificação Mansão Green</p>
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-black flex items-center gap-2 shimmer-green truncate">Olá, {user?.full_name?.split(" ")[0]}</h1>
+            <p className="text-gray-400 text-xs mt-0.5 hidden sm:block">Bem-vindo ao Gamificação Mansão Green</p>
           </div>
-          <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
-            <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1">
-              {[
-                { id: "mensal", label: "Mensal" },
-                { id: "trimestral", label: "Abr-Jun" },
-                { id: "anual", label: "Anual" },
-              ].map(p => (
-                <button
-                  key={p.id}
-                  onClick={() => setPeriodMode(p.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${periodMode === p.id ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-            {periodMode === "mensal" && (
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-1.5 px-2.5 py-2 bg-gray-900 hover:bg-gray-800 text-green-400 border border-green-700 rounded-xl text-xs font-medium transition-colors disabled:opacity-50 shrink-0"
+          >
+            <RotateCcw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">{refreshing ? "Atualizando..." : "Atualizar"}</span>
+          </button>
+        </div>
+
+        {/* Period filters row */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1">
+            {[
+              { id: "mensal", label: "Mensal" },
+              { id: "trimestral", label: "Abr-Jun" },
+              { id: "anual", label: "Anual" },
+            ].map(p => (
+              <button
+                key={p.id}
+                onClick={() => setPeriodMode(p.id)}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${periodMode === p.id ? "bg-green-500 text-black" : "text-gray-400 hover:text-white"}`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          {periodMode === "mensal" && (
             <select
               value={monthFilter}
               onChange={e => setMonthFilter(e.target.value)}
-              className="bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+              className="flex-1 min-w-0 bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-green-500"
             >
               {Array.from({ length: 12 }, (_, i) => {
                 const d = new Date();
@@ -308,17 +319,9 @@ export default function Dashboard() {
                 return <option key={value} value={value}>{label.charAt(0).toUpperCase() + label.slice(1)}</option>;
               })}
             </select>
-            )}
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-900 hover:bg-gray-600 text-green-400 border border-green-400 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
-            >
-              <RotateCcw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-              <span className="hidden sm:inline">{refreshing ? "Atualizando..." : "Atualizar"}</span>
-            </button>
-          </div>
+          )}
         </div>
+
         <div className="flex gap-1 bg-gray-900/40 border border-gray-700 rounded-xl p-1 w-full sm:w-fit">
           {[
             { id: "overview", label: "Visão Geral" },
@@ -345,24 +348,18 @@ export default function Dashboard() {
 
       {activeTab === "mypoints" && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-gray-800/40 border-l-4 border-green-600 rounded-xl p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Total Ganho</span>
-              </div>
-              <p className="text-3xl font-bold text-green-400 mb-5">+{myTxs.filter(t => t.points > 0).reduce((s, t) => s + t.points, 0).toLocaleString()}</p>
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
+            <div className="bg-gray-800/40 border-l-4 border-green-600 rounded-xl p-3 sm:p-5">
+              <span className="text-gray-500 text-[10px] sm:text-[12px] font-bold uppercase tracking-widest block mb-1">Ganho</span>
+              <p className="text-xl sm:text-3xl font-bold text-green-400">+{myTxs.filter(t => t.points > 0).reduce((s, t) => s + t.points, 0).toLocaleString()}</p>
             </div>
-            <div className="bg-gray-800/40 border-l-4 border-red-600 rounded-xl p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Total Descontado</span>
-              </div>
-              <p className="text-3xl font-bold text-red-500 mb-5">{myTxs.filter(t => t.points < 0).reduce((s, t) => s + t.points, 0).toLocaleString()}</p>
+            <div className="bg-gray-800/40 border-l-4 border-red-600 rounded-xl p-3 sm:p-5">
+              <span className="text-gray-500 text-[10px] sm:text-[12px] font-bold uppercase tracking-widest block mb-1">Desconto</span>
+              <p className="text-xl sm:text-3xl font-bold text-red-500">{myTxs.filter(t => t.points < 0).reduce((s, t) => s + t.points, 0).toLocaleString()}</p>
             </div>
-            <div className="bg-gray-800/40 border-l-4 border-blue-500 rounded-xl p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Saldo Atual</span>
-              </div>
-              <p className="text-3xl font-bold text-white mb-5">{myFilteredPoints.toLocaleString()} <span className="text-sm font-normal text-gray-500">pts</span></p>
+            <div className="bg-gray-800/40 border-l-4 border-blue-500 rounded-xl p-3 sm:p-5">
+              <span className="text-gray-500 text-[10px] sm:text-[12px] font-bold uppercase tracking-widest block mb-1">Saldo</span>
+              <p className="text-xl sm:text-3xl font-bold text-white">{myFilteredPoints.toLocaleString()} <span className="text-xs font-normal text-gray-500">pts</span></p>
             </div>
           </div>
 
@@ -407,56 +404,45 @@ export default function Dashboard() {
       {activeTab === "overview" && <>
 
         {/* My stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-gray-800/40 border-l-4 border-green-600 rounded-xl p-5">
-            <div className="flex items-center gap-3 mb-3">
-
-              <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Meus Pontos</span>
-            </div>
-            <p className="text-3xl font-bold text-white">{myFilteredPoints.toLocaleString()}</p>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+          <div className="bg-gray-800/40 border-l-4 border-green-600 rounded-xl p-3 sm:p-5">
+            <span className="text-gray-500 text-[10px] sm:text-[12px] font-bold uppercase tracking-widest block mb-1 sm:mb-2">Pontos</span>
+            <p className="text-xl sm:text-3xl font-bold text-white">{myFilteredPoints.toLocaleString()}</p>
           </div>
-
-          <div className="bg-gray-800/40 border-l-4 border-amber-500 rounded-xl p-5">
-            <div className="flex items-center gap-3 mb-3">
-
-              <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Meu Ranking</span>
-            </div>
-            <p className="text-3xl font-bold text-white">{myFilteredRank ? `#${myFilteredRank}` : "-"}</p>
-            {mySector && <p className="text-xs text-gray-500 mt-1">no {mySector}</p>}
+          <div className="bg-gray-800/40 border-l-4 border-amber-500 rounded-xl p-3 sm:p-5">
+            <span className="text-gray-500 text-[10px] sm:text-[12px] font-bold uppercase tracking-widest block mb-1 sm:mb-2">Ranking</span>
+            <p className="text-xl sm:text-3xl font-bold text-white">{myFilteredRank ? `#${myFilteredRank}` : "-"}</p>
+            {mySector && <p className="text-[10px] text-gray-500 mt-0.5 truncate hidden sm:block">no {mySector}</p>}
           </div>
-
-          <div className="bg-gray-800/40 border-l-4 border-blue-500 rounded-xl p-5">
-            <div className="flex items-center gap-3 mb-3">
-
-              <span className="text-gray-500 text-[12px] font-bold uppercase tracking-widest mb-2">Setor</span>
-            </div>
-            <p className="text-lg font-bold text-white truncate">{mySector || "Não definido"}</p>
+          <div className="bg-gray-800/40 border-l-4 border-blue-500 rounded-xl p-3 sm:p-5">
+            <span className="text-gray-500 text-[10px] sm:text-[12px] font-bold uppercase tracking-widest block mb-1 sm:mb-2">Setor</span>
+            <p className="text-sm sm:text-lg font-bold text-white truncate">{mySector || "—"}</p>
           </div>
         </div>
 
         {/* Rankings grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Top 5 Setores */}
-          <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-white font-bold flex items-center gap-2 uppercase">
+          <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-white font-bold flex items-center gap-2 uppercase text-sm">
                 <GoGraph className="w-4 h-4 text-green-400" />
                 Top 5 Setores
               </h2>
-              <Link to={createPageUrl("RankingGeral")} className="text-green-400 text-sm hover:underline">Ver tudo</Link>
+              <Link to={createPageUrl("RankingGeral")} className="text-green-400 text-xs hover:underline">Ver tudo</Link>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {filteredSectorRanking.slice(0, 5).map((item, idx) => {
                 const isMe = item.sector === mySector;
                 return (
-                  <div key={item.sector} className={`flex items-center gap-4 p-6 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
-                    <span className="w-8 flex items-center justify-center shrink-0">{getMedal(idx)}</span>
+                  <div key={item.sector} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
+                    <span className="w-7 flex items-center justify-center shrink-0">{getMedal(idx)}</span>
                     <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center mb-1.5">
-                        <span className="text-white text-sm font-bold truncate">{item.sector}</span>
-                        <span className="text-green-400 font-bold text-xs">{item.points.toLocaleString()} pts</span>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-white text-xs font-bold truncate">{item.sector}</span>
+                        <span className="text-green-400 font-bold text-xs shrink-0 ml-2">{item.points.toLocaleString()} pts</span>
                       </div>
-                      <div className="h-2.5 rounded-sm bg-gray-700 overflow-hidden">
+                      <div className="h-2 rounded-sm bg-gray-700 overflow-hidden">
                         <div
                           className={`h-full rounded-sm bg-gradient-to-tr ${SECTOR_COLORS[item.sector] || "from-green-500 to-teal-500"}`}
                           style={{ width: filteredSectorRanking[0].points > 0 ? `${(item.points / filteredSectorRanking[0].points) * 100}%` : "0%" }}
@@ -470,15 +456,15 @@ export default function Dashboard() {
           </div>
 
           {/* Top 5 MG (Colaboradores) */}
-          <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-white font-bold flex items-center gap-2 uppercase">
+          <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-white font-bold flex items-center gap-2 uppercase text-sm">
                 <Trophy className="w-4 h-4 text-green-400" />
                 Top 5 MG
               </h2>
-              <Link to={createPageUrl("RankingGeral")} className="text-green-400 text-sm hover:underline">Ver tudo</Link>
+              <Link to={createPageUrl("RankingGeral")} className="text-green-400 text-xs hover:underline">Ver tudo</Link>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {(() => {
                 const empPoints = {};
                 const empNames = {};
@@ -514,9 +500,9 @@ export default function Dashboard() {
                 return topEmployees.map((emp, idx) => {
                   const isMe = emp.id === user?.id || emp.id === myProfile3?.user_id;
                   return (
-                    <div key={emp.id} className={`flex items-center gap-4 p-5 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
-                      <span className="w-8 flex items-center justify-center shrink-0">{getMedal(idx)}</span>
-                      <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0 border border-gray-700">
+                    <div key={emp.id} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? "bg-green-900/30 border border-green-700" : "bg-gray-900/50"}`}>
+                      <span className="w-7 flex items-center justify-center shrink-0">{getMedal(idx)}</span>
+                      <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center shrink-0 border border-gray-700">
                         {emp.photo ? (
                           <img src={emp.photo} alt={emp.name} className="w-full h-full object-cover" />
                         ) : (
@@ -524,16 +510,16 @@ export default function Dashboard() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-center mb-1.5">
+                        <div className="flex justify-between items-center mb-1">
                           <div className="min-w-0 flex flex-col">
-                            <p className="text-white text-sm font-bold truncate">{emp.name}</p>
-                            {emp.sector && <p className="text-gray-500 text-[10px] uppercase tracking-wider truncate -mt-0.5">{emp.sector}</p>}
+                            <p className="text-white text-xs font-bold truncate">{emp.name}</p>
+                            {emp.sector && <p className="text-gray-500 text-[10px] uppercase tracking-wider truncate">{emp.sector}</p>}
                           </div>
-                          <span className="text-green-400 font-bold text-xs shrink-0">{emp.points.toLocaleString()} pts</span>
+                          <span className="text-green-400 font-bold text-xs shrink-0 ml-2">{emp.points.toLocaleString()} pts</span>
                         </div>
-                        <div className="h-2.5 rounded-sm bg-gray-700 overflow-hidden">
+                        <div className="h-2 rounded-sm bg-gray-700 overflow-hidden">
                           <div
-                            className={`h-full rounded-sm bg-gradient-to-tr  ${SECTOR_COLORS[emp.sector] || "from-green-500 to-teal-500"}`}
+                            className={`h-full rounded-sm bg-gradient-to-tr ${SECTOR_COLORS[emp.sector] || "from-green-500 to-teal-500"}`}
                             style={{ width: `${(emp.points / maxPoints) * 100}%` }}
                           />
                         </div>
