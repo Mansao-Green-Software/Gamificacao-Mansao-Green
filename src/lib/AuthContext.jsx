@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams, refreshAppParams } from '@/lib/app-params';
 import axios from 'axios';
@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
   const [authError, setAuthError] = useState(null);
   const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
+  const isCheckingRef = useRef(false);
 
   useEffect(() => {
     // Ensure we pick up any access_token present in the URL (e.g. after email/password login redirect)
@@ -41,6 +42,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAppState = async () => {
+    // Prevent concurrent executions
+    if (isCheckingRef.current) return;
+    isCheckingRef.current = true;
     try {
       setIsLoadingPublicSettings(true);
       setAuthError(null);
@@ -116,6 +120,8 @@ export const AuthProvider = ({ children }) => {
       });
       setIsLoadingPublicSettings(false);
       setIsLoadingAuth(false);
+    } finally {
+      isCheckingRef.current = false;
     }
   };
 
