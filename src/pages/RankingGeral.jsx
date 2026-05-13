@@ -116,7 +116,7 @@ export default function RankingGeral() {
 
   const loadData = async (u) => {
     const [txs, profs] = await Promise.all([
-      base44.entities.PointTransaction.list("-created_date", 5000),
+      base44.entities.PointTransaction.list("-created_date", 500),
       base44.entities.EmployeeProfile.list(null, 1000),
     ]);
     setTransactions(txs);
