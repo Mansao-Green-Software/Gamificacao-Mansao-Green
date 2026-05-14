@@ -256,21 +256,14 @@ export default function RankingGeral() {
 
       const canonical = idToCanonical[t.employee_id] || t.employee_id;
       const empProfile = profiles[t.employee_id] || allProfiles.find(p => p.user_id === t.employee_id || p.id === t.employee_id);
-      
-      if (!empProfile) {
-        pts[canonical] = (pts[canonical] || 0) + (t.points || 0);
-        names[canonical] = t.employee_name;
-        return;
-      }
 
-      const isManager = empProfile.role === "manager" || empProfile.role === "admin" || empProfile.role === "director";
-      const empSector = isManager ? "Gerência" : empProfile.sector;
-
-      if (sector && sector !== "geral" && empSector !== sector) return;
+      // Use transaction sector as the source of truth for sector filtering
+      const txSector = t.sector;
+      if (sector && sector !== "geral" && txSector !== sector) return;
 
       pts[canonical] = (pts[canonical] || 0) + (t.points || 0);
       names[canonical] = t.employee_name;
-      empProfiles[canonical] = empProfile;
+      if (empProfile) empProfiles[canonical] = empProfile;
     });
 
     return Object.entries(pts)
