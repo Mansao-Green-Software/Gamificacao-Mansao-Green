@@ -124,8 +124,8 @@ export default function RankingGeral() {
     const profileMap = {};
     profs.forEach(p => {
       profileMap[p.id] = p;
-      if (p.user_id) profileMap[p.user_id] = p;
-      if (p.email) profileMap[p.email] = p;
+      if (p.user_id && p.user_id.trim()) profileMap[p.user_id] = p;
+      if (p.email && p.email.trim()) profileMap[p.email] = p;
     });
     setProfiles(profileMap);
   };
@@ -224,8 +224,8 @@ export default function RankingGeral() {
     // Mapa de ID canônico: unifica user_id, id do perfil e employee_id da transação
     const idToCanonical = {};
     allProfiles.forEach(p => {
-      const canonical = p.user_id || p.id;
-      if (p.user_id) idToCanonical[p.user_id] = canonical;
+      const canonical = (p.user_id && p.user_id.trim()) ? p.user_id : p.id;
+      if (p.user_id && p.user_id.trim()) idToCanonical[p.user_id] = canonical;
       if (p.id) idToCanonical[p.id] = canonical;
     });
 
