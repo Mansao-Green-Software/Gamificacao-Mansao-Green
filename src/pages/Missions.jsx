@@ -1234,6 +1234,15 @@ export default function Missions() {
                         <FaComment className="text-gray-500 shrink-0 mt-0.5" /> {r.justification}
                       </p>
                     )}
+                    {r.attachments?.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {r.attachments.map((url, idx) => (
+                          <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-purple-500 transition-colors">
+                            <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
