@@ -1254,10 +1254,14 @@ export default function Missions() {
       {/* TAB: Revisão de Pontos */}
       {tab === "revisao" && isReviewer && (() => {
         const approved = requests.filter(r => r.status === "aprovado" && r.sent_to_review === true);
+        const cancelled = requests.filter(r => r.status === "cancelado" && r.sent_to_review === true);
         const filtered = reviewEmployeeFilter
           ? approved.filter(r => r.employee_id === reviewEmployeeFilter || r.employee_name === reviewEmployeeFilter)
           : approved;
-        const allPeople = [...new Map(approved.map(r => [r.employee_id, { id: r.employee_id, name: r.employee_name }])).values()]
+        const filteredCancelled = reviewEmployeeFilter
+          ? cancelled.filter(r => r.employee_id === reviewEmployeeFilter || r.employee_name === reviewEmployeeFilter)
+          : cancelled;
+        const allPeople = [...new Map([...approved, ...cancelled].map(r => [r.employee_id, { id: r.employee_id, name: r.employee_name }])).values()]
           .sort((a, b) => a.name?.localeCompare(b.name, "pt-BR"));
         return (
           <div className="space-y-4">
@@ -1313,11 +1317,49 @@ export default function Missions() {
                 </div>
               )}
             </div>
-          </div>
+            {filteredCancelled.length > 0 && (
+            <div className="bg-gray-800 border border-red-700/30 rounded-2xl p-6">
+              <h3 className="text-white font-bold mb-1 flex items-center gap-2">
+                <XCircle className="w-4 h-4 text-red-400" />
+                Histórico de Pontuações Canceladas
+                <span className="px-2 py-0.5 bg-red-900/50 text-red-300 text-xs rounded-full">{filteredCancelled.length}</span>
+              </h3>
+              <p className="text-gray-500 text-xs mb-4">Pontuações que foram canceladas nesta revisão.</p>
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                {filteredCancelled.map(r => (
+                  <div key={r.id} className="p-4 bg-red-900/10 rounded-xl border border-red-700/20 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
+                        <p className="text-gray-400 text-xs mt-0.5">{r.employee_name} · {r.sector}</p>
+                        <p className="text-gray-500 text-xs">{formatBRT(r.created_date, "date")} · aprovado por {r.approved_by_name || "—"}</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <span className="text-red-400 font-bold text-sm line-through">+{r.mission_points} pts</span>
+                        <span className="text-xs text-red-300 bg-red-900/30 border border-red-700/30 rounded-lg px-2 py-0.5">Cancelado</span>
+                      </div>
+                    </div>
+                    {r.cancellation_note && (
+                      <p className="text-xs text-orange-300 bg-orange-900/20 border border-orange-700/30 rounded-lg px-3 py-2">
+                        ⚠️ Motivo: {r.cancellation_note}
+                      </p>
+                    )}
+                    {r.justification && (
+                      <p className="flex items-start gap-1.5 text-gray-500 text-xs bg-gray-800/50 rounded-lg px-3 py-2 border border-gray-700">
+                        <FaComment className="text-gray-600 shrink-0 mt-0.5" /> {r.justification}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
         );
       })()}
 
       {/* Cancel Approved Modal */}
+
       {cancelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
           <div className="bg-gray-800 border border-red-700/50 rounded-2xl p-6 w-full max-w-md">
