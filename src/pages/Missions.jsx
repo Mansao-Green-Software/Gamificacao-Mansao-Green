@@ -550,8 +550,11 @@ export default function Missions() {
             { id: "solicitacoes", label: "Solicitações", badge: pendingCount, onClick: () => setTab("solicitacoes") },
             { id: "expiradas", label: "Expiradas", badge: 0, onClick: () => setTab("expiradas") }
           ] : []),
+          ...(isReviewRequester ? [
+            { id: "enviar_revisao", label: "Enviar p/ Revisão", badge: requests.filter(r => r.status === "aprovado" && !r.sent_to_review).length || 0, onClick: () => setTab("enviar_revisao") }
+          ] : []),
           ...(isReviewer ? [
-            { id: "revisao", label: "Revisão de Pontos", onClick: () => setTab("revisao") }
+            { id: "revisao", label: "Revisão de Pontos", badge: requests.filter(r => r.status === "aprovado" && r.sent_to_review === true).length || 0, onClick: () => setTab("revisao") }
           ] : [])
         ].map(t => (
           <button
@@ -923,7 +926,7 @@ export default function Missions() {
                       ⚠️ Pontuação cancelada por {r.cancelled_by_name || "revisão"}.{r.cancellation_note ? ` Motivo: ${r.cancellation_note}` : ""}
                     </p>
                   )}
-                  {isReviewRequester && r.status === "aprovado" && (
+                  {isReviewRequester && r.status === "aprovado" && !r.sent_to_review && (
                     <div className="flex justify-end">
                       {r.sent_to_review ? (
                         <span className="text-xs text-purple-400 bg-purple-900/20 border border-purple-700/30 rounded-lg px-3 py-1.5 flex items-center gap-1">
@@ -1167,6 +1170,77 @@ export default function Missions() {
           })()}
         </div>
       )}
+
+      {/* TAB: Enviar para Revisão (kevinathy25) */}
+      {tab === "enviar_revisao" && isReviewRequester && (() => {
+        const allApproved = requests.filter(r => r.status === "aprovado");
+        const filteredApproved = reviewEmployeeFilter
+          ? allApproved.filter(r => r.employee_id === reviewEmployeeFilter || r.employee_name === reviewEmployeeFilter)
+          : allApproved;
+        const allPeople = [...new Map(allApproved.map(r => [r.employee_id, { id: r.employee_id, name: r.employee_name }])).values()]
+          .sort((a, b) => a.name?.localeCompare(b.name, "pt-BR"));
+        return (
+          <div className="bg-gray-800 border border-purple-700/30 rounded-2xl p-6">
+            <h3 className="text-white font-bold mb-1 flex items-center gap-2">
+              <Bell className="w-4 h-4 text-purple-400" />
+              Solicitações Aprovadas — Enviar para Revisão
+            </h3>
+            <p className="text-gray-500 text-xs mb-4">Selecione as solicitações que devem ser revisadas por igaming@gruporoyalty.com.</p>
+            <div className="flex items-center gap-2 mb-4">
+              <Search className="w-4 h-4 text-gray-500 shrink-0" />
+              <select
+                value={reviewEmployeeFilter}
+                onChange={e => setReviewEmployeeFilter(e.target.value)}
+                className="bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-purple-500 flex-1 max-w-xs"
+              >
+                <option value="">Filtrar por colaborador (Todos)</option>
+                {allPeople.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+              <span className="text-gray-600 text-xs shrink-0">{filteredApproved.length} reg.</span>
+            </div>
+            {filteredApproved.length === 0 ? (
+              <p className="text-gray-500 text-sm text-center py-8">Nenhuma solicitação aprovada encontrada.</p>
+            ) : (
+              <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+                {filteredApproved.map(r => (
+                  <div key={r.id} className="p-4 bg-gray-900/50 rounded-xl border border-gray-700/50 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
+                        <p className="text-gray-400 text-xs mt-0.5">{r.employee_name} · {r.sector}</p>
+                        <p className="text-gray-500 text-xs">{formatBRT(r.created_date, "date")} · aprovado por {r.approved_by_name || "—"}</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <span className="text-green-400 font-bold text-sm">+{r.mission_points} pts</span>
+                        {r.sent_to_review ? (
+                          <span className="text-xs text-purple-400 bg-purple-900/20 border border-purple-700/30 rounded-lg px-2.5 py-1 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" /> Enviado
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleSendToReview(r.id)}
+                            disabled={sendingToReview === r.id}
+                            className="text-xs text-purple-300 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-700/40 rounded-lg px-2.5 py-1 font-medium transition-colors disabled:opacity-50"
+                          >
+                            {sendingToReview === r.id ? "Enviando..." : "Enviar p/ Revisão"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {r.justification && (
+                      <p className="flex items-start gap-1.5 text-gray-400 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
+                        <FaComment className="text-gray-500 shrink-0 mt-0.5" /> {r.justification}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* TAB: Revisão de Pontos */}
       {tab === "revisao" && isReviewer && (() => {
