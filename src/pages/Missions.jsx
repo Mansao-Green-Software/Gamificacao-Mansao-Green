@@ -150,6 +150,7 @@ export default function Missions() {
   const [cancelNote, setCancelNote] = useState("");
   const [cancelling, setCancelling] = useState(null);
   const [reviewEmployeeFilter, setReviewEmployeeFilter] = useState("");
+  const [sendingToReview, setSendingToReview] = useState(null);
 
   const loadData = async (showSpinner = false) => {
     if (showSpinner) setRefreshing(true);
@@ -438,6 +439,14 @@ export default function Missions() {
   const openRejectModal = (r) => { setRejectModal(r); setRejectNote(""); };
 
   const isReviewer = user?.email === "igaming@gruporoyalty.com";
+  const isReviewRequester = user?.email === "kevinathy25@gmail.com";
+
+  const handleSendToReview = async (requestId) => {
+    setSendingToReview(requestId);
+    await base44.entities.MissionRequest.update(requestId, { sent_to_review: true });
+    setRequests(prev => prev.map(r => r.id === requestId ? { ...r, sent_to_review: true } : r));
+    setSendingToReview(null);
+  };
 
   const handleCancelApproved = async () => {
     if (!cancelModal || !cancelNote.trim()) return;
@@ -914,6 +923,23 @@ export default function Missions() {
                       ⚠️ Pontuação cancelada por {r.cancelled_by_name || "revisão"}.{r.cancellation_note ? ` Motivo: ${r.cancellation_note}` : ""}
                     </p>
                   )}
+                  {isReviewRequester && r.status === "aprovado" && (
+                    <div className="flex justify-end">
+                      {r.sent_to_review ? (
+                        <span className="text-xs text-purple-400 bg-purple-900/20 border border-purple-700/30 rounded-lg px-3 py-1.5 flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3" /> Enviado para revisão
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleSendToReview(r.id)}
+                          disabled={sendingToReview === r.id}
+                          className="text-xs text-purple-300 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-700/40 rounded-lg px-3 py-1.5 font-medium transition-colors disabled:opacity-50"
+                        >
+                          {sendingToReview === r.id ? "Enviando..." : "Enviar para Revisão"}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -1144,7 +1170,7 @@ export default function Missions() {
 
       {/* TAB: Revisão de Pontos */}
       {tab === "revisao" && isReviewer && (() => {
-        const approved = requests.filter(r => r.status === "aprovado");
+        const approved = requests.filter(r => r.status === "aprovado" && r.sent_to_review === true);
         const filtered = reviewEmployeeFilter
           ? approved.filter(r => r.employee_id === reviewEmployeeFilter || r.employee_name === reviewEmployeeFilter)
           : approved;

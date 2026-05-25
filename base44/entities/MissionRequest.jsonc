@@ -47,6 +47,11 @@
       "type": "string",
       "description": "Nome de quem cancelou a pontua\u00e7\u00e3o aprovada"
     },
+    "sent_to_review": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a solicita\u00e7\u00e3o foi enviada para revis\u00e3o pelo colaborador"
+    },
     "attachments": {
       "type": "array",
       "items": {
