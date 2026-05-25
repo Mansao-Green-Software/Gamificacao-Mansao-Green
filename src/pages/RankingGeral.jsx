@@ -499,7 +499,11 @@ export default function RankingGeral() {
       {selectedEmployee && (
         <EmployeeHistoryModal
           employee={selectedEmployee}
-          transactions={filteredRankingTxs.filter(t => t.employee_id === selectedEmployee.id)}
+          transactions={filteredRankingTxs.filter(t => {
+            const emp = allProfiles.find(p => (p.user_id && p.user_id === selectedEmployee.id) || p.id === selectedEmployee.id);
+            return t.employee_id === selectedEmployee.id ||
+              (emp && (t.employee_id === emp.id || t.employee_id === emp.user_id));
+          })}
           onClose={() => setSelectedEmployee(null)}
         />
       )}
