@@ -161,6 +161,14 @@ export default function RankingGeral() {
   // Excluir apenas resgates da Green Shop do ranking (punições continuam contando)
   const rankingTxs = periodTxs.filter(t => !t.description?.startsWith("Resgate:"));
 
+  // Colaboradores excluídos dos rankings
+  const excludedNames = new Set(["italo gomes", "kevinathy"]);
+  
+  // Filtrar transações para remover colaboradores excluídos
+  const filteredRankingTxs = rankingTxs.filter(t => 
+    !excludedNames.has((t.employee_name || "").toLowerCase())
+  );
+
   const getSectorPoints = () => {
     // Supervisores que não participam do ranking do setor ficam no setor "Supervisor"
     const excludedFromSector = new Set(
@@ -270,14 +278,6 @@ export default function RankingGeral() {
       .map(([id, points]) => ({ id, name: empProfiles[id]?.full_name || names[id], points, sector: empProfiles[id]?.sector, photo_url: empProfiles[id]?.photo_url }))
       .sort((a, b) => b.points - a.points);
   };
-
-  // Colaboradores excluídos dos rankings
-  const excludedNames = new Set(["italo gomes", "kevinathy"]);
-  
-  // Filtrar transações para remover colaboradores excluídos
-  const filteredRankingTxs = rankingTxs.filter(t => 
-    !excludedNames.has((t.employee_name || "").toLowerCase())
-  );
 
   const sectorRanking = getSectorPoints();
   const maxSectorPts = sectorRanking[0]?.points || 1;
