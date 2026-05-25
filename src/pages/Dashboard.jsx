@@ -395,6 +395,11 @@ export default function Dashboard() {
                       <p className="text-gray-500 text-[10px] mt-0.5">
                         por {tx.awarded_by_name || "Sistema"} · {formatBRT(tx.created_date)}
                       </p>
+                      {tx.points < 0 && tx.description?.includes("Motivo:") && (
+                        <p className="text-orange-400 text-[10px] mt-0.5">
+                          ⚠️ {tx.description.split("Motivo:")[1]?.trim() ? `Motivo: ${tx.description.split("Motivo:")[1].trim()}` : tx.description}
+                        </p>
+                      )}
                     </div>
                     <span className={`font-bold text-sm shrink-0 ${tx.points >= 0 ? "text-green-400" : "text-red-400"}`}>
                       {tx.points >= 0 ? "+" : ""}{tx.points}
