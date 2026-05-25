@@ -25,7 +25,8 @@
       "enum": [
         "pendente",
         "aprovado",
-        "rejeitado"
+        "rejeitado",
+        "cancelado"
       ],
       "default": "pendente"
     },
@@ -37,6 +38,14 @@
     },
     "approved_by_name": {
       "type": "string"
+    },
+    "cancellation_note": {
+      "type": "string",
+      "description": "Justificativa do cancelamento ap\u00f3s aprova\u00e7\u00e3o"
+    },
+    "cancelled_by_name": {
+      "type": "string",
+      "description": "Nome de quem cancelou a pontua\u00e7\u00e3o aprovada"
     },
     "attachments": {
       "type": "array",
@@ -54,23 +63,6 @@
   ],
   "rls": {
     "create": {},
-    "read": {
-      "$or": [
-        {
-          "data.employee_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
-    "update": {},
-    "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
-    }
+    "update": {}
   }
 }

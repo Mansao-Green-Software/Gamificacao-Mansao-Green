@@ -94,11 +94,12 @@ function HistoryItem({ r }) {
           <p className="text-gray-500 text-xs">{r.employee_name} · {formatBRT(r.created_date, "date")}</p>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
-          <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : "bg-red-900/50 text-red-300"}`}>
-            {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
+          <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : r.status === "cancelado" ? "bg-orange-900/50 text-orange-300" : "bg-red-900/50 text-red-300"}`}>
+            {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "cancelado" ? <><XCircle className="w-3 h-3" /> Cancelado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
           </span>
           {r.status === "aprovado" && r.approved_by_name && <p className="text-xs text-gray-500">por {r.approved_by_name}</p>}
           {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
+          {r.status === "cancelado" && r.cancellation_note && <p className="mt-1 text-xs text-orange-400 bg-orange-900/20 border border-orange-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.cancellation_note}</p>}
         </div>
       </div>
       {r.justification && (
@@ -145,6 +146,10 @@ export default function Missions() {
   const [selectedSubSector, setSelectedSubSector] = useState("");
   const [selectedSectorFilter, setSelectedSectorFilter] = useState("");
   const [selectedEmployeeFilter, setSelectedEmployeeFilter] = useState("");
+  const [cancelModal, setCancelModal] = useState(null);
+  const [cancelNote, setCancelNote] = useState("");
+  const [cancelling, setCancelling] = useState(null);
+  const [reviewEmployeeFilter, setReviewEmployeeFilter] = useState("");
 
   const loadData = async (showSpinner = false) => {
     if (showSpinner) setRefreshing(true);
@@ -432,6 +437,39 @@ export default function Missions() {
 
   const openRejectModal = (r) => { setRejectModal(r); setRejectNote(""); };
 
+  const isReviewer = user?.email === "igaming@gruporoyalty.com";
+
+  const handleCancelApproved = async () => {
+    if (!cancelModal || !cancelNote.trim()) return;
+    setCancelling(cancelModal.id);
+    const cancellerName = profile?.full_name || user?.full_name;
+    // Marca a solicitação como cancelada
+    await base44.entities.MissionRequest.update(cancelModal.id, {
+      status: "cancelado",
+      cancellation_note: cancelNote,
+      cancelled_by_name: cancellerName,
+    });
+    // Cria transação negativa para subtrair os pontos
+    await base44.functions.invoke('addPointTransaction', {
+      employee_id: cancelModal.employee_id,
+      employee_name: cancelModal.employee_name,
+      sector: cancelModal.sector,
+      points: -cancelModal.mission_points,
+      type: "mission",
+      mission_id: cancelModal.mission_id,
+      mission_title: cancelModal.mission_title,
+      description: `Pontuação cancelada: ${cancelModal.mission_title}. Motivo: ${cancelNote}`,
+      awarded_by_name: cancellerName,
+    });
+    setRequests(prev => prev.map(r => r.id === cancelModal.id
+      ? { ...r, status: "cancelado", cancellation_note: cancelNote, cancelled_by_name: cancellerName }
+      : r
+    ));
+    setCancelling(null);
+    setCancelModal(null);
+    setCancelNote("");
+  };
+
   const handleCreate = async () => {
     if (!form.title || !form.points || !form.sector) return;
     const newMission = await base44.entities.Mission.create({
@@ -502,6 +540,9 @@ export default function Missions() {
           ...(isManager ? [
             { id: "solicitacoes", label: "Solicitações", badge: pendingCount, onClick: () => setTab("solicitacoes") },
             { id: "expiradas", label: "Expiradas", badge: 0, onClick: () => setTab("expiradas") }
+          ] : []),
+          ...(isReviewer ? [
+            { id: "revisao", label: "Revisão de Pontos", onClick: () => setTab("revisao") }
           ] : [])
         ].map(t => (
           <button
@@ -841,8 +882,8 @@ export default function Missions() {
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       <span className={`font-bold text-sm ${r.mission_points >= 0 ? "text-green-400" : "text-red-400"}`}>{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
-                      <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : r.status === "rejeitado" ? "bg-red-900/50 text-red-300" : "bg-amber-900/50 text-amber-300"}`}>
-                        {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "rejeitado" ? <><XCircle className="w-3 h-3" /> Rejeitado</> : <><Clock className="w-3 h-3" /> Pendente</>}
+                      <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : r.status === "rejeitado" ? "bg-red-900/50 text-red-300" : r.status === "cancelado" ? "bg-orange-900/50 text-orange-300" : "bg-amber-900/50 text-amber-300"}`}>
+                        {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "rejeitado" ? <><XCircle className="w-3 h-3" /> Rejeitado</> : r.status === "cancelado" ? <><XCircle className="w-3 h-3" /> Cancelado</> : <><Clock className="w-3 h-3" /> Pendente</>}
                       </span>
                       {r.status === "aprovado" && r.approved_by_name && (
                         <p className="text-[10px] text-gray-500 text-right">por {r.approved_by_name}</p>
@@ -866,6 +907,11 @@ export default function Missions() {
                   {r.status === "rejeitado" && (
                     <p className="text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-3 py-2">
                       {r.notes ? `Motivo: ${r.notes}` : "Nenhum motivo informado."}
+                    </p>
+                  )}
+                  {r.status === "cancelado" && (
+                    <p className="text-xs text-orange-400 bg-orange-900/20 border border-orange-700/30 rounded-lg px-3 py-2">
+                      ⚠️ Pontuação cancelada por {r.cancelled_by_name || "revisão"}.{r.cancellation_note ? ` Motivo: ${r.cancellation_note}` : ""}
                     </p>
                   )}
                 </div>
@@ -1093,6 +1139,106 @@ export default function Missions() {
               </div>
             );
           })()}
+        </div>
+      )}
+
+      {/* TAB: Revisão de Pontos */}
+      {tab === "revisao" && isReviewer && (() => {
+        const approved = requests.filter(r => r.status === "aprovado");
+        const filtered = reviewEmployeeFilter
+          ? approved.filter(r => r.employee_id === reviewEmployeeFilter || r.employee_name === reviewEmployeeFilter)
+          : approved;
+        const allPeople = [...new Map(approved.map(r => [r.employee_id, { id: r.employee_id, name: r.employee_name }])).values()]
+          .sort((a, b) => a.name?.localeCompare(b.name, "pt-BR"));
+        return (
+          <div className="space-y-4">
+            <div className="bg-gray-800 border border-purple-700/40 rounded-2xl p-6">
+              <h3 className="text-white font-bold mb-1 flex items-center gap-2">
+                <XCircle className="w-4 h-4 text-purple-400" />
+                Revisão de Pontos Aprovados
+              </h3>
+              <p className="text-gray-500 text-xs mb-4">Cancele pontuações aprovadas incorretamente. O solicitante e o aprovador verão o motivo do cancelamento.</p>
+              <div className="flex items-center gap-2 mb-4">
+                <Search className="w-4 h-4 text-gray-500 shrink-0" />
+                <select
+                  value={reviewEmployeeFilter}
+                  onChange={e => setReviewEmployeeFilter(e.target.value)}
+                  className="bg-gray-900 border border-gray-700 text-white rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-purple-500 flex-1 max-w-xs"
+                >
+                  <option value="">Filtrar por colaborador (Todos)</option>
+                  {allPeople.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+                <span className="text-gray-600 text-xs">{filtered.length} registro{filtered.length !== 1 ? "s" : ""}</span>
+              </div>
+              {filtered.length === 0 ? (
+                <p className="text-gray-500 text-sm text-center py-8">Nenhuma solicitação aprovada encontrada.</p>
+              ) : (
+                <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+                  {filtered.map(r => (
+                    <div key={r.id} className="p-4 bg-gray-900/50 rounded-xl border border-gray-700/50 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
+                          <p className="text-gray-400 text-xs mt-0.5">{r.employee_name} · {r.sector}</p>
+                          <p className="text-gray-500 text-xs">{formatBRT(r.created_date, "date")} · aprovado por {r.approved_by_name || "—"}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <span className="text-green-400 font-bold text-sm">+{r.mission_points} pts</span>
+                          <button
+                            onClick={() => { setCancelModal(r); setCancelNote(""); }}
+                            className="flex items-center gap-1 px-2.5 py-1.5 bg-red-900/40 hover:bg-red-900/70 text-red-300 border border-red-700/40 rounded-lg text-xs font-semibold transition-colors"
+                          >
+                            <XCircle className="w-3 h-3" /> Cancelar
+                          </button>
+                        </div>
+                      </div>
+                      {r.justification && (
+                        <p className="flex items-start gap-1.5 text-gray-400 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
+                          <FaComment className="text-gray-500 shrink-0 mt-0.5" /> {r.justification}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Cancel Approved Modal */}
+      {cancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="bg-gray-800 border border-red-700/50 rounded-2xl p-6 w-full max-w-md">
+            <h3 className="text-white font-bold text-lg mb-1">Cancelar Pontuação Aprovada</h3>
+            <p className="text-gray-400 text-sm mb-1">{cancelModal.mission_title}</p>
+            <p className="text-red-400 text-sm font-bold mb-4">{cancelModal.employee_name} · +{cancelModal.mission_points} pts</p>
+            <div>
+              <label className="text-gray-400 text-xs mb-1.5 block">Motivo do cancelamento <span className="text-red-400">*</span></label>
+              <textarea
+                value={cancelNote}
+                onChange={e => setCancelNote(e.target.value)}
+                placeholder="Explique o motivo do cancelamento..."
+                rows={3}
+                className={`w-full bg-gray-900 border text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-500 resize-none ${!cancelNote.trim() ? "border-gray-600" : "border-red-500"}`}
+              />
+            </div>
+            <p className="text-gray-500 text-xs mt-2">Esta justificativa será visível para o solicitante e para quem aprovou.</p>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={handleCancelApproved}
+                disabled={!cancelNote.trim() || cancelling === cancelModal.id}
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm transition-colors disabled:opacity-50"
+              >
+                {cancelling === cancelModal.id ? "Cancelando..." : "Confirmar Cancelamento"}
+              </button>
+              <button onClick={() => { setCancelModal(null); setCancelNote(""); }} className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors">
+                Voltar
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
