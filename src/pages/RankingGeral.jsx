@@ -236,7 +236,7 @@ export default function RankingGeral() {
 
     // Setor virtual "Supervisor": agrupa todos os colaboradores com role supervisor excluídos do setor
     if (sector === "Supervisor") {
-      const filtered = filteredRankingTxs.filter(t => excludedSupervisorIds.has(t.employee_id));
+      const filtered = filteredRankingTxs.filter(t => excludedSupervisorIds.has(t.employee_id) || t.sector === "Supervisor");
       const pts = {};
       const names = {};
       const empProfiles = {};
@@ -260,7 +260,7 @@ export default function RankingGeral() {
     const empProfiles = {};
 
     filteredRankingTxs.forEach(t => {
-      if (excludedSupervisorIds.has(t.employee_id)) return;
+      if (excludedSupervisorIds.has(t.employee_id) || t.sector === "Supervisor") return;
 
       const canonical = idToCanonical[t.employee_id] || t.employee_id;
       const empProfile = profiles[t.employee_id] || allProfiles.find(p => p.user_id === t.employee_id || p.id === t.employee_id);
