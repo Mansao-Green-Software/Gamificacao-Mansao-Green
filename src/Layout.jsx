@@ -39,8 +39,8 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => {
     if (!user || profileLoadedRef.current) return;
     profileLoadedRef.current = true;
-    base44.entities.EmployeeProfile.filter({ user_id: user.id }).then(all => {
-      const found = all.find(p => (p.user_id && p.user_id === user.id) || p.email === user.email);
+    base44.entities.EmployeeProfile.list(null, 500).then(all => {
+      const found = all.find(p => p.user_id === user.id || p.email === user.email);
       if (found) setProfile(found);
     }).catch(() => {});
   }, [user]);
