@@ -265,9 +265,9 @@ export default function RankingGeral() {
       const canonical = idToCanonical[t.employee_id] || t.employee_id;
       const empProfile = profiles[t.employee_id] || allProfiles.find(p => p.user_id === t.employee_id || p.id === t.employee_id);
 
-      // Use transaction sector as the source of truth for sector filtering
-      const txSector = t.sector;
-      if (sector && sector !== "geral" && txSector !== sector) return;
+      // Use o setor do PERFIL como fonte de verdade; fallback para o setor da transação
+      const profileSector = empProfile?.sector || t.sector;
+      if (sector && sector !== "geral" && profileSector !== sector) return;
 
       pts[canonical] = (pts[canonical] || 0) + (t.points || 0);
       names[canonical] = t.employee_name;
