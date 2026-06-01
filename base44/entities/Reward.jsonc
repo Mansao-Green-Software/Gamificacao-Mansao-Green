@@ -1,5 +1,5 @@
 {
-  "name": "SurpriseMission",
+  "name": "Reward",
   "type": "object",
   "properties": {
     "title": {
@@ -8,30 +8,33 @@
     "description": {
       "type": "string"
     },
-    "points": {
+    "points_cost": {
       "type": "number"
     },
-    "sector": {
+    "image_url": {
       "type": "string"
     },
-    "rules": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Lista de regras da miss\u00e3o surpresa"
+    "stock": {
+      "type": "number"
     },
     "is_active": {
       "type": "boolean",
       "default": true
     },
-    "expires_at": {
+    "category": {
       "type": "string",
-      "description": "Data/hora de expira\u00e7\u00e3o (ISO string)"
+      "enum": [
+        "Experi\u00eancia",
+        "Produto",
+        "Benef\u00edcio",
+        "Vale-presente",
+        "Outros"
+      ],
+      "default": "Outros"
     }
   },
   "required": [
     "title",
-    "points"
+    "points_cost"
   ]
 }

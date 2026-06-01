@@ -183,10 +183,19 @@ export default function RankingGeral() {
 
     filteredRankingTxs.forEach(t => {
       if (!t.sector) return;
-      const sectorKey = excludedFromSector.has(t.employee_id) ? "Supervisor" : t.sector;
+      // Para Gerência, usar sempre o setor da transação; para outros, usar o perfil
+      const empProfile = allProfiles.find(p => p.user_id === t.employee_id || p.id === t.employee_id);
+      const effectiveSector = t.sector === "Gerência" ? "Gerência" : (empProfile?.sector || t.sector);
+      const sectorKey = excludedFromSector.has(t.employee_id) ? "Supervisor" : effectiveSector;
       pts[sectorKey] = (pts[sectorKey] || 0) + (t.points || 0);
       if (!employees[sectorKey]) employees[sectorKey] = new Set();
       employees[sectorKey].add(t.employee_id);
+      // Remover do setor original se foi movido para Gerência
+      if (t.sector === "Gerência" && empProfile?.sector && empProfile.sector !== "Gerência") {
+        const origKey = empProfile.sector;
+        if (pts[origKey]) pts[origKey] -= (t.points || 0);
+        if (employees[origKey]) employees[origKey].delete(t.employee_id);
+      }
       globalTotalPoints += (t.points || 0);
       globalEmployees.add(t.employee_id);
     });
@@ -265,9 +274,12 @@ export default function RankingGeral() {
       const canonical = idToCanonical[t.employee_id] || t.employee_id;
       const empProfile = profiles[t.employee_id] || allProfiles.find(p => p.user_id === t.employee_id || p.id === t.employee_id);
 
-      // Use o setor do PERFIL como fonte de verdade; fallback para o setor da transação
+      // Para transações com setor explícito, usar o setor da transação como fonte de verdade
+      // mas para outros setores, usar o setor do perfil para evitar duplicatas
+      const txSector = t.sector;
       const profileSector = empProfile?.sector || t.sector;
-      if (sector && sector !== "geral" && profileSector !== sector) return;
+      const effectiveSector = txSector === "Gerência" ? txSector : profileSector;
+      if (sector && sector !== "geral" && effectiveSector !== sector) return;
 
       pts[canonical] = (pts[canonical] || 0) + (t.points || 0);
       names[canonical] = t.employee_name;
