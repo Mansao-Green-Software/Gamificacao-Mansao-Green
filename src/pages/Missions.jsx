@@ -86,25 +86,43 @@ function ExpiredCard({ r, approving, onReject }) {
 
 // History item component
 function HistoryItem({ r }) {
+  const statusConfig = {
+    aprovado: { label: "Aprovado", icon: CheckCircle, cls: "bg-green-900/50 text-green-300 border-green-700/40" },
+    cancelado: { label: "Cancelado", icon: XCircle, cls: "bg-orange-900/50 text-orange-300 border-orange-700/40" },
+    rejeitado: { label: "Rejeitado", icon: XCircle, cls: "bg-red-900/50 text-red-300 border-red-700/40" },
+  };
+  const s = statusConfig[r.status] || statusConfig.rejeitado;
+  const Icon = s.icon;
   return (
-    <div className="p-3 bg-gray-900/50 rounded-xl space-y-2">
-      <div className="flex items-start justify-between gap-3">
+    <div className="p-3 bg-gray-900/50 rounded-xl space-y-2 border border-gray-800/60">
+      <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-medium">{r.mission_title}</p>
-          <p className="text-gray-500 text-xs">{r.employee_name} · {formatBRT(r.created_date, "date")}</p>
-        </div>
-        <div className="flex flex-col items-end gap-1 shrink-0">
-          <span className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : r.status === "cancelado" ? "bg-orange-900/50 text-orange-300" : "bg-red-900/50 text-red-300"}`}>
-            {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "cancelado" ? <><XCircle className="w-3 h-3" /> Cancelado</> : <><XCircle className="w-3 h-3" /> Rejeitado</>}
-          </span>
-          {r.status === "aprovado" && r.approved_by_name && <p className="text-xs text-gray-500">por {r.approved_by_name}</p>}
-          {r.status === "rejeitado" && r.notes && <p className="mt-1 text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.notes}</p>}
-          {r.status === "cancelado" && r.cancellation_note && <p className="mt-1 text-xs text-orange-400 bg-orange-900/20 border border-orange-700/30 rounded-lg px-2 py-1 text-right">Motivo: {r.cancellation_note}</p>}
+          <p className="text-white text-sm font-semibold leading-snug">{r.mission_title}</p>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium border ${s.cls}`}>
+              <Icon className="w-3 h-3" /> {s.label}
+            </span>
+            <span className="text-gray-500 text-xs">{r.employee_name}</span>
+            <span className="text-gray-600 text-xs">{formatBRT(r.created_date, "date")}</span>
+          </div>
         </div>
       </div>
+      {r.status === "aprovado" && r.approved_by_name && (
+        <p className="text-xs text-gray-500">✓ Aprovado por {r.approved_by_name}</p>
+      )}
+      {r.status === "rejeitado" && r.notes && (
+        <p className="text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-3 py-2">
+          Motivo: {r.notes}
+        </p>
+      )}
+      {r.status === "cancelado" && r.cancellation_note && (
+        <p className="text-xs text-orange-400 bg-orange-900/20 border border-orange-700/30 rounded-lg px-3 py-2">
+          ⚠️ Motivo: {r.cancellation_note}
+        </p>
+      )}
       {r.justification && (
-        <p className="flex items-center gap-1.5 text-gray-300 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
-          <FaComment className="text-gray-500 shrink-0" /> {r.justification}
+        <p className="flex items-start gap-1.5 text-gray-400 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
+          <FaComment className="text-gray-500 shrink-0 mt-0.5" /> {r.justification}
         </p>
       )}
       {r.attachments?.length > 0 && (
@@ -885,66 +903,83 @@ export default function Missions() {
             <p className="text-gray-500 text-sm text-center py-8">Você ainda não fez nenhuma solicitação.</p>
           ) : (
             <div className="space-y-3">
-              {myRequests.map(r => (
-                <div key={r.id} className="p-4 bg-gray-900/50 rounded-xl border border-gray-700/50 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white font-semibold text-sm leading-tight">{r.mission_title}</p>
-                      <p className="text-gray-500 text-xs mt-0.5">{formatBRT(r.created_date, "date")}</p>
-                    </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className={`font-bold text-sm ${r.mission_points >= 0 ? "text-green-400" : "text-red-400"}`}>{r.mission_points > 0 ? "+" : ""}{r.mission_points} pts</span>
-                      <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${r.status === "aprovado" ? "bg-green-900/50 text-green-300" : r.status === "rejeitado" ? "bg-red-900/50 text-red-300" : r.status === "cancelado" ? "bg-orange-900/50 text-orange-300" : "bg-amber-900/50 text-amber-300"}`}>
-                        {r.status === "aprovado" ? <><CheckCircle className="w-3 h-3" /> Aprovado</> : r.status === "rejeitado" ? <><XCircle className="w-3 h-3" /> Rejeitado</> : r.status === "cancelado" ? <><XCircle className="w-3 h-3" /> Cancelado</> : <><Clock className="w-3 h-3" /> Pendente</>}
+              {myRequests.map(r => {
+                const statusMap = {
+                  aprovado: { label: "Aprovado", icon: CheckCircle, cls: "bg-green-900/50 text-green-300 border-green-700/40" },
+                  rejeitado: { label: "Rejeitado", icon: XCircle, cls: "bg-red-900/50 text-red-300 border-red-700/40" },
+                  cancelado: { label: "Cancelado", icon: XCircle, cls: "bg-orange-900/50 text-orange-300 border-orange-700/40" },
+                  pendente: { label: "Pendente", icon: Clock, cls: "bg-amber-900/50 text-amber-300 border-amber-700/40" },
+                };
+                const st = statusMap[r.status] || statusMap.pendente;
+                const StIcon = st.icon;
+                return (
+                  <div key={r.id} className="p-4 bg-gray-900/50 rounded-xl border border-gray-800/60 space-y-2">
+                    {/* Linha 1: título + pontos */}
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-white font-semibold text-sm leading-snug flex-1 min-w-0">{r.mission_title}</p>
+                      <span className={`font-bold text-sm shrink-0 ${r.mission_points >= 0 ? "text-green-400" : "text-red-400"}`}>
+                        {r.mission_points > 0 ? "+" : ""}{r.mission_points} pts
                       </span>
+                    </div>
+                    {/* Linha 2: status badge + data */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium border ${st.cls}`}>
+                        <StIcon className="w-3 h-3" /> {st.label}
+                      </span>
+                      <span className="text-gray-500 text-xs">{formatBRT(r.created_date, "date")}</span>
                       {r.status === "aprovado" && r.approved_by_name && (
-                        <p className="text-[10px] text-gray-500 text-right">por {r.approved_by_name}</p>
+                        <span className="text-gray-500 text-xs">· por {r.approved_by_name}</span>
                       )}
                     </div>
+                    {/* Justificativa */}
+                    {r.justification && (
+                      <p className="flex items-start gap-1.5 text-gray-400 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
+                        <FaComment className="text-gray-500 shrink-0 mt-0.5" /> {r.justification}
+                      </p>
+                    )}
+                    {/* Anexos */}
+                    {r.attachments?.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {r.attachments.map((url, idx) => (
+                          <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
+                            <img src={url} alt="anexo" className="w-full h-full object-cover" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                    {/* Motivo rejeição */}
+                    {r.status === "rejeitado" && (
+                      <p className="text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-3 py-2">
+                        {r.notes ? `Motivo: ${r.notes}` : "Nenhum motivo informado."}
+                      </p>
+                    )}
+                    {/* Motivo cancelamento */}
+                    {r.status === "cancelado" && (
+                      <p className="text-xs text-orange-400 bg-orange-900/20 border border-orange-700/30 rounded-lg px-3 py-2">
+                        ⚠️ Cancelado por {r.cancelled_by_name || "revisão"}.{r.cancellation_note ? ` Motivo: ${r.cancellation_note}` : ""}
+                      </p>
+                    )}
+                    {/* Enviar para revisão */}
+                    {isReviewRequester && r.status === "aprovado" && (
+                      <div className="flex justify-end pt-1">
+                        {r.sent_to_review ? (
+                          <span className="text-xs text-purple-400 bg-purple-900/20 border border-purple-700/30 rounded-lg px-3 py-1.5 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" /> Enviado para revisão
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleSendToReview(r.id)}
+                            disabled={sendingToReview === r.id}
+                            className="text-xs text-purple-300 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-700/40 rounded-lg px-3 py-1.5 font-medium transition-colors disabled:opacity-50"
+                          >
+                            {sendingToReview === r.id ? "Enviando..." : "Enviar para Revisão"}
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  {r.justification && (
-                    <p className="flex items-start gap-1.5 text-gray-300 text-xs bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
-                      <FaComment className="text-gray-500 shrink-0 mt-0.5" /> {r.justification}
-                    </p>
-                  )}
-                  {r.attachments?.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {r.attachments.map((url, idx) => (
-                        <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-lg overflow-hidden border border-gray-600 block hover:border-green-500 transition-colors">
-                          <img src={url} alt="anexo" className="w-full h-full object-cover" />
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                  {r.status === "rejeitado" && (
-                    <p className="text-xs text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-3 py-2">
-                      {r.notes ? `Motivo: ${r.notes}` : "Nenhum motivo informado."}
-                    </p>
-                  )}
-                  {r.status === "cancelado" && (
-                    <p className="text-xs text-orange-400 bg-orange-900/20 border border-orange-700/30 rounded-lg px-3 py-2">
-                      ⚠️ Pontuação cancelada por {r.cancelled_by_name || "revisão"}.{r.cancellation_note ? ` Motivo: ${r.cancellation_note}` : ""}
-                    </p>
-                  )}
-                  {isReviewRequester && r.status === "aprovado" && !r.sent_to_review && (
-                    <div className="flex justify-end">
-                      {r.sent_to_review ? (
-                        <span className="text-xs text-purple-400 bg-purple-900/20 border border-purple-700/30 rounded-lg px-3 py-1.5 flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3" /> Enviado para revisão
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => handleSendToReview(r.id)}
-                          disabled={sendingToReview === r.id}
-                          className="text-xs text-purple-300 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-700/40 rounded-lg px-3 py-1.5 font-medium transition-colors disabled:opacity-50"
-                        >
-                          {sendingToReview === r.id ? "Enviando..." : "Enviar para Revisão"}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
