@@ -330,10 +330,10 @@ export default function Missions() {
         const empProfile = allProfiles.find(p =>
           (p.user_id && p.user_id === r.employee_id) ||
           p.id === r.employee_id ||
-          (r.created_by && p.email === r.created_by) ||
-          (r.employee_name && p.full_name === r.employee_name)
+          (r.created_by && p.email === r.created_by)
         );
-        const effectiveSector = (r.sector !== "Supervisor" ? r.sector : null) || empProfile?.sector;
+        // effectiveSector: usar setor da transação (exceto "Supervisor") ou fallback para perfil
+        const effectiveSector = (r.sector && r.sector !== "Supervisor" ? r.sector : null) || empProfile?.sector;
         const missionObj = missions.find(m => m.id === r.mission_id);
         const missionSector = missionObj?.sector;
         if (effectiveRole === "supervisor") {
@@ -1168,10 +1168,9 @@ export default function Missions() {
               const emp = allProfiles.find(p =>
                 (p.user_id && p.user_id === r.employee_id) ||
                 p.id === r.employee_id ||
-                (r.created_by && p.email === r.created_by) ||
-                (r.employee_name && p.full_name === r.employee_name)
+                (r.created_by && p.email === r.created_by)
               );
-              const effectiveSector = (r.sector !== "Supervisor" ? r.sector : null) || emp?.sector;
+              const effectiveSector = (r.sector && r.sector !== "Supervisor" ? r.sector : null) || emp?.sector;
               if (isDirector) {
                 if (emp?.role === "manager" || emp?.role === "director") {
                   return allMySectors.includes(emp.sector);
