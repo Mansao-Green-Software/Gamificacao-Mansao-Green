@@ -435,7 +435,7 @@ export default function Missions() {
         mission_title: request.mission_title,
         description: `Missão aprovada: ${request.mission_title}`,
         awarded_by_name: approverName,
-        transaction_date: request.created_date,
+        transaction_date: new Date().toISOString(),
       })
     ));
     setApproving(null);
