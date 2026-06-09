@@ -618,6 +618,7 @@ export default function GreenShop() {
                     <div>
                       <p className="text-white font-medium text-sm">{r.reward_title}</p>
                       <p className="text-gray-400 text-xs">{(() => { const p = allProfiles.find(ep => ep.user_id === r.employee_id || ep.id === r.employee_id || ep.full_name === r.employee_name || ep.email === r.employee_name); const name = p?.full_name || r.employee_name; const sector = p?.sector || r.sector; return `${name} · ${sector}`; })()}</p>
+                      {r.notes && <p className="text-gray-400 text-xs mt-0.5 italic">"{r.notes}"</p>}
                       <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
