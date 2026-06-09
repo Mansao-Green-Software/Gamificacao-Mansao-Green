@@ -159,7 +159,7 @@ export default function RankingGeral() {
   const periodTxs = filterByPeriod(transactions, selectedPeriod, monthFilter);
 
   // Excluir apenas resgates da Green Shop do ranking (punições continuam contando)
-  const rankingTxs = periodTxs.filter(t => !t.description?.startsWith("Resgate:"));
+  const rankingTxs = periodTxs.filter(t => !t.description?.startsWith("Resgate:") && !t.description?.startsWith("Estorno:"));
 
   // Colaboradores excluídos dos rankings
   const excludedNames = new Set(["italo gomes", "kevinathy"]);
