@@ -174,16 +174,6 @@ export default function GreenShop() {
       description: `Resgate: ${reward.title}`,
       awarded_by_name: "Green Shop",
     });
-    // Debita os pontos via função backend (normaliza o ID)
-    await base44.functions.invoke('addPointTransaction', {
-      employee_id: user.id,
-      employee_name: user.full_name,
-      sector: sector,
-      points: -reward.points_cost,
-      type: "manual",
-      description: `Resgate: ${reward.title}`,
-      awarded_by_name: "Green Shop",
-    });
     setRedemptions(prev => [redemption, ...prev]);
     setTransactions(prev => [...prev, { points: -reward.points_cost }]);
     setRedeeming(null);
