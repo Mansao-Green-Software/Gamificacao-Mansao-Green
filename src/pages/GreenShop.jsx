@@ -40,6 +40,7 @@ export default function GreenShop() {
   const [editForm, setEditForm] = useState({});
 
   const [profile, setProfile] = useState(null);
+  const [allProfiles, setAllProfiles] = useState([]);
   const [error, setError] = useState(false);
 
   const load = async () => {
@@ -63,6 +64,7 @@ export default function GreenShop() {
       const found = profiles.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
       setCampaigns(camps || []);
       setProfile(found);
+      setAllProfiles(profiles || []);
       const txs = allTxs.filter(t =>
         t.employee_id === u.id ||
         (found && (t.employee_id === found.id || t.employee_id === found.user_id)) ||
@@ -606,7 +608,7 @@ export default function GreenShop() {
                   <div key={r.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl flex-wrap gap-3">
                     <div>
                       <p className="text-white font-medium text-sm">{r.reward_title}</p>
-                      <p className="text-gray-400 text-xs">{r.employee_name} · {r.sector}</p>
+                      <p className="text-gray-400 text-xs">{(() => { const p = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id); return p ? `${p.full_name} · ${p.sector || r.sector}` : `${r.employee_name} · ${r.sector}`; })()}</p>
                       <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
