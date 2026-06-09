@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { ShoppingBag, Plus, Trash2, Star, CheckCircle, Clock, Package, Tag, Camera, Edit2, Lock, Flame } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { dateToBRT, nowBRT } from "@/utils/dateUtils";
 
 const CATEGORIES = ["Experiência", "Produto", "Benefício", "Vale-presente", "Outros"];
@@ -38,6 +38,7 @@ export default function GreenShop() {
   const [filterCategory, setFilterCategory] = useState("Todos");
   const [editingReward, setEditingReward] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [successMessage, setSuccessMessage] = useState(null);
 
   const [profile, setProfile] = useState(null);
   const [allProfiles, setAllProfiles] = useState([]);
@@ -179,6 +180,8 @@ export default function GreenShop() {
     setRedeeming(null);
     setConfirmReward(null);
     setRedemptionNote("");
+    setSuccessMessage(`Resgate de "${reward.title}" realizado com sucesso! Aguarde a aprovação.`);
+    setTimeout(() => setSuccessMessage(null), 5000);
   };
 
   const handleEditReward = (reward) => {
@@ -221,6 +224,21 @@ export default function GreenShop() {
 
   return (
     <div className="space-y-6">
+      {/* Success Toast */}
+      <AnimatePresence>
+        {successMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-6 left-1/2 -translate-x-1/2 z-[200] bg-green-500 text-gray-900 font-bold text-sm px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 max-w-sm w-full mx-4"
+          >
+            <CheckCircle className="w-5 h-5 shrink-0" />
+            {successMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
