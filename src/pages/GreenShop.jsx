@@ -564,6 +564,7 @@ export default function GreenShop() {
                   <div key={r.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl">
                     <div>
                       <p className="text-white font-medium text-sm">{r.reward_title}</p>
+                      {r.notes && <p className="text-gray-400 text-xs mt-0.5 italic">"{r.notes}"</p>}
                       <p className="text-gray-500 text-xs mt-0.5">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
                     </div>
                     <div className="flex items-center gap-3">
