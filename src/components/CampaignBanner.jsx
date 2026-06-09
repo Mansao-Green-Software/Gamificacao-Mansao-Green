@@ -42,13 +42,13 @@ export default function CampaignBanner() {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl border border-red-500/40"
-      style={{ background: "linear-gradient(135deg, #0f0f0f 0%, #1a0000 40%, #0f1a00 100%)" }}
+      className="relative overflow-hidden rounded-2xl border border-orange-500/40"
+      style={{ background: "linear-gradient(135deg, #0a1a00 0%, #1a0f00 40%, #0a1a00 100%)" }}
     >
       {/* Fundo animado */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-64 h-64 bg-red-600/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-green-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-64 h-64 bg-orange-500/15 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-green-500/15 rounded-full blur-3xl" />
       </div>
 
       {campaign.banner_image_url && (
@@ -61,16 +61,16 @@ export default function CampaignBanner() {
       <div className="relative z-10 p-5 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
           <div className="flex items-start gap-3">
-            <div className="p-2.5 rounded-xl bg-red-500/20 border border-red-500/30 shrink-0 mt-0.5">
-              <Flame className="w-5 h-5 text-red-400" />
+            <div className="p-2.5 rounded-xl bg-orange-500/20 border border-orange-500/30 shrink-0 mt-0.5">
+              <Flame className="w-5 h-5 text-orange-400" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-black uppercase tracking-widest text-red-400 bg-red-500/10 border border-red-500/20 px-2.5 py-1 rounded-full">
+                <span className="text-[10px] font-black uppercase tracking-widest text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2.5 py-1 rounded-full">
                   ● Campanha Ativa
                 </span>
               </div>
-              <h2 className="text-white font-black text-xl sm:text-2xl mt-1 leading-tight" style={{ textShadow: "0 0 30px rgba(220,38,38,0.3)" }}>
+              <h2 className="text-white font-black text-xl sm:text-2xl mt-1 leading-tight" style={{ textShadow: "0 0 30px rgba(249,115,22,0.3)" }}>
                 {campaign.name}
               </h2>
               {campaign.description && (
@@ -104,7 +104,7 @@ export default function CampaignBanner() {
             )}
             <Link
               to={createPageUrl("GreenShop")}
-              className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-sm font-bold transition-colors shadow-lg shadow-red-900/40"
+              className="flex items-center gap-2 px-4 py-2.5 bg-orange-500 hover:bg-orange-400 text-white rounded-xl text-sm font-bold transition-colors shadow-lg shadow-orange-900/40"
             >
               <ShoppingBag className="w-4 h-4" />
               Ver ofertas

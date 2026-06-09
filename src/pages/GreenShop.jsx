@@ -420,37 +420,37 @@ export default function GreenShop() {
                 const campItems = campaignRewards.filter(r => r.campaign_id === camp.id);
                 if (campItems.length === 0) return null;
                 return (
-                  <div key={camp.id} className="rounded-2xl border border-red-500/30 overflow-hidden" style={{ background: "linear-gradient(135deg, #0f0f0f 0%, #1a0000 60%, #0f1a00 100%)" }}>
-                    <div className="px-5 py-3 flex items-center gap-2 border-b border-red-500/20">
-                      <Flame className="w-4 h-4 text-red-400" />
+                  <div key={camp.id} className="rounded-2xl border border-orange-500/30 overflow-hidden" style={{ background: "linear-gradient(135deg, #0a1a00 0%, #1a0f00 60%, #0a1a00 100%)" }}>
+                    <div className="px-5 py-3 flex items-center gap-2 border-b border-orange-500/20">
+                      <Flame className="w-4 h-4 text-orange-400" />
                       <span className="text-white font-black text-sm uppercase tracking-wider">{camp.name}</span>
-                      <span className="text-[10px] text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full font-bold ml-1">Exclusivo</span>
+                      <span className="text-[10px] text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full font-bold ml-1">Exclusivo</span>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
                       {campItems.map(reward => {
                         const canAfford = availablePoints >= reward.points_cost;
                         const outOfStock = reward.stock !== null && reward.stock !== undefined && reward.stock <= 0;
                         return (
-                          <div key={reward.id} className={`group relative bg-gray-900/60 border rounded-2xl overflow-hidden flex flex-col transition-all duration-300 ${outOfStock ? "opacity-60 border-gray-800" : canAfford ? "border-red-500/40 hover:border-red-400/70 hover:-translate-y-1 hover:shadow-2xl hover:shadow-red-900/30" : "border-gray-800 opacity-80"}`}>
+                          <div key={reward.id} className={`group relative bg-gray-900/60 border rounded-2xl overflow-hidden flex flex-col transition-all duration-300 ${outOfStock ? "opacity-60 border-gray-800" : canAfford ? "border-orange-500/40 hover:border-orange-400/70 hover:-translate-y-1 hover:shadow-2xl hover:shadow-orange-900/30" : "border-gray-800 opacity-80"}`}>
                             <div className="w-full aspect-[4/3] overflow-hidden relative border-b border-gray-800">
-                              {reward.image_url ? <img src={reward.image_url} alt={reward.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" /> : <div className="w-full h-full bg-gradient-to-br from-red-900/30 to-gray-900 flex items-center justify-center"><ShoppingBag className="w-16 h-16 text-red-900/60" /></div>}
+                              {reward.image_url ? <img src={reward.image_url} alt={reward.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" /> : <div className="w-full h-full bg-gradient-to-br from-orange-900/30 to-gray-900 flex items-center justify-center"><ShoppingBag className="w-16 h-16 text-orange-900/60" /></div>}
                               <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-80" />
                               <div className="absolute top-3 right-3"><span className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-full shadow-lg backdrop-blur-md border border-white/10 ${CATEGORY_COLORS[reward.category]}`}>{reward.category}</span></div>
-                              <div className="absolute top-3 left-3"><span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-full bg-red-600/80 text-white border border-red-400/30 flex items-center gap-1"><Flame className="w-2.5 h-2.5" /> Promo</span></div>
+                              <div className="absolute top-3 left-3"><span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-full bg-orange-500/80 text-white border border-orange-400/30 flex items-center gap-1"><Flame className="w-2.5 h-2.5" /> Promo</span></div>
                             </div>
                             <div className="p-5 flex flex-col flex-1 gap-4">
                               <div className="flex-1">
-                                <h3 className="text-lg font-bold text-white leading-tight group-hover:text-red-300 transition-colors">{reward.title}</h3>
+                                <h3 className="text-lg font-bold text-white leading-tight group-hover:text-orange-300 transition-colors">{reward.title}</h3>
                                 {reward.description && <p className="text-gray-400 text-sm mt-2 line-clamp-2">{reward.description}</p>}
                               </div>
                               <div className="flex items-center justify-between py-3 border-y border-gray-800">
                                 <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 rounded-full flex items-center justify-center border border-red-800"><Star className="w-4 h-4 text-red-400" /></div>
-                                  <div className="flex items-baseline"><span className="text-red-400 font-bold text-xl">{reward.points_cost}</span><span className="text-red-500/60 text-xs uppercase font-bold ml-1">pts</span></div>
+                                  <div className="w-8 h-8 rounded-full flex items-center justify-center border border-orange-800"><Star className="w-4 h-4 text-orange-400" /></div>
+                                  <div className="flex items-baseline"><span className="text-orange-400 font-bold text-xl">{reward.points_cost}</span><span className="text-orange-500/60 text-xs uppercase font-bold ml-1">pts</span></div>
                                 </div>
                                 {reward.stock !== null && reward.stock !== undefined && <div className="text-right"><span className="block text-[10px] uppercase font-bold tracking-wider text-gray-500">Estoque</span><span className="text-gray-300 font-medium text-sm">{reward.stock} un.</span></div>}
                               </div>
-                              <button onClick={() => { setConfirmReward(reward); setRedemptionNote(""); }} disabled={!canAfford || outOfStock || redeeming === reward.id} className={`w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98] ${outOfStock ? "bg-gray-800 text-gray-500 cursor-not-allowed border-2 border-gray-700" : canAfford ? "bg-red-600 hover:bg-red-500 text-white shadow-xl shadow-red-900/30" : "bg-gray-800 text-gray-500 cursor-not-allowed border-2 border-gray-700"}`}>
+                              <button onClick={() => { setConfirmReward(reward); setRedemptionNote(""); }} disabled={!canAfford || outOfStock || redeeming === reward.id} className={`w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98] ${outOfStock ? "bg-gray-800 text-gray-500 cursor-not-allowed border-2 border-gray-700" : canAfford ? "bg-orange-500 hover:bg-orange-400 text-white shadow-xl shadow-orange-900/30" : "bg-gray-800 text-gray-500 cursor-not-allowed border-2 border-gray-700"}`}>
                                 {outOfStock ? "Esgotado" : !canAfford ? "Pontos insuficientes" : "Resgatar Oferta"}
                               </button>
                               {canEditRewards && (
@@ -700,7 +700,7 @@ export default function GreenShop() {
               <button
                 onClick={() => handleRedeem(confirmReward)}
                 disabled={redeeming === confirmReward.id}
-                className={`flex-1 py-2.5 rounded-xl font-medium text-sm transition-colors disabled:opacity-50 ${confirmReward.campaign_id ? "bg-red-600 hover:bg-red-500 text-white" : "bg-green-500 hover:bg-green-600 text-white"}`}
+                className={`flex-1 py-2.5 rounded-xl font-medium text-sm transition-colors disabled:opacity-50 ${confirmReward.campaign_id ? "bg-orange-500 hover:bg-orange-400 text-white" : "bg-green-500 hover:bg-green-600 text-white"}`}
               >
                 {redeeming === confirmReward.id ? "Processando..." : "Confirmar"}
               </button>
