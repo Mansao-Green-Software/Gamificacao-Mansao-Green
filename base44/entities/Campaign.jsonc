@@ -1,0 +1,59 @@
+{
+  "name": "Campaign",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string",
+      "description": "Identificador \u00fanico da campanha, ex: meu-sangue-verde"
+    },
+    "description": {
+      "type": "string"
+    },
+    "banner_image_url": {
+      "type": "string"
+    },
+    "start_date": {
+      "type": "string",
+      "description": "Data de in\u00edcio ISO (ex: 2026-06-09)"
+    },
+    "end_date": {
+      "type": "string",
+      "description": "Data de fim ISO (ex: 2026-06-16)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "accent_color": {
+      "type": "string",
+      "description": "Cor de destaque hex, ex: #22c55e"
+    }
+  },
+  "required": [
+    "name",
+    "slug",
+    "start_date",
+    "end_date"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

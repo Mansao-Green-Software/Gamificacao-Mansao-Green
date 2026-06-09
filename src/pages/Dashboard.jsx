@@ -8,6 +8,7 @@ import { FaMedal, FaHandPaper } from 'react-icons/fa';
 import { GoGraph } from "react-icons/go";
 import QuarterlyPrizeBanner from "../components/QuarterlyPrizeBanner";
 import SurpriseMissionBanner from "../components/SurpriseMissionBanner";
+import CampaignBanner from "../components/CampaignBanner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -271,6 +272,9 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Campaign Banner */}
+      <CampaignBanner />
+
       {/* Quarterly Prize Banner */}
       <QuarterlyPrizeBanner isAdmin={isAdmin} />
 

@@ -31,6 +31,10 @@
         "Outros"
       ],
       "default": "Outros"
+    },
+    "campaign_id": {
+      "type": "string",
+      "description": "ID da campanha \u00e0 qual este item pertence. Deixe vazio para itens da loja normal."
     }
   },
   "required": [

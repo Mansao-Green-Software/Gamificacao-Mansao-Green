@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ShoppingBag, Plus, Trash2, Star, CheckCircle, Clock, Package, Tag, Camera, Edit2, Lock } from "lucide-react";
+import { ShoppingBag, Plus, Trash2, Star, CheckCircle, Clock, Package, Tag, Camera, Edit2, Lock, Flame } from "lucide-react";
 import { motion } from "framer-motion";
 import { dateToBRT, nowBRT } from "@/utils/dateUtils";
 
@@ -26,13 +26,15 @@ export default function GreenShop() {
   const [rewards, setRewards] = useState([]);
   const [redemptions, setRedemptions] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [campaigns, setCampaigns] = useState([]);
   const [tab, setTab] = useState("loja");
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", points_cost: "", stock: "", category: "Outros", image_url: "" });
+  const [form, setForm] = useState({ title: "", description: "", points_cost: "", stock: "", category: "Outros", image_url: "", campaign_id: "" });
   const [loading, setLoading] = useState(true);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [redeeming, setRedeeming] = useState(null);
   const [confirmReward, setConfirmReward] = useState(null);
+  const [redemptionNote, setRedemptionNote] = useState("");
   const [filterCategory, setFilterCategory] = useState("Todos");
   const [editingReward, setEditingReward] = useState(null);
   const [editForm, setEditForm] = useState({});
@@ -47,7 +49,7 @@ export default function GreenShop() {
       const u = await base44.auth.me();
       setUser(u);
       const isAdminUser = u.role === "admin";
-      const [rws, redsResult, allTxs, profiles] = await Promise.all([
+      const [rws, redsResult, allTxs, profiles, camps] = await Promise.all([
         base44.entities.Reward.list(),
         // Admin usa list direto (vê tudo), usuário comum usa função backend que bypassa RLS
         isAdminUser
@@ -55,9 +57,11 @@ export default function GreenShop() {
           : base44.functions.invoke('getMyRedemptions', {}).then(r => r.data.redemptions),
         base44.entities.PointTransaction.list("-created_date", 5000),
         base44.entities.EmployeeProfile.list(),
+        base44.entities.Campaign.filter({ is_active: true }),
       ]);
       const reds = redsResult || [];
       const found = profiles.find(p => (p.user_id && p.user_id === u.id) || p.email === u.email);
+      setCampaigns(camps || []);
       setProfile(found);
       const txs = allTxs.filter(t =>
         t.employee_id === u.id ||
@@ -108,8 +112,22 @@ export default function GreenShop() {
   const availablePoints = myPoints - lockedPoints;
   const spentPoints = myRedemptions.filter(r => r.status !== "cancelado").reduce((s, r) => s + (r.points_spent || 0), 0);
 
-  const activeRewards = rewards.filter(r => r.is_active);
+  // Campanhas ativas hoje
+  const today = new Date().toISOString().slice(0, 10);
+  const activeCampaigns = campaigns.filter(c => c.start_date <= today && c.end_date >= today);
+  const activeCampaignIds = new Set(activeCampaigns.map(c => c.id));
+
+  // Itens normais (sem campanha) + itens de campanha ativa
+  const activeRewards = rewards.filter(r => {
+    if (!r.is_active) return false;
+    if (r.campaign_id) return activeCampaignIds.has(r.campaign_id);
+    return true;
+  });
   const filteredRewards = filterCategory === "Todos" ? activeRewards : activeRewards.filter(r => r.category === filterCategory);
+
+  // Separa itens de campanha dos normais para exibição
+  const campaignRewards = filteredRewards.filter(r => r.campaign_id);
+  const normalRewards = filteredRewards.filter(r => !r.campaign_id);
 
   const handleCreate = async () => {
     if (!form.title || !form.points_cost) return;
@@ -117,10 +135,11 @@ export default function GreenShop() {
       ...form,
       points_cost: parseInt(form.points_cost),
       stock: form.stock ? parseInt(form.stock) : null,
+      campaign_id: form.campaign_id || null,
       is_active: true,
     });
     setRewards(prev => [...prev, reward]);
-    setForm({ title: "", description: "", points_cost: "", stock: "", category: "Outros", image_url: "" });
+    setForm({ title: "", description: "", points_cost: "", stock: "", category: "Outros", image_url: "", campaign_id: "" });
     setShowForm(false);
   };
 
@@ -141,6 +160,7 @@ export default function GreenShop() {
       reward_title: reward.title,
       points_spent: reward.points_cost,
       status: "pendente",
+      notes: redemptionNote || "",
     });
     // Debitar pontos
     await base44.entities.PointTransaction.create({
@@ -166,6 +186,7 @@ export default function GreenShop() {
     setTransactions(prev => [...prev, { points: -reward.points_cost }]);
     setRedeeming(null);
     setConfirmReward(null);
+    setRedemptionNote("");
   };
 
   const handleEditReward = (reward) => {
@@ -337,6 +358,10 @@ export default function GreenShop() {
             <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500">
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
+            <select value={form.campaign_id} onChange={e => setForm(p => ({ ...p, campaign_id: e.target.value }))} className="bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500">
+              <option value="">Loja Normal (sem campanha)</option>
+              {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
             <div className="col-span-2 flex items-center gap-4">
               <div className="w-20 h-20 rounded-xl bg-gray-700 border border-gray-600 overflow-hidden flex items-center justify-center shrink-0">
                 {form.image_url ? (
@@ -389,8 +414,64 @@ export default function GreenShop() {
               <p>Nenhum prêmio disponível ainda.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredRewards.map(reward => {
+            <div className="space-y-6">
+              {/* Itens de campanha ativa */}
+              {campaignRewards.length > 0 && activeCampaigns.map(camp => {
+                const campItems = campaignRewards.filter(r => r.campaign_id === camp.id);
+                if (campItems.length === 0) return null;
+                return (
+                  <div key={camp.id} className="rounded-2xl border border-red-500/30 overflow-hidden" style={{ background: "linear-gradient(135deg, #0f0f0f 0%, #1a0000 60%, #0f1a00 100%)" }}>
+                    <div className="px-5 py-3 flex items-center gap-2 border-b border-red-500/20">
+                      <Flame className="w-4 h-4 text-red-400" />
+                      <span className="text-white font-black text-sm uppercase tracking-wider">{camp.name}</span>
+                      <span className="text-[10px] text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full font-bold ml-1">Exclusivo</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+                      {campItems.map(reward => {
+                        const canAfford = availablePoints >= reward.points_cost;
+                        const outOfStock = reward.stock !== null && reward.stock !== undefined && reward.stock <= 0;
+                        return (
+                          <div key={reward.id} className={`group relative bg-gray-900/60 border rounded-2xl overflow-hidden flex flex-col transition-all duration-300 ${outOfStock ? "opacity-60 border-gray-800" : canAfford ? "border-red-500/40 hover:border-red-400/70 hover:-translate-y-1 hover:shadow-2xl hover:shadow-red-900/30" : "border-gray-800 opacity-80"}`}>
+                            <div className="w-full aspect-[4/3] overflow-hidden relative border-b border-gray-800">
+                              {reward.image_url ? <img src={reward.image_url} alt={reward.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" /> : <div className="w-full h-full bg-gradient-to-br from-red-900/30 to-gray-900 flex items-center justify-center"><ShoppingBag className="w-16 h-16 text-red-900/60" /></div>}
+                              <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-80" />
+                              <div className="absolute top-3 right-3"><span className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-full shadow-lg backdrop-blur-md border border-white/10 ${CATEGORY_COLORS[reward.category]}`}>{reward.category}</span></div>
+                              <div className="absolute top-3 left-3"><span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-full bg-red-600/80 text-white border border-red-400/30 flex items-center gap-1"><Flame className="w-2.5 h-2.5" /> Promo</span></div>
+                            </div>
+                            <div className="p-5 flex flex-col flex-1 gap-4">
+                              <div className="flex-1">
+                                <h3 className="text-lg font-bold text-white leading-tight group-hover:text-red-300 transition-colors">{reward.title}</h3>
+                                {reward.description && <p className="text-gray-400 text-sm mt-2 line-clamp-2">{reward.description}</p>}
+                              </div>
+                              <div className="flex items-center justify-between py-3 border-y border-gray-800">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-full flex items-center justify-center border border-red-800"><Star className="w-4 h-4 text-red-400" /></div>
+                                  <div className="flex items-baseline"><span className="text-red-400 font-bold text-xl">{reward.points_cost}</span><span className="text-red-500/60 text-xs uppercase font-bold ml-1">pts</span></div>
+                                </div>
+                                {reward.stock !== null && reward.stock !== undefined && <div className="text-right"><span className="block text-[10px] uppercase font-bold tracking-wider text-gray-500">Estoque</span><span className="text-gray-300 font-medium text-sm">{reward.stock} un.</span></div>}
+                              </div>
+                              <button onClick={() => { setConfirmReward(reward); setRedemptionNote(""); }} disabled={!canAfford || outOfStock || redeeming === reward.id} className={`w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98] ${outOfStock ? "bg-gray-800 text-gray-500 cursor-not-allowed border-2 border-gray-700" : canAfford ? "bg-red-600 hover:bg-red-500 text-white shadow-xl shadow-red-900/30" : "bg-gray-800 text-gray-500 cursor-not-allowed border-2 border-gray-700"}`}>
+                                {outOfStock ? "Esgotado" : !canAfford ? "Pontos insuficientes" : "Resgatar Oferta"}
+                              </button>
+                              {canEditRewards && (
+                                <div className="flex gap-2 pt-1">
+                                  <button onClick={() => handleEditReward(reward)} className="flex-1 py-2.5 rounded-lg text-xs font-semibold text-blue-400 hover:bg-blue-500 hover:text-white transition-colors border border-blue-900/30 flex items-center justify-center gap-1.5"><Edit2 className="w-3.5 h-3.5" /> Editar</button>
+                                  <button onClick={() => handleDelete(reward.id)} className="flex-1 py-2.5 rounded-lg text-xs font-semibold text-red-400 hover:bg-red-500 hover:text-white transition-colors border border-red-900/30 flex items-center justify-center gap-1.5"><Trash2 className="w-3.5 h-3.5" /> Remover</button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Itens normais da loja */}
+              {normalRewards.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {normalRewards.map(reward => {
                 const canAfford = availablePoints >= reward.points_cost;
                 const outOfStock = reward.stock !== null && reward.stock !== undefined && reward.stock <= 0;
                
@@ -469,6 +550,8 @@ export default function GreenShop() {
                   </div>
                 );
               })}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -602,16 +685,26 @@ export default function GreenShop() {
             <p className="text-gray-300 text-sm mb-1">Você está resgatando:</p>
             <p className="text-white font-bold mb-1">{confirmReward.title}</p>
             <p className="text-red-400 text-sm mb-4">Custo: <span className="font-bold">{confirmReward.points_cost.toLocaleString()} pontos</span></p>
+            <div className="mb-4">
+              <label className="text-gray-400 text-xs mb-1.5 block">Observação (opcional)</label>
+              <textarea
+                value={redemptionNote}
+                onChange={e => setRedemptionNote(e.target.value)}
+                placeholder="Ex: tamanho, cor, preferência de entrega..."
+                rows={3}
+                className="w-full bg-gray-900 border border-gray-600 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 resize-none"
+              />
+            </div>
             <p className="text-gray-400 text-xs mb-6">Após o resgate, seus pontos serão debitados e o pedido ficará pendente de aprovação.</p>
             <div className="flex gap-3">
               <button
                 onClick={() => handleRedeem(confirmReward)}
                 disabled={redeeming === confirmReward.id}
-                className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium text-sm transition-colors disabled:opacity-50"
+                className={`flex-1 py-2.5 rounded-xl font-medium text-sm transition-colors disabled:opacity-50 ${confirmReward.campaign_id ? "bg-red-600 hover:bg-red-500 text-white" : "bg-green-500 hover:bg-green-600 text-white"}`}
               >
                 {redeeming === confirmReward.id ? "Processando..." : "Confirmar"}
               </button>
-              <button onClick={() => setConfirmReward(null)} className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-medium text-sm transition-colors">
+              <button onClick={() => { setConfirmReward(null); setRedemptionNote(""); }} className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-medium text-sm transition-colors">
                 Cancelar
               </button>
             </div>
