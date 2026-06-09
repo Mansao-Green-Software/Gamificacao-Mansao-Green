@@ -608,7 +608,7 @@ export default function GreenShop() {
                   <div key={r.id} className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl flex-wrap gap-3">
                     <div>
                       <p className="text-white font-medium text-sm">{r.reward_title}</p>
-                      <p className="text-gray-400 text-xs">{(() => { const p = allProfiles.find(p => p.user_id === r.employee_id || p.id === r.employee_id); return p ? `${p.full_name} · ${p.sector || r.sector}` : `${r.employee_name} · ${r.sector}`; })()}</p>
+                      <p className="text-gray-400 text-xs">{(() => { const p = allProfiles.find(ep => ep.user_id === r.employee_id || ep.id === r.employee_id); const name = p?.full_name || r.employee_name; const sector = p?.sector || r.sector; return `${name} · ${sector}`; })()}</p>
                       <p className="text-gray-500 text-xs">{new Date(r.created_date).toLocaleDateString("pt-BR")}</p>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
