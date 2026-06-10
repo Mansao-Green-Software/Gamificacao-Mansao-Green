@@ -8,7 +8,12 @@ Deno.serve(async (req) => {
     }
 
     const txs = await base44.asServiceRole.entities.PointTransaction.list("created_date", 10000);
-    const toFix = txs.filter(t => t.employee_id === "69b8604d9fddd4c8c74abb7f");
+
+    // Reverter: transações do Cauã Tipster que foram movidas erroneamente para Cauã Lobo
+    const toFix = txs.filter(t =>
+        t.employee_id === "69b86569b16d0ab1138cb756" &&
+        t.sector === "Tipster"
+    );
 
     let updated = 0;
     const errors = [];
@@ -16,11 +21,10 @@ Deno.serve(async (req) => {
     for (const t of toFix) {
         try {
             await base44.asServiceRole.entities.PointTransaction.update(t.id, {
-                employee_id: "69b86569b16d0ab1138cb756",
-                employee_name: "Cauã Lobo"
+                employee_id: "69b8604d9fddd4c8c74abb7f",
+                employee_name: "Cauã"
             });
             updated++;
-            // Evitar rate limit
             await new Promise(r => setTimeout(r, 150));
         } catch (e) {
             errors.push({ id: t.id, error: e.message });
