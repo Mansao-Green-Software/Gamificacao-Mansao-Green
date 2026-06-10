@@ -8,8 +8,12 @@ const TZ = "America/Sao_Paulo";
 function parseUTC(date) {
   if (!date) return null;
   if (date instanceof Date) return date;
-  // Se a string não tem indicador de fuso, assume UTC
   const s = String(date);
+  // Data pura sem hora (ex: "2026-04-01") → meia-noite UTC
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    return new Date(s + "T00:00:00Z");
+  }
+  // Datetime sem fuso → assume UTC
   if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s) && !/[Z+\-]\d{2}:?\d{2}$/.test(s) && !s.endsWith("Z")) {
     return new Date(s + "Z");
   }
