@@ -48,6 +48,7 @@ export function nowBRT() {
  */
 export function dateToBRT(date) {
   const d = parseUTC(date);
+  if (!d || isNaN(d.getTime())) return null;
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: TZ,
     year: "numeric", month: "2-digit", day: "2-digit",

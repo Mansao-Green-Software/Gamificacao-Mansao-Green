@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { dateToBRT } from "@/utils/dateUtils";
 import { Trophy, Users, BarChart2, RotateCcw, Info, Crown } from "lucide-react";
 import { FaMedal } from 'react-icons/fa';
 import { motion } from "framer-motion";
@@ -77,21 +78,23 @@ const PERIODS = [
   { key: "anual", label: "Anual" },
 ];
 
-const getTxDate = (t) => new Date(t.transaction_date || t.created_date);
-
 function filterByPeriod(txs, period, monthFilter) {
   const now = new Date();
   const year = now.getFullYear();
   return txs.filter(t => {
-    const d = getTxDate(t);
+    const rawDate = t.transaction_date || t.created_date;
+    if (!rawDate) return false;
+    const d = dateToBRT(rawDate);
+    if (!d || isNaN(d.getTime())) return false;
     if (period === "mensal") {
       if (monthFilter) {
         const [y, m] = monthFilter.split("-").map(Number);
         return d.getFullYear() === y && d.getMonth() + 1 === m;
       }
-      return d.getMonth() === now.getMonth() && d.getFullYear() === year;
+      const nowBRT = dateToBRT(now);
+      return d.getMonth() === nowBRT.getMonth() && d.getFullYear() === nowBRT.getFullYear();
     }
-    if (period === "trimestral") return [3, 4, 5].includes(d.getMonth()) && d.getFullYear() === year;
+    if (period === "trimestral") return [4, 5, 6].includes(d.getMonth() + 1) && d.getFullYear() === year;
     if (period === "anual") return d.getFullYear() === year;
     return true;
   });

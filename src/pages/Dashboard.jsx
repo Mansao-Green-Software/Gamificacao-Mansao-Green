@@ -188,7 +188,10 @@ export default function Dashboard() {
     const now = new Date();
     const year = now.getFullYear();
     return txs.filter(t => {
-      const d = dateToBRT(t.transaction_date || t.created_date);
+      const rawDate = t.transaction_date || t.created_date;
+      if (!rawDate) return false;
+      const d = dateToBRT(rawDate);
+      if (!d || isNaN(d.getTime())) return false;
       if (periodMode === "mensal") {
         if (!monthFilter) return true;
         const [y, m] = monthFilter.split("-").map(Number);
