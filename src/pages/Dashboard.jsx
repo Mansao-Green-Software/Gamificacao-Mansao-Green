@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { motion } from "framer-motion";
 import { Trophy, Star, Target, TrendingUp, Medal, History, TrendingDown, RotateCcw, Crown } from "lucide-react";
-import { formatBRT } from "@/utils/dateUtils";
+import { formatBRT, dateToBRT } from "@/utils/dateUtils";
 import { FaMedal, FaHandPaper } from 'react-icons/fa';
 import { GoGraph } from "react-icons/go";
 import QuarterlyPrizeBanner from "../components/QuarterlyPrizeBanner";
@@ -184,7 +184,7 @@ export default function Dashboard() {
     const now = new Date();
     const year = now.getFullYear();
     return txs.filter(t => {
-      const d = new Date(t.transaction_date || t.created_date);
+      const d = dateToBRT(t.transaction_date || t.created_date);
       if (periodMode === "mensal") {
         if (!monthFilter) return true;
         const [y, m] = monthFilter.split("-").map(Number);
