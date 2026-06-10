@@ -86,10 +86,14 @@ export default function Dashboard() {
     setProfile(myProfile || null);
     const sector = myProfile?.sector;
     const myProfile2 = myProfile;
+    const myNamesSet = new Set([
+      u.full_name?.trim().toLowerCase(),
+      myProfile2?.full_name?.trim().toLowerCase(),
+    ].filter(Boolean));
     const myTxs2 = txs.filter(t =>
       t.employee_id === u.id ||
       (myProfile2 && (t.employee_id === myProfile2.id || t.employee_id === myProfile2.user_id)) ||
-      t.employee_name === (myProfile2?.full_name || u.full_name)
+      myNamesSet.has(t.employee_name?.trim().toLowerCase())
     );
     const total = myTxs2.reduce((s, t) => s + (t.points || 0), 0);
     setMyPoints(total);
@@ -203,10 +207,15 @@ export default function Dashboard() {
 
   const filteredTransactions = filterByPeriod(transactions);
 
+  const myNames = new Set([
+    user?.full_name?.trim().toLowerCase(),
+    myProfile3?.full_name?.trim().toLowerCase(),
+  ].filter(Boolean));
+
   const myTxs = filteredTransactions.filter(t =>
     (t.employee_id === user?.id ||
     (myProfile3 && (t.employee_id === myProfile3.id || t.employee_id === myProfile3.user_id)) ||
-    t.employee_name === (myProfile3?.full_name || user?.full_name)) &&
+    myNames.has(t.employee_name?.trim().toLowerCase())) &&
     !t.description?.startsWith("Resgate:")
   );
 
