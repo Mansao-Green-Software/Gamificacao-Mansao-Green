@@ -3,8 +3,14 @@ import { Crown } from "lucide-react";
 const medalColors = ["text-amber-400", "text-slate-300", "text-amber-600"];
 
 export default function BolaoRanking({ ranking, currentUserId, profiles = [] }) {
-  const profileMap = {};
-  profiles.forEach(p => { profileMap[p.user_id] = p.full_name; });
+  // Build map by user_id (when set) and by email as fallback
+  const profileByUserId = {};
+  profiles.forEach(p => { if (p.user_id) profileByUserId[p.user_id] = p.full_name; });
+
+  const getDisplayName = (entry) => {
+    if (profileByUserId[entry.user_id]) return profileByUserId[entry.user_id];
+    return entry.user_name;
+  };
 
   if (!ranking.length) {
     return <p className="text-gray-500 text-sm text-center py-8">Nenhum palpite registrado ainda.</p>;
@@ -14,7 +20,7 @@ export default function BolaoRanking({ ranking, currentUserId, profiles = [] }) 
     <div className="space-y-2">
       {ranking.map((entry, idx) => {
         const isMe = entry.user_id === currentUserId;
-        const displayName = profileMap[entry.user_id] || entry.user_name;
+        const displayName = getDisplayName(entry);
         return (
           <div
             key={entry.user_id}
