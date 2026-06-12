@@ -13,8 +13,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'FOOTBALL_API_KEY não configurada' }, { status: 400 });
     }
 
-    const response = await fetch('https://api.football-data.org/v4/competitions/WC/matches', {
-      headers: { 'X-Auth-Token': API_KEY }
+    // Copa do Mundo 2026 - league id 1, season 2026
+    const response = await fetch('https://v3.football.api-sports.io/fixtures?league=1&season=2026', {
+      headers: {
+        'x-apisports-key': API_KEY
+      }
     });
 
     if (!response.ok) {
@@ -22,7 +25,7 @@ Deno.serve(async (req) => {
     }
 
     const data = await response.json();
-    const apiMatches = data.matches || [];
+    const fixtures = data.response || [];
 
     // Buscar jogos já cadastrados
     const existing = await base44.asServiceRole.entities.BolaoMatch.list();
@@ -31,18 +34,25 @@ Deno.serve(async (req) => {
 
     let created = 0, updated = 0;
 
-    for (const m of apiMatches) {
+    for (const f of fixtures) {
+      const statusShort = f.fixture.status.short;
+      const status = statusShort === 'FT' || statusShort === 'AET' || statusShort === 'PEN'
+        ? 'finalizado'
+        : statusShort === '1H' || statusShort === '2H' || statusShort === 'HT' || statusShort === 'ET'
+          ? 'em_andamento'
+          : 'agendado';
+
       const matchData = {
-        match_id: String(m.id),
-        home_team: m.homeTeam?.shortName || m.homeTeam?.name || 'TBD',
-        away_team: m.awayTeam?.shortName || m.awayTeam?.name || 'TBD',
-        home_flag: m.homeTeam?.crest || '',
-        away_flag: m.awayTeam?.crest || '',
-        match_date: m.utcDate,
-        stage: m.stage || m.group || 'Grupo',
-        status: m.status === 'FINISHED' ? 'finalizado' : m.status === 'IN_PLAY' ? 'em_andamento' : 'agendado',
-        home_score: m.score?.fullTime?.home ?? null,
-        away_score: m.score?.fullTime?.away ?? null,
+        match_id: String(f.fixture.id),
+        home_team: f.teams.home.name,
+        away_team: f.teams.away.name,
+        home_flag: f.teams.home.logo || '',
+        away_flag: f.teams.away.logo || '',
+        match_date: f.fixture.date,
+        stage: f.league.round || 'Grupo',
+        status,
+        home_score: f.goals.home ?? null,
+        away_score: f.goals.away ?? null,
       };
 
       if (existingMap[matchData.match_id]) {
@@ -55,15 +65,16 @@ Deno.serve(async (req) => {
     }
 
     // Calcular pontos dos palpites para jogos finalizados
-    const finishedMatches = existing.filter(m => m.status === 'finalizado' && m.home_score !== null);
-    for (const match of finishedMatches) {
+    const allMatches = await base44.asServiceRole.entities.BolaoMatch.filter({ status: 'finalizado' });
+    for (const match of allMatches) {
+      if (match.home_score === null || match.home_score === undefined) continue;
       const guesses = await base44.asServiceRole.entities.BolaoGuess.filter({ match_id: match.id, result_computed: false });
       for (const guess of guesses) {
         let pts = 0;
         const homeOk = guess.home_guess === match.home_score;
         const awayOk = guess.away_guess === match.away_score;
         if (homeOk && awayOk) {
-          pts = 5; // placar exato
+          pts = 5;
         } else {
           const guessWinner = guess.home_guess > guess.away_guess ? 'home' : guess.home_guess < guess.away_guess ? 'away' : 'draw';
           const actualWinner = match.home_score > match.away_score ? 'home' : match.home_score < match.away_score ? 'away' : 'draw';

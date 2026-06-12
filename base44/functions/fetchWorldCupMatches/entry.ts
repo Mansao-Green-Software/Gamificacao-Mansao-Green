@@ -8,36 +8,43 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Usa a API pública football-data.org (gratuita para Copa do Mundo)
     const API_KEY = Deno.env.get("FOOTBALL_API_KEY");
-    const headers = API_KEY ? { 'X-Auth-Token': API_KEY } : {};
+    if (!API_KEY) {
+      return Response.json({ error: 'FOOTBALL_API_KEY não configurada' }, { status: 400 });
+    }
 
-    // Copa do Mundo 2026 - competition code WC
-    const response = await fetch('https://api.football-data.org/v4/competitions/WC/matches', { headers });
+    // Copa do Mundo 2026 - league id 1, season 2026
+    const response = await fetch('https://v3.football.api-sports.io/fixtures?league=1&season=2026', {
+      headers: {
+        'x-apisports-key': API_KEY
+      }
+    });
 
     if (!response.ok) {
-      // Fallback: retorna lista de jogos de exemplo para teste
-      return Response.json({ 
-        matches: [],
-        error: `API retornou ${response.status}. Configure FOOTBALL_API_KEY para acessar dados reais.`
-      });
+      return Response.json({ error: `API retornou ${response.status}` }, { status: 500 });
     }
 
     const data = await response.json();
-    const matches = (data.matches || []).map(m => ({
-      match_id: String(m.id),
-      home_team: m.homeTeam?.shortName || m.homeTeam?.name || 'TBD',
-      away_team: m.awayTeam?.shortName || m.awayTeam?.name || 'TBD',
-      home_flag: m.homeTeam?.crest || '',
-      away_flag: m.awayTeam?.crest || '',
-      match_date: m.utcDate,
-      stage: m.stage || m.group || 'Grupo',
-      status: m.status === 'FINISHED' ? 'finalizado' : m.status === 'IN_PLAY' ? 'em_andamento' : 'agendado',
-      home_score: m.score?.fullTime?.home ?? null,
-      away_score: m.score?.fullTime?.away ?? null,
+    const fixtures = data.response || [];
+
+    const matches = fixtures.map(f => ({
+      match_id: String(f.fixture.id),
+      home_team: f.teams.home.name,
+      away_team: f.teams.away.name,
+      home_flag: f.teams.home.logo || '',
+      away_flag: f.teams.away.logo || '',
+      match_date: f.fixture.date,
+      stage: f.league.round || 'Grupo',
+      status: f.fixture.status.short === 'FT' || f.fixture.status.short === 'AET' || f.fixture.status.short === 'PEN'
+        ? 'finalizado'
+        : f.fixture.status.short === '1H' || f.fixture.status.short === '2H' || f.fixture.status.short === 'HT' || f.fixture.status.short === 'ET'
+          ? 'em_andamento'
+          : 'agendado',
+      home_score: f.goals.home ?? null,
+      away_score: f.goals.away ?? null,
     }));
 
-    return Response.json({ matches });
+    return Response.json({ matches, total: matches.length });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
