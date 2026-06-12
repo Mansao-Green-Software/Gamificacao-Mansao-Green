@@ -8,40 +8,41 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const API_KEY = Deno.env.get("FOOTBALL_API_KEY");
+    const API_KEY = Deno.env.get("FOOTBALL_DATA_API_KEY");
     if (!API_KEY) {
-      return Response.json({ error: 'FOOTBALL_API_KEY não configurada' }, { status: 400 });
+      return Response.json({ error: 'FOOTBALL_DATA_API_KEY não configurada' }, { status: 400 });
     }
 
-    // Copa do Mundo 2026 - league id 1, season 2026
-    const response = await fetch('https://v3.football.api-sports.io/fixtures?league=1&season=2026', {
-      headers: {
-        'x-apisports-key': API_KEY
-      }
+    // Copa do Mundo 2026 - football-data.org competition id 2000
+    const response = await fetch('https://api.football-data.org/v4/competitions/2000/matches', {
+      headers: { 'X-Auth-Token': API_KEY }
     });
 
     if (!response.ok) {
-      return Response.json({ error: `API retornou ${response.status}` }, { status: 500 });
+      const text = await response.text();
+      return Response.json({ error: `API retornou ${response.status}: ${text}` }, { status: 500 });
     }
 
     const data = await response.json();
-    const fixtures = data.response || [];
+    const fixtures = data.matches || [];
+
+    const mapStatus = (s) => {
+      if (s === 'FINISHED') return 'finalizado';
+      if (s === 'IN_PLAY' || s === 'PAUSED') return 'em_andamento';
+      return 'agendado';
+    };
 
     const matches = fixtures.map(f => ({
-      match_id: String(f.fixture.id),
-      home_team: f.teams.home.name,
-      away_team: f.teams.away.name,
-      home_flag: f.teams.home.logo || '',
-      away_flag: f.teams.away.logo || '',
-      match_date: f.fixture.date,
-      stage: f.league.round || 'Grupo',
-      status: f.fixture.status.short === 'FT' || f.fixture.status.short === 'AET' || f.fixture.status.short === 'PEN'
-        ? 'finalizado'
-        : f.fixture.status.short === '1H' || f.fixture.status.short === '2H' || f.fixture.status.short === 'HT' || f.fixture.status.short === 'ET'
-          ? 'em_andamento'
-          : 'agendado',
-      home_score: f.goals.home ?? null,
-      away_score: f.goals.away ?? null,
+      match_id: String(f.id),
+      home_team: f.homeTeam.name,
+      away_team: f.awayTeam.name,
+      home_flag: f.homeTeam.crest || '',
+      away_flag: f.awayTeam.crest || '',
+      match_date: f.utcDate,
+      stage: f.stage || f.group || 'Grupo',
+      status: mapStatus(f.status),
+      home_score: f.score?.fullTime?.home ?? null,
+      away_score: f.score?.fullTime?.away ?? null,
     }));
 
     return Response.json({ matches, total: matches.length });
