@@ -16,6 +16,7 @@ export default function Bolao() {
   const [tab, setTab] = useState("jogos");
   const [matches, setMatches] = useState([]);
   const [guesses, setGuesses] = useState([]);
+  const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stageFilter, setStageFilter] = useState("Todos");
   const [statusFilter, setStatusFilter] = useState("agendado");
@@ -23,12 +24,14 @@ export default function Bolao() {
   const isAdmin = user?.role === "admin";
 
   const loadData = async () => {
-    const [m, g] = await Promise.all([
+    const [m, g, p] = await Promise.all([
       base44.entities.BolaoMatch.list("match_date", 500),
       base44.entities.BolaoGuess.list(null, 5000),
+      base44.entities.EmployeeProfile.list(null, 500),
     ]);
     setMatches(m);
     setGuesses(g);
+    setProfiles(p);
     setLoading(false);
   };
 
@@ -168,7 +171,7 @@ export default function Bolao() {
             <Trophy className="w-5 h-5 text-amber-400" />
             Ranking do Bolão
           </h2>
-          <BolaoRanking ranking={ranking} currentUserId={user?.id} />
+          <BolaoRanking ranking={ranking} currentUserId={user?.id} profiles={profiles} />
         </div>
       )}
     </div>

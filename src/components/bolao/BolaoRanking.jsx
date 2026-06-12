@@ -2,7 +2,10 @@ import { Crown } from "lucide-react";
 
 const medalColors = ["text-amber-400", "text-slate-300", "text-amber-600"];
 
-export default function BolaoRanking({ ranking, currentUserId }) {
+export default function BolaoRanking({ ranking, currentUserId, profiles = [] }) {
+  const profileMap = {};
+  profiles.forEach(p => { profileMap[p.user_id] = p.full_name; });
+
   if (!ranking.length) {
     return <p className="text-gray-500 text-sm text-center py-8">Nenhum palpite registrado ainda.</p>;
   }
@@ -11,6 +14,7 @@ export default function BolaoRanking({ ranking, currentUserId }) {
     <div className="space-y-2">
       {ranking.map((entry, idx) => {
         const isMe = entry.user_id === currentUserId;
+        const displayName = profileMap[entry.user_id] || entry.user_name;
         return (
           <div
             key={entry.user_id}
@@ -27,7 +31,7 @@ export default function BolaoRanking({ ranking, currentUserId }) {
             </div>
             <div className="flex-1 min-w-0">
               <p className={`text-sm font-bold truncate ${isMe ? "text-green-300" : "text-white"}`}>
-                {entry.user_name} {isMe && <span className="text-xs font-normal text-green-500">(você)</span>}
+                {displayName} {isMe && <span className="text-xs font-normal text-green-500">(você)</span>}
               </p>
               <p className="text-gray-500 text-xs">{entry.guesses} palpites · {entry.exact} exatos · {entry.winner} certos</p>
             </div>
