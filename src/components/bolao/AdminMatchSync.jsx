@@ -12,10 +12,15 @@ export default function AdminMatchSync({ onSynced }) {
   const handleSync = async () => {
     setSyncing(true);
     setMsg("");
-    const res = await base44.functions.invoke("syncWorldCupMatches", {});
-    setMsg(res.data?.message || res.data?.error || "Concluído");
-    setSyncing(false);
-    if (onSynced) onSynced();
+    try {
+      const res = await base44.functions.invoke("syncWorldCupMatches", {});
+      setMsg(res.data?.message || res.data?.error || "Concluído");
+      if (onSynced) onSynced();
+    } catch (e) {
+      setMsg("Erro: " + (e.response?.data?.error || e.message));
+    } finally {
+      setSyncing(false);
+    }
   };
 
   const handleManualAdd = async () => {

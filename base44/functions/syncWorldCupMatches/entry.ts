@@ -40,6 +40,9 @@ Deno.serve(async (req) => {
     let created = 0, updated = 0;
 
     for (const f of fixtures) {
+      // Pular jogos sem times definidos ainda (fases eliminatórias futuras)
+      if (!f.homeTeam?.name || !f.awayTeam?.name) continue;
+
       const matchData = {
         match_id: String(f.id),
         home_team: f.homeTeam.name,
