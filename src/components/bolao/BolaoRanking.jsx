@@ -5,12 +5,10 @@ const medalColors = ["text-amber-400", "text-slate-300", "text-amber-600"];
 export default function BolaoRanking({ ranking, currentUserId, profiles = [] }) {
   // Build map by user_id (when set) and by email as fallback
   const profileByUserId = {};
-  profiles.forEach(p => { if (p.user_id) profileByUserId[p.user_id] = p.full_name; });
+  profiles.forEach(p => { if (p.user_id) profileByUserId[p.user_id] = p; });
 
-  const getDisplayName = (entry) => {
-    if (profileByUserId[entry.user_id]) return profileByUserId[entry.user_id];
-    return entry.user_name;
-  };
+  const getProfile = (entry) => profileByUserId[entry.user_id] || null;
+  const getDisplayName = (entry) => getProfile(entry)?.full_name || entry.user_name;
 
   if (!ranking.length) {
     return <p className="text-gray-500 text-sm text-center py-8">Nenhum palpite registrado ainda.</p>;
@@ -21,6 +19,7 @@ export default function BolaoRanking({ ranking, currentUserId, profiles = [] }) 
       {ranking.map((entry, idx) => {
         const isMe = entry.user_id === currentUserId;
         const displayName = getDisplayName(entry);
+        const profile = getProfile(entry);
         return (
           <div
             key={entry.user_id}
@@ -33,6 +32,13 @@ export default function BolaoRanking({ ranking, currentUserId, profiles = [] }) 
                 <Crown className={`w-5 h-5 ${medalColors[idx]}`} />
               ) : (
                 <span className="text-gray-500 font-bold text-sm">{idx + 1}</span>
+              )}
+            </div>
+            <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center shrink-0">
+              {profile?.photo_url ? (
+                <img src={profile.photo_url} alt={displayName} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-gray-400 text-sm font-bold">{displayName?.[0]?.toUpperCase()}</span>
               )}
             </div>
             <div className="flex-1 min-w-0">
