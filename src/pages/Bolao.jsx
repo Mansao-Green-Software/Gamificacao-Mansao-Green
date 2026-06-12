@@ -41,6 +41,10 @@ export default function Bolao() {
   const myGuessMap = {};
   guesses.filter(g => g.user_id === user?.id).forEach(g => { myGuessMap[g.match_id] = g; });
 
+  // Get display name from profile
+  const myProfile = profiles.find(p => p.user_id === user?.id);
+  const myDisplayName = myProfile?.full_name || user?.full_name;
+
   // Stages list
   const stages = ["Todos", ...new Set(matches.map(m => m.stage).filter(Boolean))];
 
@@ -156,7 +160,7 @@ export default function Bolao() {
                   match={match}
                   myGuess={myGuessMap[match.id]}
                   userId={user?.id}
-                  userName={user?.full_name}
+                  userName={myDisplayName}
                   onGuessSubmit={loadData}
                 />
               ))}
