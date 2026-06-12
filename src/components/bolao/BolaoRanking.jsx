@@ -3,11 +3,17 @@ import { Crown } from "lucide-react";
 const medalColors = ["text-amber-400", "text-slate-300", "text-amber-600"];
 
 export default function BolaoRanking({ ranking, currentUserId, profiles = [] }) {
-  // Build map by user_id (when set) and by email as fallback
   const profileByUserId = {};
-  profiles.forEach(p => { if (p.user_id) profileByUserId[p.user_id] = p; });
+  const profileByName = {};
+  profiles.forEach(p => {
+    if (p.user_id) profileByUserId[p.user_id] = p;
+    if (p.full_name) profileByName[p.full_name.trim().toLowerCase()] = p;
+  });
 
-  const getProfile = (entry) => profileByUserId[entry.user_id] || null;
+  const getProfile = (entry) =>
+    profileByUserId[entry.user_id] ||
+    (entry.user_name ? profileByName[entry.user_name.trim().toLowerCase()] : null) ||
+    null;
   const getDisplayName = (entry) => getProfile(entry)?.full_name || entry.user_name;
 
   if (!ranking.length) {
