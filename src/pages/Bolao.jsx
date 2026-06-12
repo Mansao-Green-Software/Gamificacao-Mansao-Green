@@ -175,7 +175,7 @@ export default function Bolao() {
             <Trophy className="w-5 h-5 text-amber-400" />
             Ranking do Bolão
           </h2>
-          <BolaoRanking ranking={ranking} currentUserId={user?.id} profiles={profiles} />
+          <BolaoRanking ranking={ranking} currentUserId={user?.id} profiles={profiles} guesses={guesses} matches={matches} />
         </div>
       )}
     </div>
