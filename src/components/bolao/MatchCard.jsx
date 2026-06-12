@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Clock, CheckCircle, Loader2 } from "lucide-react";
+import { Clock, CheckCircle, Loader2, Trash2 } from "lucide-react";
 
 const statusLabel = { agendado: "Agendado", em_andamento: "Ao Vivo", finalizado: "Finalizado" };
 const statusColor = { agendado: "text-gray-400", em_andamento: "text-green-400 animate-pulse", finalizado: "text-blue-400" };
@@ -23,6 +23,7 @@ export default function MatchCard({ match, myGuess, userId, userName, onGuessSub
   const [awayG, setAwayG] = useState(myGuess?.away_guess ?? "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(!!myGuess);
+  const [deleting, setDeleting] = useState(false);
 
   const canGuess = match.status === "agendado";
   const matchDate = new Date(match.match_date);
@@ -54,6 +55,17 @@ export default function MatchCard({ match, myGuess, userId, userName, onGuessSub
     }
     setSaved(true);
     setSaving(false);
+    if (onGuessSubmit) onGuessSubmit();
+  };
+
+  const handleDelete = async () => {
+    if (!myGuess?.id) return;
+    setDeleting(true);
+    await base44.entities.BolaoGuess.delete(myGuess.id);
+    setHomeG("");
+    setAwayG("");
+    setSaved(false);
+    setDeleting(false);
     if (onGuessSubmit) onGuessSubmit();
   };
 
@@ -112,15 +124,27 @@ export default function MatchCard({ match, myGuess, userId, userName, onGuessSub
               className="w-12 h-10 bg-gray-900 border border-gray-600 rounded-lg text-white text-center font-bold text-lg focus:border-green-500 focus:outline-none"
             />
           </div>
-          <button
-            onClick={handleSave}
-            disabled={saving || homeG === "" || awayG === ""}
-            className={`w-full py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2 ${
-              saved ? "bg-green-900/40 border border-green-700 text-green-400" : "bg-green-500 hover:bg-green-400 text-black"
-            } disabled:opacity-50`}
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <><CheckCircle className="w-4 h-4" /> Salvo</> : "Salvar Palpite"}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleSave}
+              disabled={saving || homeG === "" || awayG === ""}
+              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2 ${
+                saved ? "bg-green-900/40 border border-green-700 text-green-400" : "bg-green-500 hover:bg-green-400 text-black"
+              } disabled:opacity-50`}
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <><CheckCircle className="w-4 h-4" /> Salvo</> : "Salvar Palpite"}
+            </button>
+            {myGuess?.id && (
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-3 py-2 rounded-lg bg-red-900/40 border border-red-700 text-red-400 hover:bg-red-800/60 transition-colors disabled:opacity-50"
+                title="Excluir palpite"
+              >
+                {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+              </button>
+            )}
+          </div>
         </div>
       ) : myGuess ? (
         <div className="text-center text-sm">
