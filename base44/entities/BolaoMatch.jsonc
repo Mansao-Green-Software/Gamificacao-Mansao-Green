@@ -1,0 +1,70 @@
+{
+  "name": "BolaoMatch",
+  "type": "object",
+  "properties": {
+    "match_id": {
+      "type": "string",
+      "description": "ID do jogo na API externa"
+    },
+    "home_team": {
+      "type": "string"
+    },
+    "away_team": {
+      "type": "string"
+    },
+    "home_flag": {
+      "type": "string",
+      "description": "URL da bandeira do time da casa"
+    },
+    "away_flag": {
+      "type": "string",
+      "description": "URL da bandeira do time visitante"
+    },
+    "match_date": {
+      "type": "string",
+      "description": "Data/hora do jogo ISO string"
+    },
+    "stage": {
+      "type": "string",
+      "description": "Fase do torneio (Grupo A, Oitavas, etc)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "agendado",
+        "em_andamento",
+        "finalizado"
+      ],
+      "default": "agendado"
+    },
+    "home_score": {
+      "type": "number"
+    },
+    "away_score": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "home_team",
+    "away_team",
+    "match_date"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

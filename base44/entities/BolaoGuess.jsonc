@@ -1,0 +1,42 @@
+{
+  "name": "BolaoGuess",
+  "type": "object",
+  "properties": {
+    "match_id": {
+      "type": "string",
+      "description": "ID do BolaoMatch"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "home_guess": {
+      "type": "number"
+    },
+    "away_guess": {
+      "type": "number"
+    },
+    "points_earned": {
+      "type": "number",
+      "default": 0
+    },
+    "result_computed": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "match_id",
+    "user_id",
+    "home_guess",
+    "away_guess"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {},
+    "delete": {}
+  }
+}

@@ -3,7 +3,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Users, Target, LayoutDashboard, LogOut, Menu, X, Crown, Star, ShoppingBag, Zap, Camera, Sun, Moon } from "lucide-react";
+import { Trophy, Users, Target, LayoutDashboard, LogOut, Menu, X, Crown, Star, ShoppingBag, Zap, Camera, Sun, Moon, Gamepad2 } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 
 const SECTORS = [
@@ -56,6 +56,7 @@ export default function Layout({ children, currentPageName }) {
     { label: "Missões", page: "Missions", icon: Target },
     { label: "Green Shop", page: "GreenShop", icon: ShoppingBag },
     { label: "Pontuação", page: "SistemaPontuacao", icon: Zap },
+    { label: "Bolão Copa", page: "Bolao", icon: Gamepad2 },
     ...(isManager ? [{ label: "Gerenciar Pontos", page: "ManagePoints", icon: Star }] : []),
     ...(isAdmin ? [{ label: "Colaboradores", page: "Employees", icon: Users }] : []),
   ];

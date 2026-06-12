@@ -54,11 +54,13 @@ import ManagePoints from './pages/ManagePoints';
 import Missions from './pages/Missions';
 import RankingGeral from './pages/RankingGeral';
 import SistemaPontuacao from './pages/SistemaPontuacao';
+import Bolao from './pages/Bolao';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Dashboard": Dashboard,
+    "Bolao": Bolao,
     "Employees": Employees,
     "GreenShop": GreenShop,
     "ManagePoints": ManagePoints,
