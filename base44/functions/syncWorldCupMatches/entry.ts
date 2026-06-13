@@ -79,8 +79,8 @@ Deno.serve(async (req) => {
         } else {
           const guessWinner = guess.home_guess > guess.away_guess ? 'home' : guess.home_guess < guess.away_guess ? 'away' : 'draw';
           const actualWinner = match.home_score > match.away_score ? 'home' : match.home_score < match.away_score ? 'away' : 'draw';
-          if (guessWinner === actualWinner) {
-            pts = actualWinner === 'draw' ? 1 : 2;
+          if (guessWinner === actualWinner && actualWinner !== 'draw') {
+            pts = 2;
           }
         }
         await base44.asServiceRole.entities.BolaoGuess.update(guess.id, { points_earned: pts, result_computed: true });
