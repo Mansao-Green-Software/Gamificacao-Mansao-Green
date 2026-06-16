@@ -237,7 +237,7 @@ export default function RankingGeral() {
     // Mapa de ID canônico: unifica user_id, id do perfil e employee_id da transação
     const idToCanonical = {};
     allProfiles.forEach(p => {
-      const canonical = (p.user_id && p.user_id.trim()) ? p.user_id : p.id;
+      const canonical = p.id || p.user_id; // Use profile ID como canonical
       if (p.user_id && p.user_id.trim()) idToCanonical[p.user_id] = canonical;
       if (p.id) idToCanonical[p.id] = canonical;
     });
