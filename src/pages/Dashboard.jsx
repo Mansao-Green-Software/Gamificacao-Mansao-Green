@@ -215,12 +215,14 @@ export default function Dashboard() {
     myProfile3?.full_name?.trim().toLowerCase(),
   ].filter(Boolean));
 
-  const myTxs = filteredTransactions.filter(t =>
-    (t.employee_id === user?.id ||
-    (myProfile3 && (t.employee_id === myProfile3.id || t.employee_id === myProfile3.user_id)) ||
-    myNames.has(t.employee_name?.trim().toLowerCase())) &&
-    !t.description?.startsWith("Resgate:")
-  );
+  const myTxs = filteredTransactions.filter(t => {
+    const isMyTx = 
+      t.employee_id === user?.id ||
+      t.employee_id === myProfile3?.id ||
+      t.employee_id === myProfile3?.user_id ||
+      myNames.has(t.employee_name?.trim().toLowerCase());
+    return isMyTx && !t.description?.startsWith("Resgate:");
+  });
 
   // Pontos e ranking calculados a partir das transações filtradas
   const myFilteredPoints = myTxs.reduce((s, t) => s + (t.points || 0), 0);
