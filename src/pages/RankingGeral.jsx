@@ -188,11 +188,12 @@ export default function RankingGeral() {
       if (!t.sector) return;
       // Para Gerência, usar sempre o setor da transação; para outros, usar o perfil
       const empProfile = allProfiles.find(p => p.user_id === t.employee_id || p.id === t.employee_id);
+      const canonicalId = empProfile?.user_id || empProfile?.id || t.employee_id;
       const effectiveSector = t.sector === "Gerência" ? "Gerência" : (empProfile?.sector || t.sector);
-      const sectorKey = excludedFromSector.has(t.employee_id) ? "Supervisor" : effectiveSector;
+      const sectorKey = excludedFromSector.has(canonicalId) ? "Supervisor" : effectiveSector;
       pts[sectorKey] = (pts[sectorKey] || 0) + (t.points || 0);
       if (!employees[sectorKey]) employees[sectorKey] = new Set();
-      employees[sectorKey].add(t.employee_id);
+      employees[sectorKey].add(canonicalId);
       // Remover do setor original se foi movido para Gerência
       if (t.sector === "Gerência" && empProfile?.sector && empProfile.sector !== "Gerência") {
         const origKey = empProfile.sector;
