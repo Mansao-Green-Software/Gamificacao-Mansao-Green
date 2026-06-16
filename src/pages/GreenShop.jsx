@@ -56,7 +56,7 @@ export default function GreenShop() {
         // Admin usa list direto (vê tudo), usuário comum usa função backend que bypassa RLS
         isAdminUser
           ? base44.entities.RewardRedemption.list("-created_date", 500)
-          : base44.functions.invoke('getMyRedemptions', {}).then(r => r.data.redemptions),
+          : base44.functions.invoke('getMyRedemptions', {}).then(r => r.data?.redemptions || []).catch(() => []),
         base44.entities.PointTransaction.list("-created_date", 5000),
         base44.entities.EmployeeProfile.list(),
         base44.entities.Campaign.filter({ is_active: true }),

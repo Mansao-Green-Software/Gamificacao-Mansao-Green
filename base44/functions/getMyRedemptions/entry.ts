@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 Deno.serve(async (req) => {
   try {
@@ -8,12 +8,17 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Busca resgates usando service role (bypassa RLS) e filtra pelo user
-    const all = await base44.asServiceRole.entities.RewardRedemption.list("-created_date", 500);
+    const [all, profiles] = await Promise.all([
+      base44.asServiceRole.entities.RewardRedemption.list("-created_date", 500),
+      base44.asServiceRole.entities.EmployeeProfile.list(null, 500),
+    ]);
+
+    const profile = profiles.find(p => p.user_id === user.id || p.email === user.email);
 
     const mine = all.filter(r =>
       r.employee_id === user.id ||
-      r.created_by === user.email ||
+      (profile && (r.employee_id === profile.id || r.employee_id === profile.user_id)) ||
+      r.employee_name === (profile?.full_name || user.full_name) ||
       r.created_by_id === user.id
     );
 
